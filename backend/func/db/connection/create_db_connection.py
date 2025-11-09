@@ -8,7 +8,6 @@ load_dotenv()
 host_name = os.getenv("DB_HOST")
 user_name = os.getenv("DB_USER")
 user_password = os.getenv("DB_PASSWORD")
-db_name = os.getenv("DB_NAME")
 
 
 def create_db_connection():
