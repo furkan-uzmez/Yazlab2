@@ -1,7 +1,17 @@
 import mysql.connector
 from mysql.connector import Error
+from dotenv import load_dotenv
+import os
 
-def open_db_connection(host_name, user_name, user_password, db_name):
+load_dotenv()
+
+host_name = os.getenv("DB_HOST")
+user_name = os.getenv("DB_USER")
+user_password = os.getenv("DB_PASSWORD")
+db_name = os.getenv("DB_NAME")
+
+
+def open_db_connection():
     connection = None
     
     try:
