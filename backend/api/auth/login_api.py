@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from backend.func.db.selection.login_control import login_control
+from backend.func.auth.login_control import login_control
 from backend.func.db.connection import open_db_connection
 
 

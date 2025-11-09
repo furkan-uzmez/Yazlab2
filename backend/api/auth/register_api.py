@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from backend.func.db.connection import open_db_connection
-from backend.func.db.insertion import register
+from backend.func.auth.register import register_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
