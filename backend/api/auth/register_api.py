@@ -23,4 +23,7 @@ async def register_user(request: RegisterRequest):
     if success:
         return {"message": "User registered successfully"}
     else:
-        return {"message": "Registration failed"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration failed. User may already exist."
+        )

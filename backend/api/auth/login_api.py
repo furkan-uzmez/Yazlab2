@@ -24,4 +24,7 @@ async def login(request: LoginRequest):
     if is_authenticated:
         return {"message": "Login successful"}
     else:
-        return {"message": "Invalid email or password"}
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
