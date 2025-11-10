@@ -7,3 +7,9 @@ DB_NAME=
 MAIL_USERNAME=
 MAIL_PASSWORD=
 MAIL_SERVER=
+
+# 'openssl rand -hex 32' komutuyla üretebileceğiniz GİZLİ bir anahtar
+JWT_SECRET_KEY=
+
+# Şifre sıfırlama token'ının kaç dakika geçerli olacağı
+RESET_TOKEN_EXPIRE_MINUTES=
