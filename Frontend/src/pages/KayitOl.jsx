@@ -18,15 +18,42 @@ function KayitOl() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert('Şifreler eşleşmiyor!');
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (formData.password !== formData.confirmPassword) {
+    alert('Şifreler eşleşmiyor!');
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        username: formData.name, // backend "username" bekliyor
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      alert(errorData.detail || "Kayıt başarısız!");
       return;
     }
-    console.log('Kayıt:', formData);
-    // Buraya kayıt işlemi eklenecek
-  };
+
+    const data = await response.json();
+    alert(data.message);
+    console.log("Kayıt başarılı:", data);
+    // burada navigate('/login') gibi yönlendirme ekleyebilirsin
+  } catch (error) {
+    console.error("Kayıt isteği başarısız:", error);
+    alert("Sunucuya bağlanılamadı!");
+  }
+};
+
 
   return (
     <div className="kayit-container">
