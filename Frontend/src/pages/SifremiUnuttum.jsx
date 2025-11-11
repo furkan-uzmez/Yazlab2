@@ -63,9 +63,6 @@ function SifremiUnuttum() {
               Lütfen e-posta kutunuzu kontrol edin.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
-              <Link to="/sifre-sifirla" className="btn-submit">
-                Şifre Sıfırlama Sayfasına Git
-              </Link>
               <Link to="/login" className="btn-submit" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white' }}>
                 Giriş Sayfasına Dön
               </Link>
@@ -116,9 +113,6 @@ function SifremiUnuttum() {
         </form>
         
         <div className="sifremi-unuttum-footer">
-          <Link to="/sifre-sifirla" className="back-link">
-            Şifre Sıfırlama Sayfasına Git →
-          </Link>
           <Link to="/login" className="back-link">
             ← Giriş sayfasına dön
           </Link>
