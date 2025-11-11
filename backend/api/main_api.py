@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.auth.login_api import router as login_router
 from backend.api.auth.register_api import router as register_router
+from backend.api.auth.forget_password_api import router as forget_password_router
 from database.create_tables import create_tables
 
 api = FastAPI()
@@ -19,6 +20,7 @@ api.add_middleware(
 
 api.include_router(login_router)
 api.include_router(register_router)
+api.include_router(forget_password_router)
 
 
 if __name__ == "__main__":
