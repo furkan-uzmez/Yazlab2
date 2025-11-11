@@ -4,7 +4,7 @@ def register_user(connection, email, password, username):
     try:
         hashed_password = hash_password(password)
         cursor = connection.cursor()
-        query = "INSERT INTO users (email, password, username) VALUES (%s, %s, %s)"
+        query = "INSERT INTO users (email, password_hash, username) VALUES (%s, %s, %s)"
         cursor.execute(query, (email, hashed_password, username))
         connection.commit()
         return True
