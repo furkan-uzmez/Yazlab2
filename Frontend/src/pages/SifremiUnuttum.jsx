@@ -7,11 +7,36 @@ function SifremiUnuttum() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Şifre sıfırlama isteği:', email);
-    setSubmitted(true);
-    // Buraya şifre sıfırlama işlemi eklenecek
+
+    try {
+      // 1. Backend'inize (FastAPI) e-posta gönderme isteği atın
+      const response = await fetch("http://localhost:8000/auth/send_forget_password_email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // 'email' state'ini backend'in beklediği JSON formatında gönder
+        body: JSON.stringify({ email: email }), 
+      });
+
+      // 2. Başarılı (2xx) cevabı kontrol et
+      if (response.ok) {
+        // E-posta başarıyla gönderildiyse "Gönderildi" ekranını göster
+        setSubmitted(true);
+      
+      } else {
+        // 3. Hatalı (5xx) cevabı (örn: "Failed to send email") yakala
+        const errorData = await response.json();
+        alert(errorData.detail || "E-posta gönderilemedi!");
+      }
+
+    } catch (error) {
+      // 4. Sunucuya ulaşılamazsa (Network error) hatayı yakala
+      console.error("Şifre sıfırlama isteği başarısız:", error);
+      alert("Sunucuya bağlanılamadı!");
+    }
   };
 
   if (submitted) {
