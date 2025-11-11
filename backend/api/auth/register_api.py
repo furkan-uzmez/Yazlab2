@@ -1,8 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from backend.func.db.connection import open_db_connection
-from backend.func.auth.register import register_user
+from backend.func.db.connection.open_db_connection import open_db_connection
+from backend.func.auth.register import register_user as register
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
