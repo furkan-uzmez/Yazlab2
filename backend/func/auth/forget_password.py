@@ -9,7 +9,7 @@ load_dotenv()
 
 async def send_reset_email(email: str, token: str):
     conf = ConnectionConfig(
-        MAIL_USERNAME = email,
+        MAIL_USERNAME = os.getenv("MAIL_USERNAME"),
         MAIL_FROM = os.getenv("MAIL_USERNAME"),
         MAIL_PASSWORD = os.getenv("MAIL_PASSWORD"),  # Gmail/Google için bu bir "Uygulama Şifresi" olmalıdır
         MAIL_PORT = int(os.getenv("MAIL_PORT", 587)), # .env'de yoksa varsayılan 587
