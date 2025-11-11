@@ -3,7 +3,10 @@ from mysql.connector import Error
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '../../../.env')
+
+
+load_dotenv(env_path)
 
 host_name = os.getenv("DB_HOST")
 user_name = os.getenv("DB_USER")
