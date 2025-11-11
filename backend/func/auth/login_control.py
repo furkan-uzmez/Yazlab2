@@ -3,7 +3,7 @@ from backend.func.security.check_password import check_password
 def login_control(connection, email, password):
     cursor = connection.cursor()
     
-    cursor.execute("SELECT password FROM users WHERE email = %s", (email,))
+    cursor.execute("SELECT password_hash FROM users WHERE email = %s", (email,))
     result = cursor.fetchone()
 
     if result is None:
