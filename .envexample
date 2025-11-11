@@ -13,3 +13,5 @@ JWT_SECRET_KEY=
 
 # Şifre sıfırlama token'ının kaç dakika geçerli olacağı
 RESET_TOKEN_EXPIRE_MINUTES=
+
+FRONTEND_URL=
