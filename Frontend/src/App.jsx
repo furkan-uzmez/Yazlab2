@@ -3,6 +3,7 @@ import AnaGiris from './pages/AnaGiris';
 import Login from './pages/Login';
 import KayitOl from './pages/KayitOl';
 import SifremiUnuttum from './pages/SifremiUnuttum';
+import SifreSifirla from './pages/SifreSifirla';
 import Home from './pages/Home';
 import './App.css';
 
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/kayit-ol" element={<KayitOl />} />
         <Route path="/sifremi-unuttum" element={<SifremiUnuttum />} />
+        <Route path="/sifre-sifirla" element={<SifreSifirla />} />
         <Route path="/home" element={<Home />} />
         <Route path="/profile/:userId?" element={<Home />} />
         <Route path="/movies" element={<Home />} />
