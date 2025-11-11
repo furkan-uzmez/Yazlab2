@@ -20,10 +20,35 @@ async def send_reset_email(email: str, token: str):
         VALIDATE_CERTS = True
     )
 
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+    # 2. Linki bu değişkene göre dinamik olarak oluşturun
+    reset_link = f"{frontend_url}/sifre-sifirla?token={token}"
+
+    # 3. HTML formatında bir e-posta gövdesi oluşturun
+    html_body = f"""
+    <html>
+    <body>
+        <p>Merhaba,</p>
+        <p>Şifrenizi sıfırlamak için lütfen aşağıdaki linke tıklayın:</p>
+        
+        <a href="{reset_link}" 
+           style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+           Şifremi Sıfırla
+        </a>
+        
+        <p>Eğer bu link çalışmazsa, aşağıdaki adresi kopyalayıp tarayıcınıza yapıştırabilirsiniz:</p>
+        <p>{reset_link}</p>
+        
+        <p>Eğer bu isteği siz yapmadıysanız, bu e-postayı görmezden gelin.</p>
+    </body>
+    </html>
+    """
+
     message = MessageSchema(
         subject="Password Reset Request",
         recipients=[email],
-        body=f"Click the link to reset your password: http://example.com/reset-password?token={token}", # Link ayarlanmalı
+        body=html_body, # Link ayarlanmalı
         subtype="html"
     )
 
