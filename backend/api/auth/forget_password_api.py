@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.auth.forget_password import send_reset_email,update_password
+from backend.func.auth.forget_password import send_reset_email,update_password as update_password_func
 from backend.func.security.jwt_utils import create_reset_token, validate_reset_token
 
 
@@ -50,7 +50,7 @@ def update_password(request: ResetPasswordRequest):
     
     connection = open_db_connection()
     
-    success = update_password(connection,password,email)
+    success = update_password_func(connection,request.new_password,email)
 
     connection.close()
     
