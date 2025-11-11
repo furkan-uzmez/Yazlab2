@@ -17,11 +17,45 @@ function Login() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login:', formData);
-    // Buraya login işlemi eklenecek
-    navigate('/home');
+    
+    try {
+      // 1. Backend'inize (FastAPI) login isteği atın
+      const response = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // formData state'i, backend'in beklediği {email, password}
+        // formatıyla zaten uyumlu
+        body: JSON.stringify(formData), 
+      });
+
+      // 2. Başarılı (2xx) cevabı kontrol et
+      if (response.ok) {
+        const data = await response.json();
+        // data = {"message": "Login successful"}
+        
+        // ÖNEMLİ: Gerçekte, backend'in burada bir JWT token 
+        // döndürmesi ve sizin bunu localStorage'a kaydetmeniz gerekir.
+        console.log("Giriş başarılı:", data);
+
+        // Ana sayfaya yönlendir
+        navigate('/home'); 
+
+      } else {
+        // 3. Hatalı (4xx, 5xx) cevabı (örn: 401 Yetkisiz) yakala
+        const errorData = await response.json();
+        // errorData = {"detail": "Invalid email or password"}
+        alert(errorData.detail || "E-posta veya şifre hatalı!");
+      }
+
+    } catch (error) {
+      // 4. Sunucuya ulaşılamazsa (Network error) hatayı yakala
+      console.error("Giriş isteği başarısız:", error);
+      alert("Sunucuya bağlanılamadı!");
+    }
   };
 
   return (
