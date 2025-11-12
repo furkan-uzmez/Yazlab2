@@ -2,7 +2,7 @@ from fastapi import APIRouter ,  HTTPException, status
 from pydantic import BaseModel
 
 from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.user.follow import follow as follow_user
+from backend.func.user.follow import follow as follow_user , unfollow as unfollow_user
 
 
 router = APIRouter(prefix="/user", tags=["user"])
@@ -25,4 +25,20 @@ async def follow(request: FollowRequest):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to follow user"
+        )
+
+@router.delete("/unfollow")
+async def unfollow(request: FollowRequest):
+    connection = open_db_connection()
+    
+    success = unfollow_user(connection, request.follower_id, request.followed_id)
+
+    connection.close()
+    
+    if success:
+        return {"message": "Unfollowed successfully"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to unfollow user"
         )
