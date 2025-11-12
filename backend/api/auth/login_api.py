@@ -15,11 +15,16 @@ class LoginRequest(BaseModel):
 async def login(request: LoginRequest):
     connection = open_db_connection()
 
-
-    is_authenticated = login_control(connection, request.email, request.password)
-
-
-    connection.close()
+    try:
+        is_authenticated = login_control(connection, request.email, request.password)
+    except Exception as e:
+        print(f"HATA: Giriş işlemi başarısız: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Login process failed"
+        )
+    finally:
+        connection.close()
 
     if is_authenticated:
         return {"message": "Login successful"}

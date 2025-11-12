@@ -16,9 +16,16 @@ class RegisterRequest(BaseModel):
 async def register_user(request: RegisterRequest):
     connection = open_db_connection()
 
-    success = register(connection, request.email, request.password, request.username)
-
-    connection.close()
+    try:
+        success = register(connection, request.email, request.password, request.username)
+    except Exception as e:
+        print(f"HATA: Kayıt işlemi başarısız: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Registration process failed"
+        )
+    finally:
+        connection.close()
 
     if success:
         return {"message": "User registered successfully"}

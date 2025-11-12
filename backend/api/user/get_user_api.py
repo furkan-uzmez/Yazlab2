@@ -14,9 +14,16 @@ class UserRequest(BaseModel):
 async def get_user(request: UserRequest):
     connection = open_db_connection()
     
-    user_data = get_user(request.user_name)
-
-    connection.close()
+    try:
+        user_data = get_user(connection, request.user_name)
+    except Exception as e:
+        print(f"HATA: Kullanıcı alınamadı: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not retrieve user"
+        )
+    finally:
+        connection.close()
     
     if user_data is not None:
         return {"message": "User found", "user": user}

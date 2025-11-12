@@ -31,9 +31,16 @@ async def follow(request: FollowRequest):
 async def unfollow(request: FollowRequest):
     connection = open_db_connection()
     
-    success = unfollow_user(connection, request.follower_id, request.followed_id)
-
-    connection.close()
+    try:
+        success = unfollow_user(connection, request.follower_id, request.followed_id)
+    except Exception as e:
+        print(f"HATA: Takipten çıkma işlemi başarısız: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unfollow process failed"
+        )
+    finally:
+        connection.close()
     
     if success:
         return {"message": "Unfollowed successfully"}
