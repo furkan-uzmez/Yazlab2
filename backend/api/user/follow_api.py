@@ -15,9 +15,16 @@ class FollowRequest(BaseModel):
 async def follow(request: FollowRequest):
     connection = open_db_connection()
     
-    success = follow_user(connection, request.follower_id, request.followed_id)
-
-    connection.close()
+    try:
+        success = follow_user(connection, request.follower_id, request.followed_id)
+    except Exception as e:
+        print(f"HATA: Takip işlemi başarısız: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Follow process failed"
+        )
+    finally:
+        connection.close()
     
     if success:
         return {"message": "Followed successfully"}
