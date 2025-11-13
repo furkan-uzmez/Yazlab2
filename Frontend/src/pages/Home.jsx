@@ -1,5 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import {
+  FaHome,
+  FaUser,
+  FaFilm,
+  FaBook,
+  FaSearch,
+  FaRegThumbsUp,
+  FaRegCommentDots,
+  FaGripLines,
+  FaSignOutAlt
+} from 'react-icons/fa';
+import ShinyText from '../components/ShinyText';
+import ActivityCardSkeleton from '../components/ActivityCardSkeleton';
 import './Home.css';
 
 // Tüm örnek aktivite verileri (gerçek uygulamada API'den gelecek)
@@ -114,13 +127,81 @@ const allMockActivities = [
   }
 ];
 
+// Örnek yorumlar (gerçek uygulamada API'den gelecek)
+const getMockComments = (activityId) => {
+  const commentsMap = {
+    1: [
+      {
+        id: 1,
+        userId: 2,
+        userName: 'Ayşe Demir',
+        userAvatar: 'https://i.pravatar.cc/150?img=5',
+        text: 'Harika bir film! Nolan gerçekten usta bir yönetmen.',
+        date: new Date(Date.now() - 1 * 3600 * 1000)
+      },
+      {
+        id: 2,
+        userId: 3,
+        userName: 'Mehmet Kaya',
+        userAvatar: 'https://i.pravatar.cc/150?img=12',
+        text: 'Kesinlikle izlenmeli. Zaman kavramı çok iyi işlenmiş.',
+        date: new Date(Date.now() - 30 * 60 * 1000)
+      }
+    ],
+    2: [
+      {
+        id: 3,
+        userId: 1,
+        userName: 'Ahmet Yılmaz',
+        userAvatar: 'https://i.pravatar.cc/150?img=1',
+        text: 'Çok güzel bir yorum olmuş. Ben de bu kitabı okumak istiyorum.',
+        date: new Date(Date.now() - 2 * 3600 * 1000)
+      }
+    ]
+  };
+  return commentsMap[activityId] || [];
+};
+
 // Aktivite Kartı Bileşeni
 function ActivityCard({ activity }) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState(getMockComments(activity.id));
+
+  const handleLike = (e) => {
+    e.preventDefault();
+    setIsLiked(!isLiked);
+  };
+
+  const handleCommentToggle = (e) => {
+    e.preventDefault();
+    setIsCommentOpen(!isCommentOpen);
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (commentText.trim()) {
+      // Yeni yorum ekle
+      const newComment = {
+        id: comments.length + 1,
+        userId: 999, // Mevcut kullanıcı ID'si
+        userName: 'Sen',
+        userAvatar: 'https://i.pravatar.cc/150?img=20',
+        text: commentText,
+        date: new Date()
+      };
+      setComments([...comments, newComment]);
+      setCommentText('');
+      // Yorum sayısını güncelle (gerçek uygulamada API çağrısı yapılacak)
+    }
+  };
+
   const formatTimeAgo = (date) => {
     const now = new Date();
     const activityDate = new Date(date);
     const diffInSeconds = Math.floor((now - activityDate) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Az önce';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} dakika önce`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} saat önce`;
@@ -129,14 +210,12 @@ function ActivityCard({ activity }) {
   };
 
   const renderRatingStars = (rating) => {
-    // Rating değerini 0-10 aralığına normalize et
     const normalizedRating = Math.max(0, Math.min(10, rating || 0));
-    // 5 yıldız sistemine çevir (10 üzerinden 5 üzerinden)
     const starRating = (normalizedRating / 10) * 5;
     const fullStars = Math.floor(starRating);
     const hasHalfStar = starRating % 1 >= 0.5;
     const emptyStars = Math.max(0, 5 - fullStars - (hasHalfStar ? 1 : 0));
-    
+
     return (
       <div className="rating-stars">
         {fullStars > 0 && [...Array(fullStars)].map((_, i) => (
@@ -167,8 +246,8 @@ function ActivityCard({ activity }) {
             className="user-avatar"
           />
             <div className="user-details">
-            <Link to={`/profile/${activity.userId}`} className="user-name">
-              {activity.userName}
+            <Link to={`/profile/${activity.userId}`} className="user-name-link">
+              <ShinyText text={activity.userName} speed={4} className="user-name" />
             </Link>
             <span className="action-text">{activity.actionText}</span>
           </div>
@@ -187,8 +266,15 @@ function ActivityCard({ activity }) {
                 className="poster-image"
               />
               <div className="content-info">
-                <h3 className="content-title">{activity.contentTitle}</h3>
-                <p className="content-type">{activity.contentType}</p>
+                <div className="content-header">
+                  <Link to="#" className="content-title-link">
+                  <ShinyText text={activity.contentTitle} speed={4} className="content-title" />
+                </Link>
+                  <div className={`content-type-badge ${activity.contentType === 'Film' ? 'film-badge' : 'book-badge'}`}>
+                    {activity.contentType === 'Film' ? <FaFilm /> : <FaBook />}
+                    <span>{activity.contentType}</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="rating-display">
@@ -204,15 +290,22 @@ function ActivityCard({ activity }) {
                 className="poster-image"
               />
               <div className="content-info">
-                <h3 className="content-title">{activity.contentTitle}</h3>
-                <p className="content-type">{activity.contentType}</p>
+                <div className="content-header">
+                  <Link to="#" className="content-title-link">
+                  <ShinyText text={activity.contentTitle} speed={4} className="content-title" />
+                </Link>
+                  <div className={`content-type-badge ${activity.contentType === 'Film' ? 'film-badge' : 'book-badge'}`}>
+                    {activity.contentType === 'Film' ? <FaFilm /> : <FaBook />}
+                    <span>{activity.contentType}</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="review-excerpt">
               <p>{truncateText(activity.reviewText)}</p>
               {activity.reviewText.length > 200 && (
                 <Link to={`/review/${activity.reviewId}`} className="read-more-link">
-                  ...daha fazlasını oku
+                  <ShinyText text="...daha fazlasını oku" speed={4} className="read-more-text" />
                 </Link>
               )}
             </div>
@@ -222,34 +315,114 @@ function ActivityCard({ activity }) {
 
       {/* Alt Bilgi (Footer) / Etkileşim */}
       <div className="activity-footer">
-        <button className="interaction-btn like-btn">
-          <span className="btn-icon">👍</span>
-          <span>Beğen</span>
-          {activity.likes > 0 && <span className="count">{activity.likes}</span>}
+        <button 
+          className={`interaction-btn like-btn ${isLiked ? 'active' : ''}`}
+          onClick={handleLike}
+        >
+          <FaRegThumbsUp className="btn-icon" />
+          {(activity.likes > 0 || isLiked) && (
+            <span className="count">{activity.likes + (isLiked ? 1 : 0)}</span>
+          )}
         </button>
-        <button className="interaction-btn comment-btn">
-          <span className="btn-icon">💬</span>
-          <span>Yorum Yap</span>
-          {activity.comments > 0 && <span className="count">{activity.comments}</span>}
+        <button 
+          className={`interaction-btn comment-btn ${isCommentOpen ? 'active' : ''}`}
+          onClick={handleCommentToggle}
+        >
+          <FaRegCommentDots className="btn-icon" />
+          {(activity.comments > 0 || comments.length > 0) && (
+            <span className="count">{comments.length > 0 ? comments.length : activity.comments}</span>
+          )}
         </button>
       </div>
+
+      {/* Yorumlar ve Yorum Yapma Formu */}
+      {isCommentOpen && (
+        <div className="comment-section">
+          {/* Mevcut Yorumlar */}
+          {comments.length > 0 && (
+            <div className="comments-list">
+              <h4 className="comments-title">Yorumlar ({comments.length})</h4>
+              {comments.map((comment) => (
+                <div key={comment.id} className="comment-item">
+                  <img 
+                    src={comment.userAvatar || '/api/placeholder/32/32'} 
+                    alt={comment.userName}
+                    className="comment-avatar"
+                  />
+                  <div className="comment-content">
+                    <div className="comment-header">
+                      <span className="comment-author">{comment.userName}</span>
+                      <span className="comment-date">{formatTimeAgo(comment.date)}</span>
+                    </div>
+                    <p className="comment-text">{comment.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Yorum Yapma Formu */}
+          <form onSubmit={handleCommentSubmit} className="comment-form">
+            <textarea
+              className="comment-input"
+              placeholder="Yorumunuzu yazın..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              rows="3"
+            />
+            <div className="comment-form-actions">
+              <button 
+                type="button" 
+                className="comment-cancel-btn"
+                onClick={() => setIsCommentOpen(false)}
+              >
+                İptal
+              </button>
+              <button 
+                type="submit" 
+                className="comment-submit-btn"
+                disabled={!commentText.trim()}
+              >
+                Gönder
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
 
 function Home() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const loadingRef = useRef(null);
   const loadingRefValue = useRef(false);
 
+  const handleLogout = () => {
+    // localStorage'dan token ve kullanıcı bilgilerini temizle
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // Ana giriş sayfasına yönlendir
+    navigate('/');
+  };
+
   const fetchActivities = useCallback(async (pageNum) => {
     if (loadingRefValue.current) return;
     
     loadingRefValue.current = true;
-    setLoading(true);
+    const isInitialLoad = pageNum === 1 && activities.length === 0;
+    
+    if (isInitialLoad) {
+      setInitialLoading(true);
+    } else {
+      setLoading(true);
+    }
     
     try {
       // Simüle edilmiş API çağrısı
@@ -270,9 +443,10 @@ function Home() {
       console.error('Error fetching activities:', error);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
       loadingRefValue.current = false;
     }
-  }, []);
+  }, [activities.length]);
 
   useEffect(() => {
     // İlk yükleme - sadece bir kez
@@ -308,50 +482,62 @@ function Home() {
     <div className="home-container">
       {/* Sidebar */}
       <aside className="sidebar">
+        <div className="sidebar-brand">
+          <ShinyText text="READDIT" speed={3} className="brand-text" />
+        </div>
         <div className="sidebar-content">
           <div className="sidebar-section">
             <h3 className="sidebar-title">Menü</h3>
             <nav className="sidebar-nav">
-              <Link to="/home" className="nav-item active">
-                <span className="nav-icon">🏠</span>
+              <Link 
+                to="/home" 
+                className={`nav-item ${location.pathname === '/home' || location.pathname === '/' ? 'active' : ''}`}
+              >
+                <FaHome className="nav-icon" />
                 <span>Ana Sayfa</span>
               </Link>
-              <Link to="/profile" className="nav-item">
-                <span className="nav-icon">👤</span>
+              <Link 
+                to="/profile" 
+                className={`nav-item ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
+              >
+                <FaUser className="nav-icon" />
                 <span>Profilim</span>
               </Link>
-              <Link to="/movies" className="nav-item">
-                <span className="nav-icon">🎬</span>
+              <Link 
+                to="/movies" 
+                className={`nav-item ${location.pathname === '/movies' ? 'active' : ''}`}
+              >
+                <FaFilm className="nav-icon" />
                 <span>Filmler</span>
               </Link>
-              <Link to="/books" className="nav-item">
-                <span className="nav-icon">📚</span>
+              <Link 
+                to="/books" 
+                className={`nav-item ${location.pathname === '/books' ? 'active' : ''}`}
+              >
+                <FaBook className="nav-icon" />
                 <span>Kitaplar</span>
               </Link>
-              <Link to="/search" className="nav-item">
-                <span className="nav-icon">🔍</span>
+              <Link 
+                to="/search" 
+                className={`nav-item ${location.pathname === '/search' ? 'active' : ''}`}
+              >
+                <FaSearch className="nav-icon" />
                 <span>Ara</span>
               </Link>
             </nav>
           </div>
-          
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Takip Edilenler</h3>
-            <div className="following-list">
-              <div className="following-item">
-                <img src="https://i.pravatar.cc/150?img=1" alt="User" className="following-avatar" />
-                <span>Ahmet Yılmaz</span>
-              </div>
-              <div className="following-item">
-                <img src="https://i.pravatar.cc/150?img=5" alt="User" className="following-avatar" />
-                <span>Ayşe Demir</span>
-              </div>
-              <div className="following-item">
-                <img src="https://i.pravatar.cc/150?img=12" alt="User" className="following-avatar" />
-                <span>Mehmet Kaya</span>
-              </div>
-            </div>
+
+          <div className="sidebar-footer">
+            <button type="button" className="nav-item">
+              <FaGripLines className="nav-icon" />
+              <span>Daha Fazla</span>
+            </button>
+            <button type="button" className="nav-item" onClick={handleLogout}>
+              <FaSignOutAlt className="nav-icon" />
+              <span>Çıkış Yap</span>
+            </button>
           </div>
+
         </div>
       </aside>
 
@@ -363,20 +549,40 @@ function Home() {
         </div>
 
         <div className="activities-feed">
-          {activities.map((activity) => (
-            <ActivityCard key={activity.id} activity={activity} />
-          ))}
+          {initialLoading ? (
+            // İlk yükleme için skeleton loader'lar
+            <>
+              {[...Array(5)].map((_, index) => (
+                <ActivityCardSkeleton key={`skeleton-${index}`} />
+              ))}
+            </>
+          ) : (
+            // Yüklenen aktiviteler
+            <>
+              {activities.map((activity) => (
+                <ActivityCard key={activity.id} activity={activity} />
+              ))}
+              {loading && (
+                // Daha fazla yükleme için skeleton loader'lar
+                <>
+                  {[...Array(3)].map((_, index) => (
+                    <ActivityCardSkeleton key={`loading-skeleton-${index}`} />
+                  ))}
+                </>
+              )}
+            </>
+          )}
         </div>
 
         {/* Loading ve Daha Fazla Yükle */}
         <div ref={loadingRef} className="load-more-container">
-          {loading && (
+          {!initialLoading && loading && activities.length > 0 && (
             <div className="loading-spinner">
               <div className="spinner"></div>
               <p>Yükleniyor...</p>
             </div>
           )}
-          {!hasMore && activities.length > 0 && (
+          {!hasMore && activities.length > 0 && !initialLoading && (
             <p className="no-more-activities">Tüm aktiviteler yüklendi</p>
           )}
         </div>
