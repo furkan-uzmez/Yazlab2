@@ -1,3 +1,4 @@
+import BottomNav from '../components/BottomNav';
 import './Profile.css';
 
 function Profile() {
@@ -8,6 +9,7 @@ function Profile() {
         <h1>Profilim</h1>
         <p>Bu sayfa henüz içerik eklenmedi.</p>
       </div>
+      <BottomNav />
     </div>
   );
 }

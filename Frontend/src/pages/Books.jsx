@@ -1,3 +1,4 @@
+import BottomNav from '../components/BottomNav';
 import './Books.css';
 
 function Books() {
@@ -8,6 +9,7 @@ function Books() {
         <h1>Kitaplar</h1>
         <p>Bu sayfa henüz içerik eklenmedi.</p>
       </div>
+      <BottomNav />
     </div>
   );
 }

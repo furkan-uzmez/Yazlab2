@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fa';
 import ShinyText from '../components/ShinyText';
 import ActivityCardSkeleton from '../components/ActivityCardSkeleton';
+import BottomNav from '../components/BottomNav';
 import './Home.css';
 
 // Tüm örnek aktivite verileri (gerçek uygulamada API'den gelecek)
@@ -943,6 +944,9 @@ function Home() {
           </div>
         </>
       )}
+
+      {/* Mobil Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }

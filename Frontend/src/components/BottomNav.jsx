@@ -1,0 +1,45 @@
+import { Link, useLocation } from 'react-router-dom';
+import { FaHome, FaUser, FaFilm, FaBook, FaSearch } from 'react-icons/fa';
+import '../pages/Home.css';
+
+function BottomNav() {
+  const location = useLocation();
+
+  return (
+    <nav className="bottom-nav">
+      <Link 
+        to="/home" 
+        className={`bottom-nav-item ${location.pathname === '/home' || location.pathname === '/' ? 'active' : ''}`}
+      >
+        <FaHome className="bottom-nav-icon" />
+      </Link>
+      <Link 
+        to="/profile" 
+        className={`bottom-nav-item ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
+      >
+        <FaUser className="bottom-nav-icon" />
+      </Link>
+      <Link 
+        to="/movies" 
+        className={`bottom-nav-item ${location.pathname === '/movies' ? 'active' : ''}`}
+      >
+        <FaFilm className="bottom-nav-icon" />
+      </Link>
+      <Link 
+        to="/books" 
+        className={`bottom-nav-item ${location.pathname === '/books' ? 'active' : ''}`}
+      >
+        <FaBook className="bottom-nav-icon" />
+      </Link>
+      <Link 
+        to="/search" 
+        className={`bottom-nav-item ${location.pathname === '/search' ? 'active' : ''}`}
+      >
+        <FaSearch className="bottom-nav-icon" />
+      </Link>
+    </nav>
+  );
+}
+
+export default BottomNav;
+
