@@ -27,7 +27,7 @@ async def login(request: LoginRequest):
         connection.close()
 
     if is_authenticated:
-        return {"message": "Login successful"}
+        return {"email": request.email , "message": "Login successful"}
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
