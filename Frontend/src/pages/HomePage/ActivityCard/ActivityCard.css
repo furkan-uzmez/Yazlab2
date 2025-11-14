@@ -248,23 +248,60 @@
 }
 
 .review-excerpt {
-  padding: 1.25rem;
-  background-color: #1a1a1a;
-  border-radius: 10px;
-  border-left: 3px solid #4a9eff;
-  line-height: 1.7;
-  color: #cccccc;
+  padding: 1.5rem;
+  background-color: #000000;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  line-height: 1.8;
+  color: #e0e0e0;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.review-excerpt::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #4a9eff, rgba(74, 158, 255, 0.3), transparent);
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.review-excerpt::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .activity-card:hover .review-excerpt {
-  background-color: #1f1f1f;
-  border-left-color: #5aaeff;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.activity-card:hover .review-excerpt::before {
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
+}
+
+.activity-card:hover .review-excerpt::after {
+  opacity: 1;
 }
 
 .review-excerpt p {
   margin: 0;
   font-size: 0.95rem;
+  position: relative;
+  z-index: 1;
 }
 
 .read-more-link {

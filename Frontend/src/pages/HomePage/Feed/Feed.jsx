@@ -55,29 +55,15 @@ function Feed({
       <div ref={loadingRef} className="load-more-container">
         {!initialLoading && loading && activities.length > 0 && (
           <div className="loading-wrapper">
-            <div className="modern-spinner">
-              <div className="spinner-ring">
-                <div className="spinner-ring-inner"></div>
-              </div>
-              <div className="spinner-dots">
-                <span className="dot"></span>
-                <span className="dot"></span>
-                <span className="dot"></span>
-              </div>
-            </div>
-            <div className="loading-text-container">
-              <p className="loading-text">Yeni içerikler yükleniyor</p>
-              <div className="loading-progress">
-                <div className="loading-progress-bar"></div>
-              </div>
-            </div>
+            <div className="simple-spinner"></div>
+            <p className="loading-text">Yükleniyor...</p>
           </div>
         )}
         {!hasMore && activities.length > 0 && !initialLoading && (
           <div className="no-more-wrapper">
-            <div className="no-more-icon">✓</div>
-            <p className="no-more-activities">Tüm aktiviteler yüklendi</p>
-            <p className="no-more-subtitle">Daha fazla içerik için sayfayı yenileyin</p>
+            <div className="no-more-divider"></div>
+            <p className="no-more-text">Tüm aktiviteler yüklendi</p>
+            <div className="no-more-divider"></div>
           </div>
         )}
       </div>
