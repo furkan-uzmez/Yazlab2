@@ -1,0 +1,72 @@
+/* Bottom Navigation (Mobil) */
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: #000000;
+    border-top: 1px solid #1a1a1a;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    color: #888;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: color 0.2s ease;
+    position: relative;
+    background: transparent;
+  }
+
+  .bottom-nav-item:hover {
+    color: #ffffff;
+  }
+
+  .bottom-nav-item.active {
+    color: #ffffff;
+  }
+
+  .bottom-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: #ffffff;
+    border-radius: 50%;
+  }
+
+  .bottom-nav-icon {
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .bottom-nav-item:hover .bottom-nav-icon {
+    transform: scale(1.05);
+  }
+
+  .bottom-nav-item.active .bottom-nav-icon {
+    transform: scale(1.1);
+  }
+}
+

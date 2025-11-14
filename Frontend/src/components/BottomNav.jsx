@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { FaHome, FaUser, FaFilm, FaBook, FaSearch } from 'react-icons/fa';
-import '../pages/Home.css';
+import './BottomNav.css';
 
 function BottomNav() {
   const location = useLocation();

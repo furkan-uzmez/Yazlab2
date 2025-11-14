@@ -4,10 +4,10 @@ import Login from './pages/Login';
 import KayitOl from './pages/KayitOl';
 import SifremiUnuttum from './pages/SifremiUnuttum';
 import SifreSifirla from './pages/SifreSifirla';
-import Home from './pages/Home';
-import Profile from './pages/Profile';
-import Movies from './pages/Movies';
-import Books from './pages/Books';
+import Home from './pages/HomePage/Home';
+import Profile from './pages/Profile/Profile';
+import Movies from './pages/Movies/Movies';
+import Books from './pages/Books/Books';
 import './App.css';
 
 function App() {

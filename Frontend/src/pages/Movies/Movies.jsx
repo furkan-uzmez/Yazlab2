@@ -1,4 +1,4 @@
-import BottomNav from '../components/BottomNav';
+import BottomNav from '../../components/BottomNav';
 import './Movies.css';
 
 function Movies() {
