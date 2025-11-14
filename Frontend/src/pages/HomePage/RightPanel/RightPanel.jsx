@@ -1,44 +1,73 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { FaUserFriends, FaStar } from 'react-icons/fa';
 import './RightPanel.css';
 
 function RightPanel({ followedUsers, onFollowUser }) {
   const navigate = useNavigate();
+  const [following, setFollowing] = useState([]);
+  const [limit, setLimit] = useState(5);
+
+  useEffect(() => {
+    const fetchFollowing = async () => {
+      try {
+        const email = localStorage.getItem("email"); // Giriş yapmış kullanıcının email'i
+        if (!email) {
+          console.error("Kullanıcı email'i bulunamadı.");
+          return;
+        }
+
+        const url = `http://localhost:8000/user/${email}/followers`;
+
+        const res = await fetch(url);
+        if (res.ok) {
+            const data = await res.json();
+            
+            // --- 1. DÜZELTME: Verinin tamamını değil, 'followers' dizisini state'e ata
+            setFollowing(data.followers); 
+            
+        } else {
+            console.error("Takip edilenler alınamadı:", res.status);
+        }
+      } catch (err) {
+        console.error("Takip API hatası:", err);
+      }
+    };
+
+    fetchFollowing();
+  }, []); // Boş dizi [], bu effect'in sadece bileşen ilk yüklendiğinde çalışmasını sağlar
 
   const handleShowMoreFollowing = () => {
-    navigate('/profile');
+    setLimit((prev) => prev + 5);
   };
 
   return (
     <aside className="right-panel">
       <div className="right-panel-content">
-        {/* Takip Ettiklerin */}
+        
         <div className="right-panel-section">
           <h3 className="right-panel-title">
             <FaUserFriends className="right-panel-title-icon" />
-            Takip Ettiklerin
+            {/* API'den takipçi listesini çekiyoruz, "Takip Ettiklerin" değil */}
+            Takipçilerin
           </h3>
           <div className="right-panel-list">
-            {[
-              { id: 1, name: 'Mehmet Demir', avatar: 'https://i.pravatar.cc/150?img=12' },
-              { id: 2, name: 'Ayşe Kaya', avatar: 'https://i.pravatar.cc/150?img=15' },
-              { id: 3, name: 'Can Özkan', avatar: 'https://i.pravatar.cc/150?img=20' },
-              { id: 4, name: 'Zeynep Yıldız', avatar: 'https://i.pravatar.cc/150?img=25' },
-              { id: 5, name: 'Ali Çelik', avatar: 'https://i.pravatar.cc/150?img=30' },
-              { id: 6, name: 'Fatma Yılmaz', avatar: 'https://i.pravatar.cc/150?img=33' },
-              { id: 7, name: 'Mustafa Kaya', avatar: 'https://i.pravatar.cc/150?img=36' }
-            ].slice(0, 5).map((user) => (
-              <div key={user.id} className="right-panel-item">
+            
+            {/* --- 2. DÜZELTME: Doğru veri anahtarlarını (keys) kullan --- */}
+            {following.slice(0, limit).map((user) => (
+              <div key={user.username} className="right-panel-item"> {/* key='id' -> 'username' */}
                 <img 
-                  src={user.avatar} 
-                  alt={user.name}
+                  src={user.avatar_url} // src='avatar' -> 'avatar_url'
+                  alt={user.username}   // alt='name' -> 'username'
                   className="right-panel-avatar"
                 />
                 <div className="right-panel-item-info">
-                  <span className="right-panel-item-name">{user.name}</span>
+                  <span className="right-panel-item-name">{user.username}</span> {/* 'name' -> 'username' */}
                 </div>
               </div>
             ))}
+            {/* --- DÜZELTME SONU --- */}
+            
             <button 
               className="right-panel-show-more-btn"
               onClick={handleShowMoreFollowing}
@@ -47,8 +76,10 @@ function RightPanel({ followedUsers, onFollowUser }) {
             </button>
           </div>
         </div>
+        {/* --- DİNAMİK BÖLÜM SONU --- */}
 
-        {/* Senin İçin Önerilenler */}
+
+        {/* "Senin İçin Önerilenler" (Bu bölüm zaten props ile doğru çalışıyor) */}
         <div className="right-panel-section">
           <h3 className="right-panel-title">
             <FaStar className="right-panel-title-icon" />
@@ -61,7 +92,8 @@ function RightPanel({ followedUsers, onFollowUser }) {
               { id: 103, name: 'Selin Aydın', avatar: 'https://i.pravatar.cc/150?img=45', followers: '2.1K takipçi', mutual: '2 ortak takipçi' },
               { id: 104, name: 'Emre Doğan', avatar: 'https://i.pravatar.cc/150?img=50', followers: '3.5K takipçi', mutual: '7 ortak takipçi' }
             ].map((user) => {
-              const isFollowed = followedUsers.has(user.id);
+              // 'followedUsers' prop'u "Önerilenler" listesini kontrol etmek için kullanılıyor
+              const isFollowed = followedUsers.has(user.id); 
               return (
                 <div key={user.id} className="right-panel-item">
                   <img 
@@ -76,7 +108,8 @@ function RightPanel({ followedUsers, onFollowUser }) {
                   </div>
                   <button 
                     className={`right-panel-follow-text-btn ${isFollowed ? 'followed' : ''}`}
-                    onClick={() => onFollowUser(user.id)}
+                    // 'onFollowUser' prop'u "Önerilenler" listesindeki butonu kontrol ediyor
+                    onClick={() => onFollowUser(user.id)} 
                   >
                     {isFollowed ? 'Takip Ediliyor' : 'Takip Et'}
                   </button>
@@ -91,4 +124,3 @@ function RightPanel({ followedUsers, onFollowUser }) {
 }
 
 export default RightPanel;
-
