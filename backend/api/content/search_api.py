@@ -23,4 +23,4 @@ async def search(query: str):
             detail="No content found for the given username"
         )
 
-    return {"query": request.query, "results": results}
+    return {"query": query, "results": results}
