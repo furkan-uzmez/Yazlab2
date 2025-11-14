@@ -40,6 +40,8 @@ function Login() {
         // ÖNEMLİ: Gerçekte, backend'in burada bir JWT token 
         // döndürmesi ve sizin bunu localStorage'a kaydetmeniz gerekir.
         console.log("Giriş başarılı:", data);
+        
+        localStorage.setItem("email", data.email)
 
         // Ana sayfaya yönlendir
         navigate('/home'); 
