@@ -23,7 +23,8 @@ def execute_sql_script_func(conn,file_path):
 def create_tables():
     sql_scripts = ['database.sql','user.sql','contents.sql','genres.sql'
                   ,'content_genres.sql','ratings.sql','reviews.sql'
-                  ,'lists.sql','list_items.sql','follows.sql','activities.sql']
+                  ,'lists.sql','list_items.sql','follows.sql'
+                  ,'activities.sql','activities_comments.sql']
     try:
         connection = create_db_connection()
     except Exception as e:
