@@ -2,3 +2,5 @@ docs
 .env
 node_modules
 users_data.json
+activities.json
+comments.json
