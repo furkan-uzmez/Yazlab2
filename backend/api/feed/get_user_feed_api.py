@@ -2,13 +2,14 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from backend.func.db.connection.open_db_connection import open_db_connection
+from backend.func.feed.get_user_feed import get_user_feed as get_user_feed_func
 
 router = APIRouter(prefix="/feed", tags=["feed"])
 
 
 @router.get("/{email}/search")
 async def get_feed(email: str):
-
+    print(f"Kullanıcı beslemesi isteniyor: {email}")
     connection = open_db_connection()
 
     if connection is None:
@@ -18,7 +19,7 @@ async def get_feed(email: str):
         )
     
     try:
-        results = get_feed(connection, email)
+        results = get_user_feed_func(connection, email)
     except Exception as e:
         print(f"HATA: Kullanıcı beslemesi alınamadı: {e}")
         raise HTTPException(
