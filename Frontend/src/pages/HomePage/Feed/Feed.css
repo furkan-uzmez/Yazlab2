@@ -5,6 +5,12 @@
   margin-right: 320px;
   padding: 2rem;
   max-width: 800px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Feed adjusts when sidebar is in search mode */
+.sidebar.search-mode ~ .feed-container {
+  margin-left: 340px;
 }
 
 .feed-header {
@@ -123,6 +129,10 @@
   .feed-container {
     margin-left: 240px;
     margin-right: 0;
+  }
+  
+  .sidebar.search-mode ~ .feed-container {
+    margin-left: 280px;
   }
 }
 

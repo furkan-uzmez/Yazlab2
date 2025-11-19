@@ -34,6 +34,19 @@
     transition: color 0.2s ease;
     position: relative;
     background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  button.bottom-nav-item {
+    border: none;
+    outline: none;
+  }
+  
+  button.bottom-nav-item:focus {
+    outline: none;
+    border: none;
   }
 
   .bottom-nav-item:hover {

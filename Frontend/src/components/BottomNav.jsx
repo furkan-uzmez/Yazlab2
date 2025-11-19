@@ -2,8 +2,15 @@ import { Link, useLocation } from 'react-router-dom';
 import { FaHome, FaUser, FaFilm, FaBook, FaSearch } from 'react-icons/fa';
 import './BottomNav.css';
 
-function BottomNav() {
+function BottomNav({ onSearchClick, isSearchMode }) {
   const location = useLocation();
+
+  const handleSearchClick = (e) => {
+    e.preventDefault();
+    if (onSearchClick) {
+      onSearchClick();
+    }
+  };
 
   return (
     <nav className="bottom-nav">
@@ -31,12 +38,13 @@ function BottomNav() {
       >
         <FaBook className="bottom-nav-icon" />
       </Link>
-      <Link 
-        to="/search" 
-        className={`bottom-nav-item ${location.pathname === '/search' ? 'active' : ''}`}
+      <button
+        type="button"
+        className={`bottom-nav-item ${isSearchMode ? 'active' : ''}`}
+        onClick={handleSearchClick}
       >
         <FaSearch className="bottom-nav-icon" />
-      </Link>
+      </button>
     </nav>
   );
 }

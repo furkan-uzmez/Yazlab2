@@ -18,6 +18,7 @@ function Home() {
   const [page, setPage] = useState(1);
   const loadingRef = useRef(null);
   const loadingRefValue = useRef(false);
+  const [isSearchMode, setIsSearchMode] = useState(false);
   
   // ... (Diğer state'ler aynı kalacak: commentPanelOpen, selectedActivity vb.) ...
   const [commentPanelOpen, setCommentPanelOpen] = useState(false);
@@ -139,7 +140,11 @@ function Home() {
   return (
     <div className="home-container">
       {/* ... (JSX yapısı tamamen aynı) ... */}
-      <Sidebar onLogout={handleLogout} />
+      <Sidebar 
+        onLogout={handleLogout}
+        isSearchMode={isSearchMode}
+        onSearchModeChange={setIsSearchMode}
+      />
       
       <Feed 
         activities={activities}
@@ -167,7 +172,10 @@ function Home() {
         // ...
       />
       
-      <BottomNav />
+      <BottomNav 
+        onSearchClick={() => setIsSearchMode(true)}
+        isSearchMode={isSearchMode}
+      />
     </div>
   );
 }
