@@ -1,9 +1,18 @@
 from backend.func.db.connection.create_db_connection import create_db_connection
 from pathlib import Path  # <-- 1. GEREKLİ MODÜLÜ İÇERİ AKTARIN
 
-# --- 2. SQL DOSYALARININ BULUNDUĞU DİZİNİ TANIMLAYIN ---
-# Bu, 'create_tables.py' dosyasının bulunduğu dizini (yani 'database/' klasörünü)
-# dinamik olarak bulur.
+import logging
+
+Path("logs").mkdir(exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    filename="logs/app.log",   # LOG DOSYASI
+    filemode="a",              # ekleme modu
+)
+
+
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
@@ -17,7 +26,8 @@ def execute_sql_script_func(conn,file_path):
             cursor.execute(stmt)
         except Exception as e:
             print(f"Hata oluştu: {e} --> {stmt}")
-    print(f"{file_path} dosyasındaki SQL sorguları başarıyla çalıştırıldı.")
+    logger = logging.getLogger(__name__)
+    logger.info("%s dosyasındaki SQL sorguları başarıyla çalıştırıldı.", file_path)
     cursor.close()
 
 def create_tables():
@@ -41,7 +51,8 @@ def create_tables():
         # '/home/furkan/Projects/Yazlab2/database/create_database.sql' gibi tam bir yol oluşturulacak.
         script_path = SCRIPT_DIR / script_name 
         
-        print(f"Executing script: {script_path}")
+        logger = logging.getLogger(__name__)
+        logger.info(f"Executing script: {script_path}")
         
         # Dosyanın var olup olmadığını kontrol etmek iyi bir fikirdir
         if not script_path.exists():
