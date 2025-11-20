@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaTh, FaPalette, FaCog, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
+import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaTh, FaSun, FaMoon, FaCog, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
 import ShinyText from '../../../components/ShinyText';
 import './Sidebar.css';
 
@@ -13,6 +13,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   const [isCompactTabs, setIsCompactTabs] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isMoreMenuClosing, setIsMoreMenuClosing] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const searchInputRef = useRef(null);
   const tabsRef = useRef(null);
   const moreMenuRef = useRef(null);
@@ -165,9 +166,10 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   };
 
   const handleChangeView = () => {
-    // Görünümü değiştir fonksiyonu - şimdilik placeholder
-    console.log('Görünüm değiştirildi');
+    // Görünümü değiştir fonksiyonu - açık/koyu mod toggle
+    setIsDarkMode(!isDarkMode);
     setIsMoreMenuOpen(false);
+    // TODO: Tema değişikliği uygulanacak
   };
 
   const handleSettings = () => {
@@ -282,7 +284,11 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                           className="more-menu-item"
                           onClick={handleChangeView}
                         >
-                          <FaPalette className="more-menu-icon" />
+                          {isDarkMode ? (
+                            <FaSun className="more-menu-icon" />
+                          ) : (
+                            <FaMoon className="more-menu-icon" />
+                          )}
                           <span>Görünümü Değiştir</span>
                         </button>
                         <button 
