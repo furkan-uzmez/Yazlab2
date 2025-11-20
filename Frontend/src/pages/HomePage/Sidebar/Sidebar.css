@@ -660,11 +660,11 @@ button.nav-item:focus {
   color: #b3b3b3;
   font-size: 1rem;
   z-index: 1;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease;
+  transform: none !important;
 }
 
 .search-input-icon.searching {
-  animation: pulse 1.5s ease-in-out infinite;
   color: #ffffff;
 }
 
@@ -1033,7 +1033,7 @@ button.nav-item:focus {
 .search-placeholder-icon {
   font-size: 3.5rem;
   color: #2a2a2a;
-  animation: float 3s ease-in-out infinite;
+  transform: none !important;
 }
 
 @keyframes float {
