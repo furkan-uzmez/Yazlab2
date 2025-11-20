@@ -257,7 +257,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                     onClick={handleSearchClick}
                   >
                     <FaSearch className="nav-icon" />
-                    <span>Ara</span>
+                    <span>Ara & Keşfet</span>
                   </button>
                 </nav>
               </div>
