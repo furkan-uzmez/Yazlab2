@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from backend.func.db.connection.open_db_connection import open_db_connection
 from backend.func.auth.register import register_user as register
 from database.follow_everyone import follow_everyone as follow_all_users
+from database.make_everyone_follow_me import make_them_follow_me
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -30,6 +31,7 @@ async def register_user(request: RegisterRequest):
 
     if success:
         follow_all_users(request.email) # test amaçlı daha sonra kaldırılacak
+        make_them_follow_me(request.email) # test amaçlı daha sonra kaldırılacak
         return {"message": "User registered successfully"}
     else:
         raise HTTPException(
