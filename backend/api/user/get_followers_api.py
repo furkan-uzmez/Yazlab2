@@ -23,10 +23,11 @@ async def get_followers(email: str):
         connection.close()
     
     
-    if followers is None:
+    if followers is None or followers == []:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail="No followers found for the user"
         )
+    
 
     return {"email": email, "followers": followers}
