@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
-import { FaEdit, FaPlus, FaUserPlus, FaUserCheck, FaFilm, FaBook, FaStar, FaClock, FaList } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaUserPlus, FaUserCheck, FaFilm, FaBook, FaStar, FaClock, FaList, FaTimes, FaSearch, FaTrash } from 'react-icons/fa';
 import './Profile.css';
 
 function Profile() {
@@ -29,6 +29,18 @@ function Profile() {
   // Library tabs
   const [activeLibraryTab, setActiveLibraryTab] = useState('watched');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+  
+  // Create list modal
+  const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false);
+  const [newListName, setNewListName] = useState('');
+  const [newListDescription, setNewListDescription] = useState('');
+  
+  // Edit list modal
+  const [isEditListModalOpen, setIsEditListModalOpen] = useState(false);
+  const [selectedList, setSelectedList] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   const handleTabChange = (newTab) => {
     if (newTab !== activeLibraryTab) {
@@ -65,11 +77,16 @@ function Profile() {
     ]
   };
   
-  // Mock custom lists
-  const customLists = [
-    { name: 'En İyi Bilimkurgu Filmlerim', description: 'Favori bilimkurgu filmlerim', items: [1, 2, 3] },
-    { name: 'Okunacak Klasikler', description: 'Mutlaka okumam gereken klasik eserler', items: [1, 2] }
-  ];
+  // Mock custom lists - now using state
+  const [customLists, setCustomLists] = useState([
+    { id: 1, name: 'En İyi Bilimkurgu Filmlerim', description: 'Favori bilimkurgu filmlerim', items: [
+      { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
+      { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' }
+    ]},
+    { id: 2, name: 'Okunacak Klasikler', description: 'Mutlaka okumam gereken klasik eserler', items: [
+      { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' }
+    ]}
+  ]);
   
   // Mock recent activities
   const recentActivities = [
@@ -106,8 +123,128 @@ function Profile() {
   };
 
   const handleCreateList = () => {
-    // TODO: Open create list modal
-    console.log('Create new list');
+    setIsCreateListModalOpen(true);
+  };
+
+  const handleCloseCreateListModal = () => {
+    setIsCreateListModalOpen(false);
+    setNewListName('');
+    setNewListDescription('');
+  };
+
+  const handleSubmitNewList = (e) => {
+    e.preventDefault();
+    if (newListName.trim()) {
+      const newList = {
+        id: Date.now(),
+        name: newListName,
+        description: newListDescription,
+        items: []
+      };
+      // Add to custom lists (in real app, this would be an API call)
+      setCustomLists([...customLists, newList]);
+      handleCloseCreateListModal();
+    }
+  };
+
+  const handleEditList = (list) => {
+    setSelectedList(list);
+    setIsEditListModalOpen(true);
+  };
+
+  const handleCloseEditListModal = () => {
+    setIsEditListModalOpen(false);
+    setSelectedList(null);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  const handleSearchContent = (query) => {
+    setSearchQuery(query);
+    if (query.trim().length > 0) {
+      setIsSearching(true);
+      // Mock search results - in real app, this would be an API call
+      setTimeout(() => {
+        const mockResults = [
+          { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
+          { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
+          { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
+          { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
+          { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
+        ].filter(item => 
+          item.title.toLowerCase().includes(query.toLowerCase())
+        );
+        setSearchResults(mockResults);
+        setIsSearching(false);
+      }, 300);
+    } else {
+      setSearchResults([]);
+      setIsSearching(false);
+    }
+  };
+
+  const handleAddToList = (content) => {
+    if (selectedList) {
+      const updatedLists = customLists.map(list => {
+        if (list.id === selectedList.id) {
+          // Check if content already exists
+          const exists = list.items.some(item => item.id === content.id);
+          if (!exists) {
+            return {
+              ...list,
+              items: [...list.items, content]
+            };
+          }
+        }
+        return list;
+      });
+      setCustomLists(updatedLists);
+      setSelectedList(updatedLists.find(l => l.id === selectedList.id));
+      setSearchQuery('');
+      setSearchResults([]);
+    }
+  };
+
+  const handleRemoveFromList = (contentId) => {
+    if (selectedList) {
+      const updatedLists = customLists.map(list => {
+        if (list.id === selectedList.id) {
+          return {
+            ...list,
+            items: list.items.filter(item => item.id !== contentId)
+          };
+        }
+        return list;
+      });
+      setCustomLists(updatedLists);
+      setSelectedList(updatedLists.find(l => l.id === selectedList.id));
+    }
+  };
+
+  const handleUpdateList = (e) => {
+    e.preventDefault();
+    if (selectedList) {
+      const updatedLists = customLists.map(list => {
+        if (list.id === selectedList.id) {
+          return {
+            ...list,
+            name: selectedList.name,
+            description: selectedList.description
+          };
+        }
+        return list;
+      });
+      setCustomLists(updatedLists);
+      handleCloseEditListModal();
+    }
+  };
+
+  const handleDeleteList = () => {
+    if (selectedList) {
+      const updatedLists = customLists.filter(list => list.id !== selectedList.id);
+      setCustomLists(updatedLists);
+      handleCloseEditListModal();
+    }
   };
 
 
@@ -282,8 +419,12 @@ function Profile() {
             </h2>
             <div className="custom-lists">
               {customLists.length > 0 ? (
-                customLists.map((list, index) => (
-                  <div key={index} className="custom-list-card">
+                customLists.map((list) => (
+                  <div 
+                    key={list.id} 
+                    className="custom-list-card"
+                    onClick={() => handleEditList(list)}
+                  >
                     <div className="custom-list-card-header">
                       <h3>{list.name}</h3>
                     </div>
@@ -341,6 +482,198 @@ function Profile() {
         onConfirm={handleConfirmLogout}
         onCancel={handleCancelLogout}
       />
+
+      {/* Create List Modal */}
+      {isCreateListModalOpen && (
+        <div className="create-list-modal-overlay" onClick={handleCloseCreateListModal}>
+          <div className="create-list-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="create-list-modal-header">
+              <h2>Yeni Liste Oluştur</h2>
+              <button 
+                className="create-list-modal-close"
+                onClick={handleCloseCreateListModal}
+                aria-label="Kapat"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <form className="create-list-modal-form" onSubmit={handleSubmitNewList}>
+              <div className="form-group">
+                <label htmlFor="list-name">Liste Adı</label>
+                <input
+                  id="list-name"
+                  type="text"
+                  value={newListName}
+                  onChange={(e) => setNewListName(e.target.value)}
+                  placeholder="Örn: En İyi Bilimkurgu Filmlerim"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="list-description">Açıklama (Opsiyonel)</label>
+                <textarea
+                  id="list-description"
+                  value={newListDescription}
+                  onChange={(e) => setNewListDescription(e.target.value)}
+                  placeholder="Liste hakkında kısa bir açıklama..."
+                  rows="3"
+                />
+              </div>
+              <div className="create-list-modal-actions">
+                <button 
+                  type="button" 
+                  className="create-list-modal-cancel"
+                  onClick={handleCloseCreateListModal}
+                >
+                  İptal
+                </button>
+                <button 
+                  type="submit" 
+                  className="create-list-modal-submit"
+                >
+                  Oluştur
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit List Modal */}
+      {isEditListModalOpen && selectedList && (
+        <div className="create-list-modal-overlay" onClick={handleCloseEditListModal}>
+          <div className="create-list-modal edit-list-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="create-list-modal-header">
+              <h2>Listeyi Düzenle</h2>
+              <button 
+                className="create-list-modal-close"
+                onClick={handleCloseEditListModal}
+                aria-label="Kapat"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <form className="create-list-modal-form" onSubmit={handleUpdateList}>
+              <div className="form-group">
+                <label htmlFor="edit-list-name">Liste Adı</label>
+                <input
+                  id="edit-list-name"
+                  type="text"
+                  value={selectedList.name}
+                  onChange={(e) => setSelectedList({...selectedList, name: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="edit-list-description">Açıklama</label>
+                <textarea
+                  id="edit-list-description"
+                  value={selectedList.description || ''}
+                  onChange={(e) => setSelectedList({...selectedList, description: e.target.value})}
+                  rows="3"
+                />
+              </div>
+            </form>
+
+            {/* Add Content Section */}
+            <div className="edit-list-add-content">
+              <div className="form-group">
+                <label htmlFor="search-content">İçerik Ekle</label>
+                <div className="search-content-wrapper">
+                  <FaSearch className="search-content-icon" />
+                  <input
+                    id="search-content"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleSearchContent(e.target.value)}
+                    placeholder="Film veya kitap ara..."
+                  />
+                  {isSearching && <div className="search-spinner"></div>}
+                </div>
+              </div>
+
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <div className="search-results-list">
+                  {searchResults.map((result) => (
+                    <div key={result.id} className="search-result-item">
+                      <img src={result.poster_url || '/placeholder.jpg'} alt={result.title} />
+                      <div className="search-result-info">
+                        <span className="search-result-title">{result.title}</span>
+                        <span className="search-result-type">{result.type}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="add-content-btn"
+                        onClick={() => handleAddToList(result)}
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* List Items */}
+            <div className="edit-list-items">
+              <h3 className="list-items-title">Listedeki İçerikler ({selectedList.items?.length || 0})</h3>
+              {selectedList.items && selectedList.items.length > 0 ? (
+                <div className="list-items-grid">
+                  {selectedList.items.map((item) => (
+                    <div key={item.id} className="list-item-card">
+                      <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
+                      <div className="list-item-info">
+                        <span className="list-item-title">{item.title}</span>
+                        <span className="list-item-type">{item.type}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="remove-item-btn"
+                        onClick={() => handleRemoveFromList(item.id)}
+                        aria-label="Kaldır"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-list-message">Listede henüz içerik yok</p>
+              )}
+            </div>
+
+            <div className="create-list-modal-actions">
+              <button 
+                type="button" 
+                className="create-list-modal-delete"
+                onClick={handleDeleteList}
+              >
+                <FaTrash />
+                <span>Listeyi Sil</span>
+              </button>
+              <div className="action-buttons-group">
+                <button 
+                  type="button" 
+                  className="create-list-modal-cancel"
+                  onClick={handleCloseEditListModal}
+                >
+                  İptal
+                </button>
+                <button 
+                  type="submit" 
+                  className="create-list-modal-submit"
+                  onClick={handleUpdateList}
+                >
+                  Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
