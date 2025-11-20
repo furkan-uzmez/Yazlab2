@@ -33,13 +33,95 @@ function Home() {
 
   // ... (Handler fonksiyonları aynı kalacak: handleLogout, handleCommentClick vb.) ...
   const handleLogout = () => setLogoutModalOpen(true);
-  const handleConfirmLogout = () => { /* ... */ };
-  const handleCancelLogout = () => setLogoutModalOpen(false);
-  const handleCommentClick = (activity, comments) => { /* ... */ };
-  const handleCloseCommentPanel = () => { /* ... */ };
-  const handleCommentSubmit = (e) => { /* ... */ };
-  const handleCommentLike = (commentId) => { /* ... */ };
-  const handleFollowUser = (userId) => { /* ... */ };
+  const handleConfirmLogout = () => {
+    setLogoutLoading(true);
+    setTimeout(() => {
+      // localStorage'dan token ve kullanıcı bilgilerini temizle
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Ana giriş sayfasına yönlendir
+      navigate('/');
+    }, 1300);
+  };
+
+  const handleCancelLogout = () => {
+    setLogoutModalOpen(false);
+  };
+
+  const handleCommentClick = (activity, comments) => {
+    setSelectedActivity(activity);
+    setPanelComments(comments);
+    setCommentPanelOpen(true);
+  };
+
+  const handleCloseCommentPanel = () => {
+    setCommentPanelClosing(true);
+    setTimeout(() => {
+      setCommentPanelOpen(false);
+      setCommentPanelClosing(false);
+      setSelectedActivity(null);
+      setPanelComments([]);
+      setCommentText('');
+    }, 400); // Animasyon süresi ile eşleşmeli
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (commentText.trim()) {
+      const newComment = {
+        id: panelComments.length + 1,
+        userId: 999,
+        userName: 'Sen',
+        userAvatar: 'https://i.pravatar.cc/150?img=20',
+        text: commentText,
+        date: new Date(),
+        likes: 0
+      };
+      setPanelComments([...panelComments, newComment]);
+      setCommentText('');
+      
+      // Gönderinin yorum sayısını artır
+      if (selectedActivity) {
+        setSelectedActivity({
+          ...selectedActivity,
+          comments: (selectedActivity.comments || 0) + 1
+        });
+        
+        // Activity card'daki yorum sayısını da güncelle
+        setActivities(prevActivities => 
+          prevActivities.map(activity => 
+            activity.id === selectedActivity.id 
+              ? { ...activity, comments: (activity.comments || 0) + 1 }
+              : activity
+          )
+        );
+      }
+    }
+  };
+
+  const handleCommentLike = (commentId) => {
+    setLikedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
+      } else {
+        newSet.add(commentId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleFollowUser = (userId) => {
+    setFollowedUsers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
 
   // --- API'DEN VERİ ÇEKME FONKSİYONU (GÜNCELLENDİ) ---
   const fetchActivities = useCallback(async (pageNum) => {
@@ -164,12 +246,22 @@ function Home() {
       
       <CommentPanel
         isOpen={commentPanelOpen}
-        // ...
+        isClosing={commentPanelClosing}
+        selectedActivity={selectedActivity}
+        comments={panelComments}
+        likedComments={likedComments}
+        commentText={commentText}
+        onClose={handleCloseCommentPanel}
+        onCommentLike={handleCommentLike}
+        onCommentSubmit={handleCommentSubmit}
+        onCommentTextChange={setCommentText}
       />
       
       <LogoutModal
         isOpen={logoutModalOpen}
-        // ...
+        isLoading={logoutLoading}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
       />
       
       <BottomNav 
