@@ -32,15 +32,18 @@ function Profile() {
   
   // Create list modal
   const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false);
+  const [isCreateListModalClosing, setIsCreateListModalClosing] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListDescription, setNewListDescription] = useState('');
   
   // Edit list modal
   const [isEditListModalOpen, setIsEditListModalOpen] = useState(false);
+  const [isEditListModalClosing, setIsEditListModalClosing] = useState(false);
   const [selectedList, setSelectedList] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isSearchResultsClosing, setIsSearchResultsClosing] = useState(false);
   
   const handleTabChange = (newTab) => {
     if (newTab !== activeLibraryTab) {
@@ -127,9 +130,13 @@ function Profile() {
   };
 
   const handleCloseCreateListModal = () => {
-    setIsCreateListModalOpen(false);
-    setNewListName('');
-    setNewListDescription('');
+    setIsCreateListModalClosing(true);
+    setTimeout(() => {
+      setIsCreateListModalOpen(false);
+      setIsCreateListModalClosing(false);
+      setNewListName('');
+      setNewListDescription('');
+    }, 300);
   };
 
   const handleSubmitNewList = (e) => {
@@ -143,7 +150,14 @@ function Profile() {
       };
       // Add to custom lists (in real app, this would be an API call)
       setCustomLists([...customLists, newList]);
-      handleCloseCreateListModal();
+      // Close with animation
+      setIsCreateListModalClosing(true);
+      setTimeout(() => {
+        setIsCreateListModalOpen(false);
+        setIsCreateListModalClosing(false);
+        setNewListName('');
+        setNewListDescription('');
+      }, 300);
     }
   };
 
@@ -153,33 +167,71 @@ function Profile() {
   };
 
   const handleCloseEditListModal = () => {
-    setIsEditListModalOpen(false);
-    setSelectedList(null);
-    setSearchQuery('');
-    setSearchResults([]);
+    setIsEditListModalClosing(true);
+    setTimeout(() => {
+      setIsEditListModalOpen(false);
+      setIsEditListModalClosing(false);
+      setSelectedList(null);
+      setSearchQuery('');
+      setSearchResults([]);
+      setIsSearchResultsClosing(false);
+    }, 300);
   };
 
   const handleSearchContent = (query) => {
     setSearchQuery(query);
     if (query.trim().length > 0) {
-      setIsSearching(true);
-      // Mock search results - in real app, this would be an API call
-      setTimeout(() => {
-        const mockResults = [
-          { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
-          { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
-          { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
-          { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
-          { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
-        ].filter(item => 
-          item.title.toLowerCase().includes(query.toLowerCase())
-        );
-        setSearchResults(mockResults);
-        setIsSearching(false);
-      }, 300);
+      // If there are existing results, close them first
+      if (searchResults.length > 0) {
+        setIsSearchResultsClosing(true);
+        setTimeout(() => {
+          setIsSearchResultsClosing(false);
+          setIsSearching(true);
+          // Mock search results - in real app, this would be an API call
+          setTimeout(() => {
+            const mockResults = [
+              { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
+              { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
+              { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
+              { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
+              { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
+            ].filter(item => 
+              item.title.toLowerCase().includes(query.toLowerCase())
+            );
+            setSearchResults(mockResults);
+            setIsSearching(false);
+          }, 300);
+        }, 300);
+      } else {
+        setIsSearching(true);
+        // Mock search results - in real app, this would be an API call
+        setTimeout(() => {
+          const mockResults = [
+            { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
+            { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
+            { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
+            { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
+            { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
+          ].filter(item => 
+            item.title.toLowerCase().includes(query.toLowerCase())
+          );
+          setSearchResults(mockResults);
+          setIsSearching(false);
+        }, 300);
+      }
     } else {
-      setSearchResults([]);
-      setIsSearching(false);
+      // Close with animation
+      if (searchResults.length > 0) {
+        setIsSearchResultsClosing(true);
+        setTimeout(() => {
+          setSearchResults([]);
+          setIsSearchResultsClosing(false);
+          setIsSearching(false);
+        }, 300);
+      } else {
+        setSearchResults([]);
+        setIsSearching(false);
+      }
     }
   };
 
@@ -201,7 +253,16 @@ function Profile() {
       setCustomLists(updatedLists);
       setSelectedList(updatedLists.find(l => l.id === selectedList.id));
       setSearchQuery('');
-      setSearchResults([]);
+      // Close with animation
+      if (searchResults.length > 0) {
+        setIsSearchResultsClosing(true);
+        setTimeout(() => {
+          setSearchResults([]);
+          setIsSearchResultsClosing(false);
+        }, 300);
+      } else {
+        setSearchResults([]);
+      }
     }
   };
 
@@ -235,7 +296,16 @@ function Profile() {
         return list;
       });
       setCustomLists(updatedLists);
-      handleCloseEditListModal();
+      // Close with animation
+      setIsEditListModalClosing(true);
+      setTimeout(() => {
+        setIsEditListModalOpen(false);
+        setIsEditListModalClosing(false);
+        setSelectedList(null);
+        setSearchQuery('');
+        setSearchResults([]);
+        setIsSearchResultsClosing(false);
+      }, 300);
     }
   };
 
@@ -243,7 +313,16 @@ function Profile() {
     if (selectedList) {
       const updatedLists = customLists.filter(list => list.id !== selectedList.id);
       setCustomLists(updatedLists);
-      handleCloseEditListModal();
+      // Close with animation
+      setIsEditListModalClosing(true);
+      setTimeout(() => {
+        setIsEditListModalOpen(false);
+        setIsEditListModalClosing(false);
+        setSelectedList(null);
+        setSearchQuery('');
+        setSearchResults([]);
+        setIsSearchResultsClosing(false);
+      }, 300);
     }
   };
 
@@ -485,8 +564,8 @@ function Profile() {
 
       {/* Create List Modal */}
       {isCreateListModalOpen && (
-        <div className="create-list-modal-overlay" onClick={handleCloseCreateListModal}>
-          <div className="create-list-modal" onClick={(e) => e.stopPropagation()}>
+        <div className={`create-list-modal-overlay ${isCreateListModalClosing ? 'closing' : ''}`} onClick={handleCloseCreateListModal}>
+          <div className={`create-list-modal ${isCreateListModalClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="create-list-modal-header">
               <h2>Yeni Liste Oluştur</h2>
               <button 
@@ -542,8 +621,8 @@ function Profile() {
 
       {/* Edit List Modal */}
       {isEditListModalOpen && selectedList && (
-        <div className="create-list-modal-overlay" onClick={handleCloseEditListModal}>
-          <div className="create-list-modal edit-list-modal" onClick={(e) => e.stopPropagation()}>
+        <div className={`create-list-modal-overlay ${isEditListModalClosing ? 'closing' : ''}`} onClick={handleCloseEditListModal}>
+          <div className={`create-list-modal edit-list-modal ${isEditListModalClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="create-list-modal-header">
               <h2>Listeyi Düzenle</h2>
               <button 
@@ -555,94 +634,102 @@ function Profile() {
               </button>
             </div>
             
-            <form className="create-list-modal-form" onSubmit={handleUpdateList}>
-              <div className="form-group">
-                <label htmlFor="edit-list-name">Liste Adı</label>
-                <input
-                  id="edit-list-name"
-                  type="text"
-                  value={selectedList.name}
-                  onChange={(e) => setSelectedList({...selectedList, name: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="edit-list-description">Açıklama</label>
-                <textarea
-                  id="edit-list-description"
-                  value={selectedList.description || ''}
-                  onChange={(e) => setSelectedList({...selectedList, description: e.target.value})}
-                  rows="3"
-                />
-              </div>
-            </form>
-
-            {/* Add Content Section */}
-            <div className="edit-list-add-content">
-              <div className="form-group">
-                <label htmlFor="search-content">İçerik Ekle</label>
-                <div className="search-content-wrapper">
-                  <FaSearch className="search-content-icon" />
-                  <input
-                    id="search-content"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => handleSearchContent(e.target.value)}
-                    placeholder="Film veya kitap ara..."
-                  />
-                  {isSearching && <div className="search-spinner"></div>}
-                </div>
-              </div>
-
-              {/* Search Results */}
-              {searchResults.length > 0 && (
-                <div className="search-results-list">
-                  {searchResults.map((result) => (
-                    <div key={result.id} className="search-result-item">
-                      <img src={result.poster_url || '/placeholder.jpg'} alt={result.title} />
-                      <div className="search-result-info">
-                        <span className="search-result-title">{result.title}</span>
-                        <span className="search-result-type">{result.type}</span>
-                      </div>
-                      <button
-                        type="button"
-                        className="add-content-btn"
-                        onClick={() => handleAddToList(result)}
-                      >
-                        <FaPlus />
-                      </button>
+            <div className="edit-list-modal-content">
+              {/* Left Side - Content Management */}
+              <div className="edit-list-left-panel">
+                {/* Add Content Section */}
+                <div className="edit-list-add-content">
+                  <div className="form-group">
+                    <label htmlFor="search-content">İçerik Ekle</label>
+                    <div className="search-content-wrapper">
+                      <FaSearch className="search-content-icon" />
+                      <input
+                        id="search-content"
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => handleSearchContent(e.target.value)}
+                        placeholder="Film veya kitap ara..."
+                      />
+                      {isSearching && <div className="search-spinner"></div>}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
 
-            {/* List Items */}
-            <div className="edit-list-items">
-              <h3 className="list-items-title">Listedeki İçerikler ({selectedList.items?.length || 0})</h3>
-              {selectedList.items && selectedList.items.length > 0 ? (
-                <div className="list-items-grid">
-                  {selectedList.items.map((item) => (
-                    <div key={item.id} className="list-item-card">
-                      <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
-                      <div className="list-item-info">
-                        <span className="list-item-title">{item.title}</span>
-                        <span className="list-item-type">{item.type}</span>
-                      </div>
-                      <button
-                        type="button"
-                        className="remove-item-btn"
-                        onClick={() => handleRemoveFromList(item.id)}
-                        aria-label="Kaldır"
-                      >
-                        <FaTrash />
-                      </button>
+                  {/* Search Results */}
+                  {(searchResults.length > 0 || isSearchResultsClosing) && (
+                    <div className={`search-results-list ${isSearchResultsClosing ? 'closing' : ''}`}>
+                      {searchResults.map((result) => (
+                        <div key={result.id} className="search-result-item">
+                          <img src={result.poster_url || '/placeholder.jpg'} alt={result.title} />
+                          <div className="search-result-info">
+                            <span className="search-result-title">{result.title}</span>
+                            <span className="search-result-type">{result.type}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="add-content-btn"
+                            onClick={() => handleAddToList(result)}
+                          >
+                            <FaPlus />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              ) : (
-                <p className="empty-list-message">Listede henüz içerik yok</p>
-              )}
+
+                {/* List Items */}
+                <div className="edit-list-items">
+                  <h3 className="list-items-title">Listedeki İçerikler ({selectedList.items?.length || 0})</h3>
+                  {selectedList.items && selectedList.items.length > 0 ? (
+                    <div className="list-items-grid">
+                      {selectedList.items.map((item) => (
+                        <div key={item.id} className="list-item-card">
+                          <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
+                          <div className="list-item-info">
+                            <span className="list-item-title">{item.title}</span>
+                            <span className="list-item-type">{item.type}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="remove-item-btn"
+                            onClick={() => handleRemoveFromList(item.id)}
+                            aria-label="Kaldır"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="empty-list-message">Listede henüz içerik yok</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Side - List Info */}
+              <div className="edit-list-right-panel">
+                <form className="create-list-modal-form" onSubmit={handleUpdateList}>
+                  <div className="form-group">
+                    <label htmlFor="edit-list-name">Liste Adı</label>
+                    <input
+                      id="edit-list-name"
+                      type="text"
+                      value={selectedList.name}
+                      onChange={(e) => setSelectedList({...selectedList, name: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="edit-list-description">Açıklama</label>
+                    <textarea
+                      id="edit-list-description"
+                      value={selectedList.description || ''}
+                      onChange={(e) => setSelectedList({...selectedList, description: e.target.value})}
+                      rows="4"
+                    />
+                  </div>
+                </form>
+              </div>
             </div>
 
             <div className="create-list-modal-actions">
