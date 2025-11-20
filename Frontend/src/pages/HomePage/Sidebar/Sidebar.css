@@ -176,7 +176,7 @@ button.nav-item:focus {
 }
 
 .sidebar-footer {
-  margin-top: 15rem;
+  margin-top: 14.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
