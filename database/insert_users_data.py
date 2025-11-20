@@ -76,11 +76,13 @@ def insert_initial_data(): # Fonksiyon adını güncelledim
         # (Kullanıcı ID'lerinin 1-7 arasında olduğunu varsayarak)
         follow_relationships = [
             (1, 2), (1, 3), (1, 4),               # Mehmet (1) -> Ayşe, Can, Zeynep'i takip ediyor
-            (2, 1), (2, 5),                       # Ayşe (2) -> Mehmet, Ali'yi takip ediyor
+            (2, 1), (2, 5), (2, 6), (2, 7), (2, 8), (2, 3),   # Ayşe (2) -> Mehmet, Ali'yi takip ediyor
             (3, 1), (3, 2), (3, 4), (3, 5), (3, 6), # Can (3) -> Neredeyse herkesi takip ediyor
-            (4, 1), (4, 3),                       # Zeynep (4) -> Mehmet, Can'ı takip ediyor
-            (5, 6), (5, 7),                       # Ali (5) -> Fatma, Mustafa'yı takip ediyor
-            (7, 1), (7, 2), (7, 3)                # Mustafa (7) -> Mehmet, Ayşe, Can'ı takip ediyor
+            (4, 1), (4, 3),(4, 2),                       # Zeynep (4) -> Mehmet, Can'ı takip ediyor
+            (5, 6), (5, 7),(5, 2),
+            (6, 2),                       # Ali (5) -> Fatma, Mustafa'yı takip ediyor
+            (7, 1), (7, 2), (7, 3),
+            (8, 2)                # Mustafa (7) -> Mehmet, Ayşe, Can'ı takip ediyor
         ]
         
         follow_query = "INSERT INTO follows (follower_id, followed_id) VALUES (%s, %s)"
