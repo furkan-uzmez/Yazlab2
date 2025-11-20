@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ActivityCard from '../ActivityCard/ActivityCard';
 import ActivityCardSkeleton from '../../../components/ActivityCardSkeleton';
 import './Feed.css';
@@ -13,11 +13,52 @@ function Feed({
   selectedActivity,
   loadingRef 
 }) {
+  const [activeTab, setActiveTab] = useState('for-you'); // 'for-you' or 'following'
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const feedContainerRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < 10) {
+        // En üstteyse her zaman göster
+        setIsHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        // Aşağı kaydırılıyor
+        setIsHeaderVisible(false);
+      } else {
+        // Yukarı kaydırılıyor
+        setIsHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   return (
-    <main className="feed-container">
-      <div className="feed-header">
-        <h1 className="feed-title">Ana Sayfa</h1>
-        <p className="feed-subtitle">Sosyal Akış - Zaman Tüneli</p>
+    <main className="feed-container" ref={feedContainerRef}>
+      <div className={`feed-header ${isHeaderVisible ? 'visible' : 'hidden'}`}>
+        <div className="feed-tabs">
+          <button
+            type="button"
+            className={`feed-tab ${activeTab === 'for-you' ? 'active' : ''}`}
+            onClick={() => setActiveTab('for-you')}
+          >
+            Senin için
+          </button>
+          <button
+            type="button"
+            className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
+            onClick={() => setActiveTab('following')}
+          >
+            Takip Ettiklerin
+          </button>
+        </div>
       </div>
 
       <div className="activities-feed">

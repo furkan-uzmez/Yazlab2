@@ -14,35 +14,98 @@
 }
 
 .feed-header {
-  margin-bottom: 2.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #1a1a1a;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.feed-header::after {
+.feed-header.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.feed-header.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feed-tabs {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.feed-tab {
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  outline: none;
+}
+
+.feed-tab::before {
   content: '';
   position: absolute;
-  bottom: -1px;
+  bottom: -0.75rem;
   left: 0;
-  width: 100px;
-  height: 2px;
-  background: linear-gradient(90deg, #4a9eff, rgba(74, 158, 255, 0.4), transparent);
-  border-radius: 2px;
+  right: 0;
+  height: 1px;
+  background: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.feed-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+.feed-tab:hover {
+  color: #b3b3b3;
+  transform: translateY(-1px);
+}
+
+.feed-tab:hover::before {
+  transform: scaleX(0.5);
+}
+
+.feed-tab:focus {
+  color: #b3b3b3;
+  outline: none;
+}
+
+.feed-tab:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.feed-tab:active {
+  transform: translateY(0);
+  transition: all 0.1s ease;
+}
+
+.feed-tab.active {
   color: #ffffff;
-  letter-spacing: -0.02em;
+  font-weight: 500;
 }
 
-.feed-subtitle {
-  font-size: 0.95rem;
-  color: #888;
-  transition: color 0.2s ease;
+.feed-tab.active::before {
+  transform: scaleX(1);
+}
+
+.feed-tab.active:hover {
+  color: #ffffff;
 }
 
 /* Activities Feed */
