@@ -237,6 +237,7 @@ function Home() {
         commentPanelOpen={commentPanelOpen}
         selectedActivity={selectedActivity}
         loadingRef={loadingRef}
+        followedUsers={followedUsers}
       />
       
       <RightPanel 
