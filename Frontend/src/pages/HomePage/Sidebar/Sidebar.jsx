@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaTh, FaSun, FaMoon, FaCog, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
+import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaSun, FaMoon, FaCog, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
 import ShinyText from '../../../components/ShinyText';
 import './Sidebar.css';
 
@@ -8,7 +8,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   const location = useLocation();
   const [internalSearchMode, setInternalSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState('all'); // 'all', 'movie', 'book', 'user'
+  const [searchType, setSearchType] = useState('user'); // 'movie', 'book', 'user'
   const [isSearching, setIsSearching] = useState(false);
   const [isCompactTabs, setIsCompactTabs] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -36,7 +36,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
       setInternalSearchMode(false);
     }
     setSearchQuery('');
-    setSearchType('all');
+    setSearchType('user');
   };
 
   // Auto-focus search input when search mode opens and lock body scroll on mobile
@@ -124,8 +124,8 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
           document.body.removeChild(tabClone);
         });
         
-        // Add gap spacing (4 tabs * 0.25rem gap)
-        totalWidth += 0.25 * 3 * 16; // 3 gaps * 0.25rem in pixels
+        // Add gap spacing (3 tabs * 0.25rem gap)
+        totalWidth += 0.25 * 2 * 16; // 2 gaps * 0.25rem in pixels
         
         setIsCompactTabs(totalWidth > containerWidth - 10); // 10px buffer
       };
@@ -360,12 +360,12 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
               >
                 <button
                   type="button"
-                  className={`search-tab ${searchType === 'all' ? 'active' : ''}`}
-                  onClick={() => setSearchType('all')}
-                  title="Tümü"
+                  className={`search-tab ${searchType === 'user' ? 'active' : ''}`}
+                  onClick={() => setSearchType('user')}
+                  title="Kullanıcılar"
                 >
-                  <FaTh className="search-tab-icon" />
-                  <span className="search-tab-text">Tümü</span>
+                  <FaUser className="search-tab-icon" />
+                  <span className="search-tab-text">Kullanıcılar</span>
                 </button>
                 <button
                   type="button"
@@ -384,15 +384,6 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                 >
                   <FaBook className="search-tab-icon" />
                   <span className="search-tab-text">Kitaplar</span>
-                </button>
-                <button
-                  type="button"
-                  className={`search-tab ${searchType === 'user' ? 'active' : ''}`}
-                  onClick={() => setSearchType('user')}
-                  title="Kullanıcılar"
-                >
-                  <FaUser className="search-tab-icon" />
-                  <span className="search-tab-text">Kullanıcılar</span>
                 </button>
               </div>
 
