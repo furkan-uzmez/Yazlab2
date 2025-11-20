@@ -12,6 +12,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   const [isSearching, setIsSearching] = useState(false);
   const [isCompactTabs, setIsCompactTabs] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isMoreMenuClosing, setIsMoreMenuClosing] = useState(false);
   const searchInputRef = useRef(null);
   const tabsRef = useRef(null);
   const moreMenuRef = useRef(null);
@@ -150,7 +151,17 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   };
 
   const handleMoreClick = () => {
-    setIsMoreMenuOpen(!isMoreMenuOpen);
+    if (isMoreMenuOpen) {
+      // Kapanış animasyonu
+      setIsMoreMenuClosing(true);
+      setTimeout(() => {
+        setIsMoreMenuOpen(false);
+        setIsMoreMenuClosing(false);
+      }, 300); // Animasyon süresi kadar bekle
+    } else {
+      setIsMoreMenuOpen(true);
+      setIsMoreMenuClosing(false);
+    }
   };
 
   const handleChangeView = () => {
@@ -181,7 +192,11 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
-        setIsMoreMenuOpen(false);
+        setIsMoreMenuClosing(true);
+        setTimeout(() => {
+          setIsMoreMenuOpen(false);
+          setIsMoreMenuClosing(false);
+        }, 300);
       }
     };
 
@@ -257,8 +272,11 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                   </button>
                   {isMoreMenuOpen && (
                     <>
-                      <div className="more-menu-backdrop" onClick={handleMoreClick}></div>
-                      <div className="more-menu">
+                      <div 
+                        className={`more-menu-backdrop ${isMoreMenuClosing ? 'closing' : ''}`}
+                        onClick={handleMoreClick}
+                      ></div>
+                      <div className={`more-menu ${isMoreMenuClosing ? 'closing' : ''}`}>
                         <button 
                           type="button" 
                           className="more-menu-item"
