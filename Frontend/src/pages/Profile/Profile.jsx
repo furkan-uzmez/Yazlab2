@@ -3,7 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
-import { FaEdit, FaPlus, FaUserPlus, FaUserCheck, FaFilm, FaBook, FaStar, FaClock, FaList, FaTimes, FaSearch, FaTrash } from 'react-icons/fa';
+import CreateListModal from './components/CreateListModal/CreateListModal';
+import EditListModal from './components/EditListModal/EditListModal';
+import ProfileHeader from './sections/ProfileHeader/ProfileHeader';
+import LibraryTabs from './sections/LibraryTabs/LibraryTabs';
+import CustomLists from './sections/CustomLists/CustomLists';
+import RecentActivities from './sections/RecentActivities/RecentActivities';
 import './Profile.css';
 
 function Profile() {
@@ -336,220 +341,38 @@ function Profile() {
       />
       <div className="profile-content">
         {/* Profile Header */}
-        <div className="profile-header">
-          <div className="profile-avatar-section">
-            <img 
-              src={profileUser.avatar_url || `https://i.pravatar.cc/150?img=${profileUser.user_id || 1}`}
-              alt={profileUser.username}
-              className="profile-avatar"
-            />
-          </div>
-          <div className="profile-info-section">
-            <h1 className="profile-username">{profileUser.username}</h1>
-            {profileUser.bio && (
-              <p className="profile-bio">{profileUser.bio}</p>
-            )}
-            <div className="profile-stats">
-              <div className="profile-stat">
-                <span className="stat-value">{libraryData.watched.length + libraryData.read.length}</span>
-                <span className="stat-label">İçerik</span>
-              </div>
-              <div className="profile-stat">
-                <span className="stat-value">{customLists.length}</span>
-                <span className="stat-label">Liste</span>
-              </div>
-              <div className="profile-stat">
-                <span className="stat-value">{recentActivities.length}</span>
-                <span className="stat-label">Aktivite</span>
-              </div>
-            </div>
-          </div>
-          <div className="profile-actions">
-            {isOwnProfile ? (
-              <>
-                <button className="profile-action-btn primary" onClick={handleEditProfile}>
-                  <FaEdit />
-                  <span>Profili Düzenle</span>
-                </button>
-                <button className="profile-action-btn secondary" onClick={handleCreateList}>
-                  <FaPlus />
-                  <span>Yeni Liste Oluştur</span>
-                </button>
-              </>
-            ) : (
-              <button 
-                className={`profile-action-btn ${isFollowing ? 'unfollow' : 'follow'}`}
-                onClick={handleFollow}
-              >
-                {isFollowing ? (
-                  <>
-                    <FaUserCheck />
-                    <span>Takipten Çık</span>
-                  </>
-                ) : (
-                  <>
-                    <FaUserPlus />
-                    <span>Takip Et</span>
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
+        <ProfileHeader
+          profileUser={profileUser}
+          isOwnProfile={isOwnProfile}
+          isFollowing={isFollowing}
+          customLists={customLists}
+          libraryData={libraryData}
+          recentActivities={recentActivities}
+          onEditProfile={handleEditProfile}
+          onCreateList={handleCreateList}
+          onFollow={handleFollow}
+        />
 
         {/* Library Tabs */}
-        <div className="profile-library-section">
-          <div className="library-tabs">
-            <button
-              className={`library-tab ${activeLibraryTab === 'watched' ? 'active' : ''}`}
-              onClick={() => handleTabChange('watched')}
-            >
-              <FaFilm />
-              <span>İzlediklerim</span>
-            </button>
-            <button
-              className={`library-tab ${activeLibraryTab === 'toWatch' ? 'active' : ''}`}
-              onClick={() => handleTabChange('toWatch')}
-            >
-              <FaClock />
-              <span>İzlenecekler</span>
-            </button>
-            <button
-              className={`library-tab ${activeLibraryTab === 'read' ? 'active' : ''}`}
-              onClick={() => handleTabChange('read')}
-            >
-              <FaBook />
-              <span>Okuduklarım</span>
-            </button>
-            <button
-              className={`library-tab ${activeLibraryTab === 'toRead' ? 'active' : ''}`}
-              onClick={() => handleTabChange('toRead')}
-            >
-              <FaClock />
-              <span>Okunacaklar</span>
-            </button>
-          </div>
-          <div className={`library-content ${isTabTransitioning ? 'transitioning' : ''}`}>
-            {activeLibraryTab === 'watched' && (
-              <div className="library-items">
-                {libraryData.watched.length > 0 ? (
-                  libraryData.watched.map((item, index) => (
-                    <div key={index} className="library-item">
-                      <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
-                      <span>{item.title}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="empty-state">Henüz izlenen içerik yok</p>
-                )}
-              </div>
-            )}
-            {activeLibraryTab === 'toWatch' && (
-              <div className="library-items">
-                {libraryData.toWatch.length > 0 ? (
-                  libraryData.toWatch.map((item, index) => (
-                    <div key={index} className="library-item">
-                      <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
-                      <span>{item.title}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="empty-state">Henüz izlenecek içerik yok</p>
-                )}
-              </div>
-            )}
-            {activeLibraryTab === 'read' && (
-              <div className="library-items">
-                {libraryData.read.length > 0 ? (
-                  libraryData.read.map((item, index) => (
-                    <div key={index} className="library-item">
-                      <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
-                      <span>{item.title}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="empty-state">Henüz okunan içerik yok</p>
-                )}
-              </div>
-            )}
-            {activeLibraryTab === 'toRead' && (
-              <div className="library-items">
-                {libraryData.toRead.length > 0 ? (
-                  libraryData.toRead.map((item, index) => (
-                    <div key={index} className="library-item">
-                      <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
-                      <span>{item.title}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="empty-state">Henüz okunacak içerik yok</p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+        <LibraryTabs
+          activeTab={activeLibraryTab}
+          onTabChange={handleTabChange}
+          isTabTransitioning={isTabTransitioning}
+          libraryData={libraryData}
+        />
 
         {/* Custom Lists */}
         {isOwnProfile && (
-          <div className="profile-custom-lists-section">
-            <h2 className="section-title">
-              <FaList />
-              <span>Özel Listelerim</span>
-            </h2>
-            <div className="custom-lists">
-              {customLists.length > 0 ? (
-                customLists.map((list) => (
-                  <div 
-                    key={list.id} 
-                    className="custom-list-card"
-                    onClick={() => handleEditList(list)}
-                  >
-                    <div className="custom-list-card-header">
-                      <h3>{list.name}</h3>
-                    </div>
-                    <p>{list.description || 'Açıklama yok'}</p>
-                    <div className="custom-list-card-footer">
-                      <span className="list-count">{list.items?.length || 0} içerik</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="empty-state">Henüz özel liste oluşturulmamış</p>
-              )}
-            </div>
-          </div>
+          <CustomLists
+            customLists={customLists}
+            onEditList={handleEditList}
+          />
         )}
 
         {/* Recent Activities */}
-        <div className="profile-activities-section">
-          <h2 className="section-title">
-            <FaStar />
-            <span>Son Aktiviteler</span>
-          </h2>
-          <div className="activities-list">
-            {recentActivities.length > 0 ? (
-              recentActivities.map((activity, index) => (
-                <div key={index} className="activity-item">
-                  <div className={`activity-icon ${activity.type === 'rating' ? 'rating-icon' : 'review-icon'}`}>
-                    {activity.type === 'rating' ? <FaStar /> : <FaEdit />}
-                  </div>
-                  <div className="activity-content">
-                    <p className="activity-text">
-                      {activity.type === 'rating' 
-                        ? `${activity.content_title} için ${activity.rating_score} puan verdi`
-                        : `${activity.content_title} hakkında yorum yaptı`}
-                    </p>
-                    <span className="activity-date">
-                      {new Date(activity.created_at).toLocaleDateString('tr-TR')}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="empty-state">Henüz aktivite yok</p>
-            )}
-          </div>
-        </div>
+        <RecentActivities
+          recentActivities={recentActivities}
+        />
       </div>
       <BottomNav 
         onSearchClick={() => setIsSearchMode(true)}
@@ -563,204 +386,36 @@ function Profile() {
       />
 
       {/* Create List Modal */}
-      {isCreateListModalOpen && (
-        <div className={`create-list-modal-overlay ${isCreateListModalClosing ? 'closing' : ''}`} onClick={handleCloseCreateListModal}>
-          <div className={`create-list-modal ${isCreateListModalClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
-            <div className="create-list-modal-header">
-              <h2>Yeni Liste Oluştur</h2>
-              <button 
-                className="create-list-modal-close"
-                onClick={handleCloseCreateListModal}
-                aria-label="Kapat"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <form className="create-list-modal-form" onSubmit={handleSubmitNewList}>
-              <div className="form-group">
-                <label htmlFor="list-name">Liste Adı</label>
-                <input
-                  id="list-name"
-                  type="text"
-                  value={newListName}
-                  onChange={(e) => setNewListName(e.target.value)}
-                  placeholder="Örn: En İyi Bilimkurgu Filmlerim"
-                  required
-                  autoFocus
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="list-description">Açıklama (Opsiyonel)</label>
-                <textarea
-                  id="list-description"
-                  value={newListDescription}
-                  onChange={(e) => setNewListDescription(e.target.value)}
-                  placeholder="Liste hakkında kısa bir açıklama..."
-                  rows="3"
-                />
-              </div>
-              <div className="create-list-modal-actions">
-                <button 
-                  type="button" 
-                  className="create-list-modal-cancel"
-                  onClick={handleCloseCreateListModal}
-                >
-                  İptal
-                </button>
-                <button 
-                  type="submit" 
-                  className="create-list-modal-submit"
-                >
-                  Oluştur
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <CreateListModal
+        isOpen={isCreateListModalOpen}
+        isClosing={isCreateListModalClosing}
+        onClose={handleCloseCreateListModal}
+        onSubmit={handleSubmitNewList}
+        listName={newListName}
+        setListName={setNewListName}
+        listDescription={newListDescription}
+        setListDescription={setNewListDescription}
+      />
 
       {/* Edit List Modal */}
-      {isEditListModalOpen && selectedList && (
-        <div className={`create-list-modal-overlay ${isEditListModalClosing ? 'closing' : ''}`} onClick={handleCloseEditListModal}>
-          <div className={`create-list-modal edit-list-modal ${isEditListModalClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
-            <div className="create-list-modal-header">
-              <h2>Listeyi Düzenle</h2>
-              <button 
-                className="create-list-modal-close"
-                onClick={handleCloseEditListModal}
-                aria-label="Kapat"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            
-            <div className="edit-list-modal-content">
-              {/* Left Side - Content Management */}
-              <div className="edit-list-left-panel">
-                {/* Add Content Section */}
-                <div className="edit-list-add-content">
-                  <div className="form-group">
-                    <label htmlFor="search-content">İçerik Ekle</label>
-                    <div className="search-content-wrapper">
-                      <FaSearch className="search-content-icon" />
-                      <input
-                        id="search-content"
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => handleSearchContent(e.target.value)}
-                        placeholder="Film veya kitap ara..."
-                      />
-                      {isSearching && <div className="search-spinner"></div>}
-                    </div>
-                  </div>
-
-                  {/* Search Results */}
-                  {(searchResults.length > 0 || isSearchResultsClosing) && (
-                    <div className={`search-results-list ${isSearchResultsClosing ? 'closing' : ''}`}>
-                      {searchResults.map((result) => (
-                        <div key={result.id} className="search-result-item">
-                          <img src={result.poster_url || '/placeholder.jpg'} alt={result.title} />
-                          <div className="search-result-info">
-                            <span className="search-result-title">{result.title}</span>
-                            <span className="search-result-type">{result.type}</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="add-content-btn"
-                            onClick={() => handleAddToList(result)}
-                          >
-                            <FaPlus />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* List Items */}
-                <div className="edit-list-items">
-                  <h3 className="list-items-title">Listedeki İçerikler ({selectedList.items?.length || 0})</h3>
-                  {selectedList.items && selectedList.items.length > 0 ? (
-                    <div className="list-items-grid">
-                      {selectedList.items.map((item) => (
-                        <div key={item.id} className="list-item-card">
-                          <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
-                          <div className="list-item-info">
-                            <span className="list-item-title">{item.title}</span>
-                            <span className="list-item-type">{item.type}</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="remove-item-btn"
-                            onClick={() => handleRemoveFromList(item.id)}
-                            aria-label="Kaldır"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="empty-list-message">Listede henüz içerik yok</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Side - List Info */}
-              <div className="edit-list-right-panel">
-                <form className="create-list-modal-form" onSubmit={handleUpdateList}>
-                  <div className="form-group">
-                    <label htmlFor="edit-list-name">Liste Adı</label>
-                    <input
-                      id="edit-list-name"
-                      type="text"
-                      value={selectedList.name}
-                      onChange={(e) => setSelectedList({...selectedList, name: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="edit-list-description">Açıklama</label>
-                    <textarea
-                      id="edit-list-description"
-                      value={selectedList.description || ''}
-                      onChange={(e) => setSelectedList({...selectedList, description: e.target.value})}
-                      rows="4"
-                    />
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <div className="create-list-modal-actions">
-              <button 
-                type="button" 
-                className="create-list-modal-delete"
-                onClick={handleDeleteList}
-              >
-                <FaTrash />
-                <span>Listeyi Sil</span>
-              </button>
-              <div className="action-buttons-group">
-                <button 
-                  type="button" 
-                  className="create-list-modal-cancel"
-                  onClick={handleCloseEditListModal}
-                >
-                  İptal
-                </button>
-                <button 
-                  type="submit" 
-                  className="create-list-modal-submit"
-                  onClick={handleUpdateList}
-                >
-                  Kaydet
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditListModal
+        isOpen={isEditListModalOpen}
+        isClosing={isEditListModalClosing}
+        onClose={handleCloseEditListModal}
+        selectedList={selectedList}
+        setSelectedList={setSelectedList}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchResults={searchResults}
+        setSearchResults={setSearchResults}
+        isSearching={isSearching}
+        isSearchResultsClosing={isSearchResultsClosing}
+        onSearchContent={handleSearchContent}
+        onAddToList={handleAddToList}
+        onRemoveFromList={handleRemoveFromList}
+        onUpdateList={handleUpdateList}
+        onDeleteList={handleDeleteList}
+      />
     </div>
   );
 }
