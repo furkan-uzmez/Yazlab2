@@ -7,6 +7,8 @@ function RightPanel({ followedUsers, onFollowUser }) {
   const navigate = useNavigate();
   const [following, setFollowing] = useState([]);
   const [limit, setLimit] = useState(5);
+  const [showAll, setShowAll] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     const fetchFollowing = async () => {
@@ -38,7 +40,19 @@ function RightPanel({ followedUsers, onFollowUser }) {
   }, []); // Boş dizi [], bu effect'in sadece bileşen ilk yüklendiğinde çalışmasını sağlar
 
   const handleShowMoreFollowing = () => {
-    setLimit((prev) => prev + 5);
+    if (showAll) {
+      // Daha az göster - animasyonlu kapanış
+      setIsClosing(true);
+      setTimeout(() => {
+        setLimit(5);
+        setShowAll(false);
+        setIsClosing(false);
+      }, 300); // Animasyon süresi kadar bekle
+    } else {
+      // Daha fazla göster - tüm listeyi göster
+      setLimit(following.length);
+      setShowAll(true);
+    }
   };
 
   return (
@@ -54,26 +68,40 @@ function RightPanel({ followedUsers, onFollowUser }) {
           <div className="right-panel-list">
             
             {/* --- 2. DÜZELTME: Doğru veri anahtarlarını (keys) kullan --- */}
-            {following.slice(0, limit).map((user) => (
-              <div key={user.username} className="right-panel-item"> {/* key='id' -> 'username' */}
-                <img 
-                  src={user.avatar_url} // src='avatar' -> 'avatar_url'
-                  alt={user.username}   // alt='name' -> 'username'
-                  className="right-panel-avatar"
-                />
-                <div className="right-panel-item-info">
-                  <span className="right-panel-item-name">{user.username}</span> {/* 'name' -> 'username' */}
+            {following.slice(0, limit).map((user, index) => {
+              // Kapanış animasyonu için: 5'ten fazla olan öğeler kapanırken animasyonlu
+              const shouldAnimateClose = isClosing && index >= 5;
+              return (
+                <div 
+                  key={user.username} 
+                  className={`right-panel-item ${shouldAnimateClose ? 'closing' : ''}`}
+                  style={{ 
+                    animationDelay: shouldAnimateClose 
+                      ? `${(index - 5) * 0.03}s` 
+                      : `${index * 0.05}s` 
+                  }}
+                > {/* key='id' -> 'username' */}
+                  <img 
+                    src={user.avatar_url} // src='avatar' -> 'avatar_url'
+                    alt={user.username}   // alt='name' -> 'username'
+                    className="right-panel-avatar"
+                  />
+                  <div className="right-panel-item-info">
+                    <span className="right-panel-item-name">{user.username}</span> {/* 'name' -> 'username' */}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {/* --- DÜZELTME SONU --- */}
             
-            <button 
-              className="right-panel-show-more-btn"
-              onClick={handleShowMoreFollowing}
-            >
-              + Daha fazla göster
-            </button>
+            {following.length > 5 && (
+              <button 
+                className="right-panel-show-more-btn"
+                onClick={handleShowMoreFollowing}
+              >
+                {showAll ? '− Daha az göster' : '+ Daha fazla göster'}
+              </button>
+            )}
           </div>
         </div>
         {/* --- DİNAMİK BÖLÜM SONU --- */}

@@ -46,6 +46,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .right-panel-item {
@@ -55,6 +56,65 @@
   padding: 0.5rem;
   border-radius: 8px;
   background-color: transparent;
+  animation: fadeInSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.right-panel-item.closing {
+  animation: fadeOutSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOutSlide {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 100px;
+    margin-bottom: 0.5rem;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.right-panel-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.right-panel-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.right-panel-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.right-panel-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.right-panel-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.right-panel-item:nth-child(n+6) {
+  animation-delay: 0.3s;
 }
 
 .right-panel-avatar {
@@ -126,26 +186,58 @@
 
 .right-panel-show-more-btn {
   width: 100%;
-  padding: 0;
+  padding: 0.75rem 0;
   background-color: transparent;
   border: none;
-  border-radius: 0;
+  border-radius: 8px;
   color: #888;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
   margin-top: 0.5rem;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.right-panel-show-more-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.right-panel-show-more-btn:hover::before {
+  left: 100%;
 }
 
 .right-panel-show-more-btn:hover {
-  background-color: transparent;
+  background-color: rgba(255, 255, 255, 0.05);
   border: none;
   color: #ffffff;
+  transform: translateY(-1px);
 }
 
+.right-panel-show-more-btn:active {
+  transform: translateY(0);
+  transition: all 0.1s ease;
+}
+
+.right-panel-show-more-btn:focus {
+  outline: none;
+  border: none;
+}
+
+.right-panel-show-more-btn:focus-visible {
+  outline: none;
+  border: none;
+}
 .right-panel::-webkit-scrollbar {
   width: 6px;
 }
