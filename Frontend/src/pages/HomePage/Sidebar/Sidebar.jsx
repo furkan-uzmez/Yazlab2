@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaTh } from 'react-icons/fa';
+import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaTh, FaPalette, FaCog, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
 import ShinyText from '../../../components/ShinyText';
 import './Sidebar.css';
 
@@ -11,8 +11,10 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   const [searchType, setSearchType] = useState('all'); // 'all', 'movie', 'book', 'user'
   const [isSearching, setIsSearching] = useState(false);
   const [isCompactTabs, setIsCompactTabs] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const searchInputRef = useRef(null);
   const tabsRef = useRef(null);
+  const moreMenuRef = useRef(null);
 
   // Use external state if provided, otherwise use internal state
   const isSearchMode = externalSearchMode !== undefined ? externalSearchMode : internalSearchMode;
@@ -147,6 +149,51 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
     }
   };
 
+  const handleMoreClick = () => {
+    setIsMoreMenuOpen(!isMoreMenuOpen);
+  };
+
+  const handleChangeView = () => {
+    // Görünümü değiştir fonksiyonu - şimdilik placeholder
+    console.log('Görünüm değiştirildi');
+    setIsMoreMenuOpen(false);
+  };
+
+  const handleSettings = () => {
+    // Ayarlar fonksiyonu - şimdilik placeholder
+    console.log('Ayarlar açıldı');
+    setIsMoreMenuOpen(false);
+  };
+
+  const handleAbout = () => {
+    // Hakkında fonksiyonu - şimdilik placeholder
+    console.log('Hakkında açıldı');
+    setIsMoreMenuOpen(false);
+  };
+
+  const handleHelp = () => {
+    // Yardım fonksiyonu - şimdilik placeholder
+    console.log('Yardım açıldı');
+    setIsMoreMenuOpen(false);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
+        setIsMoreMenuOpen(false);
+      }
+    };
+
+    if (isMoreMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMoreMenuOpen]);
+
   return (
     <aside className={`sidebar ${isSearchMode ? 'search-mode' : ''}`}>
       <div className={`sidebar-content-wrapper ${isSearchMode ? 'search-active' : 'menu-active'}`}>
@@ -199,10 +246,55 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
               </div>
 
               <div className="sidebar-footer">
-                <button type="button" className="nav-item">
-                  <FaGripLines className="nav-icon" />
-                  <span>Daha Fazla</span>
-                </button>
+                <div className="more-menu-wrapper" ref={moreMenuRef}>
+                  <button 
+                    type="button" 
+                    className={`nav-item ${isMoreMenuOpen ? 'active' : ''}`}
+                    onClick={handleMoreClick}
+                  >
+                    <FaGripLines className="nav-icon" />
+                    <span>Daha Fazla</span>
+                  </button>
+                  {isMoreMenuOpen && (
+                    <>
+                      <div className="more-menu-backdrop" onClick={handleMoreClick}></div>
+                      <div className="more-menu">
+                        <button 
+                          type="button" 
+                          className="more-menu-item"
+                          onClick={handleChangeView}
+                        >
+                          <FaPalette className="more-menu-icon" />
+                          <span>Görünümü Değiştir</span>
+                        </button>
+                        <button 
+                          type="button" 
+                          className="more-menu-item"
+                          onClick={handleSettings}
+                        >
+                          <FaCog className="more-menu-icon" />
+                          <span>Ayarlar</span>
+                        </button>
+                        <button 
+                          type="button" 
+                          className="more-menu-item"
+                          onClick={handleAbout}
+                        >
+                          <FaInfoCircle className="more-menu-icon" />
+                          <span>Hakkında</span>
+                        </button>
+                        <button 
+                          type="button" 
+                          className="more-menu-item"
+                          onClick={handleHelp}
+                        >
+                          <FaQuestionCircle className="more-menu-icon" />
+                          <span>Yardım</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
                 <button type="button" className="nav-item" onClick={onLogout}>
                   <FaSignOutAlt className="nav-icon" />
                   <span>Çıkış Yap</span>
