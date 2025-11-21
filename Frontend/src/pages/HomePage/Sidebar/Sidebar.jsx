@@ -68,63 +68,75 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
     };
   }, [isSearchMode]);
 
+  // --- ASIL ARAMA FONKSİYONU (GÜNCELLENDİ) ---
   const executeSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
-    setSearchResults([]); // Önceki sonuçları temizle
+    setSearchResults([]); 
 
     try {
       let url = '';
       
+      // URL OLUŞTURMA KISMI
       if (searchType === 'movie' || searchType === 'book') {
         url = `http://localhost:8000/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${searchType}`;
       } else if (searchType === 'user') {
-        console.warn("Kullanıcı arama endpointi henüz bağlı değil.");
-        setIsSearching(false);
-        return; 
+        // Kullanıcı arama endpoint'i (Önceki konuşmamızda eklemiştik)
+        url = `http://localhost:8000/user/search?query=${encodeURIComponent(searchQuery)}`;
       }
 
       const response = await fetch(url);
       
       if (response.ok) {
         const data = await response.json();
-        console.log("API Ham Veri:", data); // Debug için
+        console.log("API Ham Veri:", data); 
 
         let formattedResults = [];
 
         // --- VERİ DÖNÜŞTÜRME (MAPPING) ---
         if (searchType === 'movie') {
-          // Film verisi 'results.results' içinde dizi olarak geliyor olabilir, kontrol edin
-          const items = data.results?.results || data.results || []; 
+          const items = data.results?.results || [];
           formattedResults = items.map(movie => ({
             id: movie.id,
             title: movie.title, 
-            // Poster URL'ini tam yap (TMDb base URL ekle)
-            image: movie.poster_path 
-              ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` 
-              : '/api/placeholder/50/75',
+            image: movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : '/api/placeholder/50/75',
             subtitle: movie.release_date ? movie.release_date.split('-')[0] : 'Tarih Yok', 
             type: 'movie'
           }));
 
         } else if (searchType === 'book') {
-          // Kitap verisi 'results.items' içinde dizi olarak geliyor olabilir, kontrol edin
-          const items = data.results?.items || data.items || [];
+          const items = data.results?.items || [];
           formattedResults = items.map(book => {
             const info = book.volumeInfo;
             return {
               id: book.id,
               title: info.title, 
-              // Google Books thumbnail linki (http -> https yapmak iyi olur)
               image: info.imageLinks?.smallThumbnail?.replace('http:', 'https:') || '/api/placeholder/50/75',
               subtitle: info.authors ? info.authors.join(', ') : 'Yazar Yok', 
               type: 'book'
             };
           });
+
+        } else if (searchType === 'user') { 
+          // --- YENİ: KULLANICI VERİSİ DÖNÜŞTÜRME ---
+          // Backend'den { results: [...] } dönüyor.
+          const items = data.results || []; 
+
+          console.log("Kullanıcı Arama Sonuçları:", items);
+          
+          formattedResults = items.map(user => ({
+            // user_id yoksa username'i, o da yoksa random bir değeri ID olarak kullan
+            id: user.user_id || user.username || Math.random(), 
+            title: user.username || "Bilinmeyen Kullanıcı", 
+            image: user.avatar_url || 'https://i.pravatar.cc/150?img=default', 
+            subtitle: user.bio 
+              ? (user.bio.length > 30 ? user.bio.substring(0, 30) + '...' : user.bio) 
+              : 'Kullanıcı', 
+            type: 'user'
+          }));
         }
 
-        console.log("Formatlanmış Sonuçlar:", formattedResults); // Debug için
         setSearchResults(formattedResults);
 
       } else {
@@ -302,7 +314,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                           {isDarkMode ? <FaSun className="more-menu-icon" /> : <FaMoon className="more-menu-icon" />}
                           <span>Görünümü Değiştir</span>
                         </button>
-                        <button type="button" className="more-menu-item" onClick={handleSettings}>
+                         <button type="button" className="more-menu-item" onClick={handleSettings}>
                           <FaCog className="more-menu-icon" />
                           <span>Ayarlar</span>
                         </button>
@@ -399,15 +411,17 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                       </p>
                     </div>
 
+                   {/* --- SONUÇ LİSTESİ --- */}
                     <div className="search-results-list">
-                        {searchResults.map((item, index) => ( // key olarak index kullanmak yerine item.id kullanmak daha iyidir ama id yoksa index kullanılabilir
+                        {searchResults.map((item, index) => (
+                          // key olarak item.id yoksa index kullanın
                           <div key={item.id || index} className="search-result-item">
                             {/* Görsel */}
                             <img 
                               src={item.image} 
                               alt={item.title} 
                               className="search-result-img" 
-                              onError={(e) => { e.target.src = '/api/placeholder/50/75'; }} // Kırık resimler için
+                              onError={(e) => { e.target.src = '/api/placeholder/50/75'; }} 
                             />
                             
                             <div className="search-result-info">
