@@ -214,9 +214,35 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   };
   // ... (Diğer handler'lar: handleChangeView, handleSettings vb. aynı)
   const handleChangeView = () => { setIsDarkMode(!isDarkMode); setIsMoreMenuOpen(false); };
-  const handleSettings = () => { setIsMoreMenuOpen(false); };
-  const handleAbout = () => { setIsMoreMenuOpen(false); };
-  const handleHelp = () => { setIsMoreMenuOpen(false); };
+  const handleSettings = () => {
+    // TODO: Navigate to settings page or open settings modal
+    console.log('Ayarlar');
+    setIsMoreMenuClosing(true);
+    setTimeout(() => {
+      setIsMoreMenuOpen(false);
+      setIsMoreMenuClosing(false);
+    }, 300);
+  };
+
+  const handleHelp = () => {
+    // TODO: Open help page or modal
+    console.log('Yardım');
+    setIsMoreMenuClosing(true);
+    setTimeout(() => {
+      setIsMoreMenuOpen(false);
+      setIsMoreMenuClosing(false);
+    }, 300);
+  };
+
+  const handleAbout = () => {
+    // TODO: Open about page or modal
+    console.log('Hakkında');
+    setIsMoreMenuClosing(true);
+    setTimeout(() => {
+      setIsMoreMenuOpen(false);
+      setIsMoreMenuClosing(false);
+    }, 300);
+  };
 
   // Menü dışına tıklama (Aynı kaldı)
   useEffect(() => {
@@ -276,7 +302,18 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                           {isDarkMode ? <FaSun className="more-menu-icon" /> : <FaMoon className="more-menu-icon" />}
                           <span>Görünümü Değiştir</span>
                         </button>
-                        {/* ... diğer menü öğeleri */}
+                        <button type="button" className="more-menu-item" onClick={handleSettings}>
+                          <FaCog className="more-menu-icon" />
+                          <span>Ayarlar</span>
+                        </button>
+                        <button type="button" className="more-menu-item" onClick={handleHelp}>
+                          <FaQuestionCircle className="more-menu-icon" />
+                          <span>Yardım</span>
+                        </button>
+                        <button type="button" className="more-menu-item" onClick={handleAbout}>
+                          <FaInfoCircle className="more-menu-icon" />
+                          <span>Hakkında</span>
+                        </button>
                       </div>
                     </>
                   )}
