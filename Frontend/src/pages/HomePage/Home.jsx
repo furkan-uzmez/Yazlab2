@@ -111,6 +111,39 @@ function Home() {
     });
   };
 
+  const handleCommentEdit = (commentId, newText) => {
+    setPanelComments(prevComments =>
+      prevComments.map(comment =>
+        comment.id === commentId
+          ? { ...comment, text: newText }
+          : comment
+      )
+    );
+  };
+
+  const handleCommentDelete = (commentId) => {
+    setPanelComments(prevComments =>
+      prevComments.filter(comment => comment.id !== commentId)
+    );
+    
+    // Gönderinin yorum sayısını azalt
+    if (selectedActivity) {
+      setSelectedActivity({
+        ...selectedActivity,
+        comments: Math.max(0, (selectedActivity.comments || 0) - 1)
+      });
+      
+      // Activity card'daki yorum sayısını da güncelle
+      setActivities(prevActivities => 
+        prevActivities.map(activity => 
+          activity.id === selectedActivity.id 
+            ? { ...activity, comments: Math.max(0, (activity.comments || 0) - 1) }
+            : activity
+        )
+      );
+    }
+  };
+
   const handleFollowUser = (userId) => {
     setFollowedUsers(prev => {
       const newSet = new Set(prev);
@@ -252,10 +285,13 @@ function Home() {
         comments={panelComments}
         likedComments={likedComments}
         commentText={commentText}
+        currentUserId={999}
         onClose={handleCloseCommentPanel}
         onCommentLike={handleCommentLike}
         onCommentSubmit={handleCommentSubmit}
         onCommentTextChange={setCommentText}
+        onCommentEdit={handleCommentEdit}
+        onCommentDelete={handleCommentDelete}
       />
       
       <LogoutModal

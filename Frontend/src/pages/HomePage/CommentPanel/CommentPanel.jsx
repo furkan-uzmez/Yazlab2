@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTimes, FaFilm, FaBook, FaRegThumbsUp, FaArrowRight } from 'react-icons/fa';
+import { FaTimes, FaFilm, FaBook, FaRegThumbsUp, FaArrowRight, FaEdit, FaTrash, FaCheck, FaTimes as FaTimesIcon } from 'react-icons/fa';
 import { formatTimeAgo } from '../utils/utils';
 import './CommentPanel.css';
 
@@ -36,12 +36,44 @@ function CommentPanel({
   comments, 
   likedComments,
   commentText,
+  currentUserId = 999, // Varsayılan olarak 999 (Home.jsx'teki gibi)
   onClose, 
   onCommentLike, 
   onCommentSubmit, 
-  onCommentTextChange 
+  onCommentTextChange,
+  onCommentEdit,
+  onCommentDelete
 }) {
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingText, setEditingText] = useState('');
+
   if (!isOpen || !selectedActivity) return null;
+
+  const handleStartEdit = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditingText(comment.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingText('');
+  };
+
+  const handleSaveEdit = (commentId) => {
+    if (editingText.trim() && onCommentEdit) {
+      onCommentEdit(commentId, editingText.trim());
+      setEditingCommentId(null);
+      setEditingText('');
+    }
+  };
+
+  const handleDelete = (commentId) => {
+    if (window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
+      if (onCommentDelete) {
+        onCommentDelete(commentId);
+      }
+    }
+  };
 
   return (
     <>
@@ -141,6 +173,9 @@ function CommentPanel({
               comments.map((comment) => {
                 const isLiked = likedComments.has(comment.id);
                 const likeCount = (comment.likes || 0) + (isLiked ? 1 : 0);
+                const isOwnComment = comment.userId === currentUserId;
+                const isEditing = editingCommentId === comment.id;
+
                 return (
                   <div key={comment.id} className="comment-panel-item">
                     <img 
@@ -152,16 +187,63 @@ function CommentPanel({
                       <div className="comment-panel-comment-header">
                         <span className="comment-panel-author">{comment.userName}</span>
                         <span className="comment-panel-comment-date">{formatTimeAgo(comment.date)}</span>
+                        {isOwnComment && !isEditing && (
+                          <div className="comment-actions">
+                            <button 
+                              className="comment-edit-btn"
+                              onClick={() => handleStartEdit(comment)}
+                              title="Düzenle"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button 
+                              className="comment-delete-btn"
+                              onClick={() => handleDelete(comment.id)}
+                              title="Sil"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div className="comment-panel-comment-body">
-                        <CommentText text={comment.text} maxLength={150} />
-                        <button 
-                          className={`comment-like-btn ${isLiked ? 'liked' : ''}`}
-                          onClick={() => onCommentLike(comment.id)}
-                        >
-                          <FaRegThumbsUp className="comment-like-icon" />
-                          {likeCount > 0 && <span className="comment-like-count">{likeCount}</span>}
-                        </button>
+                        {isEditing ? (
+                          <div className="comment-edit-wrapper">
+                            <textarea
+                              className="comment-edit-input"
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value)}
+                              rows="3"
+                              autoFocus
+                            />
+                            <div className="comment-edit-actions">
+                              <button 
+                                className="comment-save-btn"
+                                onClick={() => handleSaveEdit(comment.id)}
+                                disabled={!editingText.trim()}
+                              >
+                                <FaCheck />
+                              </button>
+                              <button 
+                                className="comment-cancel-btn"
+                                onClick={handleCancelEdit}
+                              >
+                                <FaTimesIcon />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <CommentText text={comment.text} maxLength={150} />
+                            <button 
+                              className={`comment-like-btn ${isLiked ? 'liked' : ''}`}
+                              onClick={() => onCommentLike(comment.id)}
+                            >
+                              <FaRegThumbsUp className="comment-like-icon" />
+                              {likeCount > 0 && <span className="comment-like-count">{likeCount}</span>}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
