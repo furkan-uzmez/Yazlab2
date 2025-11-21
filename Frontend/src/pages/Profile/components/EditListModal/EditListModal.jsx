@@ -109,6 +109,7 @@ function EditListModal({
 
           {/* Right Side - List Info */}
           <div className="edit-list-right-panel">
+            <h2 className="list-title-header">{selectedList.name || 'Liste Adı'}</h2>
             <form className="create-list-modal-form" onSubmit={onUpdateList}>
               <div className="form-group">
                 <label htmlFor="edit-list-name">Liste Adı</label>
