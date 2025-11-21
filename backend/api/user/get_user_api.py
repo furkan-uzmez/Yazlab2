@@ -1,4 +1,4 @@
-from fastapi import APIRouter ,  HTTPException, status
+from fastapi import APIRouter ,  HTTPException, status , Query
 from pydantic import BaseModel
 
 from backend.func.db.connection.open_db_connection import open_db_connection
@@ -7,15 +7,18 @@ from backend.func.user.get_user import get_user
 
 router = APIRouter(prefix="/user", tags=["user"])
 
-class UserRequest(BaseModel):
-    user_name: str
-
-@router.get("/get_user")
-async def get_user(request: UserRequest):
+@router.get("/search")
+async def search_users(query: str = Query(..., min_length=1)):
+    """
+    Kullanıcı araması yapar.
+    Kullanım: GET /user/search?query=ahmet
+    """
     connection = open_db_connection()
+
+    print(f"Arama sorgusu: {query}")
     
     try:
-        user_data = get_user(connection, request.user_name)
+        user_data = get_user(connection, query)
     except Exception as e:
         print(f"HATA: Kullanıcı alınamadı: {e}")
         raise HTTPException(
@@ -26,9 +29,9 @@ async def get_user(request: UserRequest):
         connection.close()
     
     if user_data is not None:
-        return {"message": "User found", "user": user}
+        return {"message": "User found", "results": user_data}
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=f"{query} user not found"
         )

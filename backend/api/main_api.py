@@ -7,6 +7,7 @@ from backend.api.auth.login_api import router as login_router
 from backend.api.auth.register_api import router as register_router
 from backend.api.auth.forget_password_api import router as forget_password_router
 from backend.api.user.get_followers_api import router as get_followers_router
+from backend.api.user.get_user_api import router as get_user_router
 from backend.api.feed.get_user_feed_api import router as get_user_feed_router
 from backend.api.content.search_api import router as search_content_router
 from database.create_tables import create_tables
@@ -28,6 +29,7 @@ api.include_router(login_router)
 api.include_router(register_router)
 api.include_router(forget_password_router)
 api.include_router(get_followers_router)
+api.include_router(get_user_router)
 api.include_router(get_user_feed_router)
 api.include_router(search_content_router)
 
