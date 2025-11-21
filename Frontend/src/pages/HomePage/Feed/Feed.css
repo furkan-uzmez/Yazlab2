@@ -6,6 +6,26 @@
   padding: 2rem;
   max-width: 800px;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+/* Gradual Blur Wrapper - Only in feed area */
+.feed-gradual-blur-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 280px;
+  right: 320px;
+  max-width: 800px;
+  margin: 0 auto;
+  pointer-events: none;
+  z-index: 50;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Feed adjusts when sidebar is in search mode */
+.sidebar.search-mode ~ .feed-container .feed-gradual-blur-wrapper {
+  left: 340px;
 }
 
 /* Feed adjusts when sidebar is in search mode */
@@ -234,6 +254,15 @@
   .sidebar.search-mode ~ .feed-container {
     margin-left: 280px;
   }
+
+  .feed-gradual-blur-wrapper {
+    left: 240px;
+    right: 0;
+  }
+
+  .sidebar.search-mode ~ .feed-container .feed-gradual-blur-wrapper {
+    left: 280px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -242,6 +271,10 @@
     margin-right: 0;
     padding: 1.5rem;
     padding-bottom: 5rem; /* Bottom nav için alan */
+  }
+
+  .feed-gradual-blur-wrapper {
+    display: none; /* Mobile'da gizle */
   }
 }
 

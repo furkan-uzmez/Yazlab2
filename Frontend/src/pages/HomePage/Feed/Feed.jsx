@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ActivityCard from '../ActivityCard/ActivityCard';
 import ActivityCardSkeleton from '../../../components/ActivityCardSkeleton';
+import GradualBlur from '../../../components/GradualBlur';
 import './Feed.css';
 
 function Feed({ 
@@ -151,6 +152,17 @@ function Feed({
             <div className="no-more-divider"></div>
           </div>
         )}
+      </div>
+
+      {/* Gradual Blur Effect - Fixed at bottom of screen, only in feed area */}
+      <div className="feed-gradual-blur-wrapper">
+        <GradualBlur 
+          position="bottom"
+          height="6rem"
+          strength={2}
+          opacity={1}
+          target="parent"
+        />
       </div>
     </main>
   );
