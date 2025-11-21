@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
@@ -23,15 +23,82 @@ function Profile() {
   const isOwnProfile = !userId; // If no userId, it's own profile
   const isFollowing = false;
   
-  // Mock profile user - now using state
-  const [profileUser, setProfileUser] = useState({
-    username: userId || 'Kullanıcı Adı',
-    email: userId || 'user@example.com',
-    avatar_url: 'https://i.pravatar.cc/150?img=1',
-    bio: 'Bu bir örnek biyografi metnidir. Kullanıcı hakkında bilgiler buraya gelecek.',
-    user_id: 1
-  });
-  
+ // ... (diğer state'ler) ...
+
+  // Mock profile user - now using state (BAŞLANGIÇ DEĞERİNİ GÜNCELLEYİN)
+  const [profileUser, setProfileUser] = useState(null); // Başlangıçta null olsun, veri gelince dolsun
+  const [loadingProfile, setLoadingProfile] = useState(true); // Yükleniyor durumu
+
+  // --- YENİ: KULLANICI VERİSİNİ ÇEKME (API) ---
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      setLoadingProfile(true);
+      try {
+        let url = '';
+        
+        // 1. URL Belirleme Mantığı (Aynı kalacak)
+        const email = localStorage.getItem('email');
+        if (!userId) { // Kendi profilimiz
+            if (!email) {
+                setLoadingProfile(false);
+                return;
+            }
+            url = `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(email)}`;
+        } else { // Başkasının profili
+            url = `http://localhost:8000/user/get_user?user_name=${encodeURIComponent(userId)}`;
+        }
+
+        const response = await fetch(url);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("API'den gelen veri (tam):", data); 
+
+          // --- DÜZELTME BURADA ---
+          
+          let userData = null;
+
+          // 1. İhtimalleri kontrol et
+          if (data.user) {
+            // Eğer API 'user' döndürdüyse (tek obje)
+            userData = data.user;
+          } else if (Array.isArray(data.results) && data.results.length > 0) {
+            // Eğer API 'results' döndürdüyse ve bu bir DİZİ ise (logunuza göre durum bu)
+            userData = data.results[0]; // Dizinin İLK elemanını al
+          } else if (data.results) {
+            // Eğer 'results' bir obje ise
+            userData = data.results;
+          }
+
+          console.log("İşlenen userData:", userData); // Kontrol et
+
+          if (userData) {
+             setProfileUser({
+                 // Veritabanından gelen alanların dolu olup olmadığını kontrol et
+                 user_id: userData.user_id, 
+                 username: userData.username,
+                 email: userData.email,
+                 avatar_url: userData.avatar_url || `https://i.pravatar.cc/150?img=${userData.user_id || 1}`, 
+                 bio: userData.bio || 'Henüz bir biyografi eklenmemiş.'
+             });
+          } else {
+             console.error("API yanıtında kullanıcı verisi bulunamadı.");
+             setProfileUser(null);
+          }
+        } else {
+          console.error("Kullanıcı profili alınamadı:", response.status);
+          setProfileUser(null);
+        }
+      } catch (error) {
+        console.error("Profil yükleme hatası:", error);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userId]);
+
   // Library tabs
   const [activeLibraryTab, setActiveLibraryTab] = useState('watched');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
@@ -360,6 +427,39 @@ function Profile() {
       }, 300);
     }
   };
+
+  // --- DÜZELTME BURADA: Yükleniyor Kontrolü Ekleyin ---
+  if (loadingProfile) {
+    return (
+      <div className="profile-container">
+        <Sidebar 
+          onLogout={handleLogout}
+          isSearchMode={isSearchMode}
+          onSearchModeChange={setIsSearchMode}
+        />
+        <div className="profile-loading">
+          <div className="loading-spinner"></div> {/* CSS'inizde spinner varsa */}
+          <p style={{color: 'white', textAlign: 'center', marginTop: '20px'}}>Profil Yükleniyor...</p>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  // Eğer yükleme bitti ama kullanıcı bulunamadıysa (profileUser hala null ise)
+  if (!profileUser) {
+     return (
+      <div className="profile-container">
+        <Sidebar onLogout={handleLogout} />
+        <div className="profile-error" style={{color: 'white', textAlign: 'center', marginTop: '50px'}}>
+           <h2>Kullanıcı Bulunamadı</h2>
+           <button onClick={() => navigate('/home')} style={{marginTop: '10px', padding: '10px'}}>Ana Sayfaya Dön</button>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+  // --- DÜZELTME SONU ---
 
 
   return (

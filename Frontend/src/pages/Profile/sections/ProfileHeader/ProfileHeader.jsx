@@ -13,31 +13,41 @@ function ProfileHeader({
   onFollow
 }) {
 
+  // profileUser'ın varlığını kontrol etmek her zaman iyidir, ancak Profile.js'de zaten kontrol ediyoruz.
+  // Burada, username veya bio'nun eksik gelme ihtimaline karşı varsayılan değerler veya kontroller ekleyebiliriz.
+
+  // Güvenli veri erişimi ve varsayılan değerler
+  const username = profileUser?.username || 'İsimsiz Kullanıcı';
+  const bio = profileUser?.bio || 'Henüz bir biyografi eklenmemiş.';
+  const avatarUrl = profileUser?.avatar_url || `https://i.pravatar.cc/150?img=${profileUser?.user_id || 1}`;
+
   return (
     <div className="profile-header">
       <div className="profile-avatar-section">
         <img 
-          src={profileUser.avatar_url || `https://i.pravatar.cc/150?img=${profileUser.user_id || 1}`}
-          alt={profileUser.username}
+          src={avatarUrl}
+          alt={username}
           className="profile-avatar"
+          onError={(e) => { e.target.src = `https://i.pravatar.cc/150?img=${profileUser?.user_id || 1}`; }} // Kırık resimler için fallback
         />
       </div>
       <div className="profile-info-section">
-        <h1 className="profile-username">{profileUser.username}</h1>
-        {profileUser.bio && (
-          <p className="profile-bio">{profileUser.bio}</p>
-        )}
+        <h1 className="profile-username">{username}</h1>
+        
+        {/* Bio varsa veya placeholder göstermek istiyorsak */}
+        <p className="profile-bio">{bio}</p>
+        
         <div className="profile-stats">
           <div className="profile-stat">
-            <span className="stat-value">{libraryData.watched.length + libraryData.read.length}</span>
+            <span className="stat-value">{libraryData?.watched?.length + libraryData?.read?.length || 0}</span>
             <span className="stat-label">İçerik</span>
           </div>
           <div className="profile-stat">
-            <span className="stat-value">{customLists.length}</span>
+            <span className="stat-value">{customLists?.length || 0}</span>
             <span className="stat-label">Liste</span>
           </div>
           <div className="profile-stat">
-            <span className="stat-value">{recentActivities.length}</span>
+            <span className="stat-value">{recentActivities?.length || 0}</span>
             <span className="stat-label">Aktivite</span>
           </div>
         </div>
@@ -78,4 +88,3 @@ function ProfileHeader({
 }
 
 export default ProfileHeader;
-
