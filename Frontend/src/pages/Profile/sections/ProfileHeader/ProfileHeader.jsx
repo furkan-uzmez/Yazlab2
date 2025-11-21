@@ -12,6 +12,7 @@ function ProfileHeader({
   onCreateList,
   onFollow
 }) {
+
   return (
     <div className="profile-header">
       <div className="profile-avatar-section">

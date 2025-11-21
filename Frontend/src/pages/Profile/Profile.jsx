@@ -5,6 +5,7 @@ import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
 import CreateListModal from './components/CreateListModal/CreateListModal';
 import EditListModal from './components/EditListModal/EditListModal';
+import EditProfileModal from './components/EditProfileModal/EditProfileModal';
 import ProfileHeader from './sections/ProfileHeader/ProfileHeader';
 import LibraryTabs from './sections/LibraryTabs/LibraryTabs';
 import CustomLists from './sections/CustomLists/CustomLists';
@@ -22,14 +23,14 @@ function Profile() {
   const isOwnProfile = !userId; // If no userId, it's own profile
   const isFollowing = false;
   
-  // Mock profile user
-  const profileUser = {
+  // Mock profile user - now using state
+  const [profileUser, setProfileUser] = useState({
     username: userId || 'Kullanıcı Adı',
     email: userId || 'user@example.com',
     avatar_url: 'https://i.pravatar.cc/150?img=1',
     bio: 'Bu bir örnek biyografi metnidir. Kullanıcı hakkında bilgiler buraya gelecek.',
     user_id: 1
-  };
+  });
   
   // Library tabs
   const [activeLibraryTab, setActiveLibraryTab] = useState('watched');
@@ -41,6 +42,10 @@ function Profile() {
   const [newListName, setNewListName] = useState('');
   const [newListDescription, setNewListDescription] = useState('');
   
+  // Edit profile modal
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isEditProfileModalClosing, setIsEditProfileModalClosing] = useState(false);
+
   // Edit list modal
   const [isEditListModalOpen, setIsEditListModalOpen] = useState(false);
   const [isEditListModalClosing, setIsEditListModalClosing] = useState(false);
@@ -126,8 +131,33 @@ function Profile() {
   };
 
   const handleEditProfile = () => {
-    // TODO: Open edit profile modal
-    console.log('Edit profile');
+    setIsEditProfileModalOpen(true);
+  };
+
+  const handleCloseEditProfileModal = () => {
+    setIsEditProfileModalClosing(true);
+    setTimeout(() => {
+      setIsEditProfileModalOpen(false);
+      setIsEditProfileModalClosing(false);
+    }, 300);
+  };
+
+  const handleSubmitEditProfile = (formData) => {
+    // Update profile user state
+    setProfileUser(prev => ({
+      ...prev,
+      username: formData.username,
+      email: formData.email,
+      bio: formData.bio,
+      avatar_url: formData.avatar_url || prev.avatar_url
+    }));
+    // In real app, this would be an API call
+    // Close with animation
+    setIsEditProfileModalClosing(true);
+    setTimeout(() => {
+      setIsEditProfileModalOpen(false);
+      setIsEditProfileModalClosing(false);
+    }, 300);
   };
 
   const handleCreateList = () => {
@@ -395,6 +425,16 @@ function Profile() {
         setListName={setNewListName}
         listDescription={newListDescription}
         setListDescription={setNewListDescription}
+      />
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileModalOpen}
+        isClosing={isEditProfileModalClosing}
+        onClose={handleCloseEditProfileModal}
+        onSubmit={handleSubmitEditProfile}
+        profileUser={profileUser}
+        setProfileUser={setProfileUser}
       />
 
       {/* Edit List Modal */}
