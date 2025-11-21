@@ -1,11 +1,12 @@
 .books-container {
-  min-width: 1750px;
+  width: 100%;
   min-height: 100vh;
   background-color: #000000;
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   padding-bottom: 5rem; /* Bottom nav için alan */
   position: relative;
+  overflow-x: hidden;
 }
 
 .books-content {
@@ -14,6 +15,8 @@
   margin-left: 280px;
   margin-right: 320px;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 76%;
+  box-sizing: border-box;
 }
 
 .books-container:has(.sidebar.search-mode) .books-content {
@@ -856,10 +859,12 @@
   .books-content {
     margin-left: 240px;
     margin-right: 0;
+    width: calc(100% - 240px);
   }
 
   .books-container:has(.sidebar.search-mode) .books-content {
     margin-left: 280px;
+    width: calc(100% - 280px);
   }
 
   .books-grid {
@@ -873,10 +878,12 @@
     margin-left: 0;
     margin-right: 0;
     padding: 1.5rem;
+    width: 100%;
   }
 
   .books-container:has(.sidebar.search-mode) .books-content {
     margin-left: 0;
+    width: 100%;
   }
 
   .books-title {

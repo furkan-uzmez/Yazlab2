@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaStar, FaCalendarAlt, FaClock, FaBookOpen, FaUser, FaFilm, FaBook, FaCheck, FaPlus, FaTimes } from 'react-icons/fa';
+import { FaStar, FaCalendarAlt, FaClock, FaBookOpen, FaUser, FaFilm, FaBook, FaCheck, FaPlus, FaTimes, FaList } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
@@ -20,12 +20,13 @@ function ContentDetail() {
   const [isInToWatch, setIsInToWatch] = useState(false);
   const [isInRead, setIsInRead] = useState(false);
   const [isInToRead, setIsInToRead] = useState(false);
-  const [showListMenu, setShowListMenu] = useState(false);
-  const [customLists, setCustomLists] = useState([]);
   const [platformRating, setPlatformRating] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
-  const customListWrapperRef = useRef(null);
-  const customListMenuRef = useRef(null);
+  const [customLists, setCustomLists] = useState([]);
+  const [isListDropdownOpen, setIsListDropdownOpen] = useState(false);
+  const [isLoadingLists, setIsLoadingLists] = useState(false);
+  const [addingToListId, setAddingToListId] = useState(null);
+  const dropdownRef = useRef(null);
 
   // Mock data - In real app, fetch from API
   useEffect(() => {
@@ -38,7 +39,7 @@ function ContentDetail() {
             poster_path: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
             release_date: '2010-07-16',
             vote_average: 8.8,
-            overview: 'A skilled thief is given a chance at redemption if he can pull off an impossible heist.',
+            overview: 'Dom Cobb, yetenekli bir hırsız ve aynı zamanda zihin hırsızıdır. Rüyaların içine girerek insanların bilinçaltından sırları çalma konusunda uzmanlaşmıştır. Ancak bu yeteneği, onu ailesinden uzaklaştırmış ve kaçak durumuna düşürmüştür. Bir gün, Saito adında güçlü bir işadamından bir teklif alır: İmkansız görünen bir görev - fikir yerleştirme (inception). Eğer bu görevi başarıyla tamamlarsa, suçlu geçmişi silinecek ve çocuklarına kavuşabilecektir. Cobb, ekibini toplar ve hedefin rüyasına girerek, onun zihnine bir fikir yerleştirmeye çalışır. Ancak bu görev, rüya içinde rüya katmanları oluşturmayı gerektirir ve her katman daha tehlikeli hale gelir. Cobb\'un geçmişi ve karısı Mal\'ın hayaleti de bu görevi zorlaştırır. Film, gerçeklik ve rüya arasındaki çizgiyi bulanıklaştırarak, izleyiciyi derin bir psikolojik yolculuğa çıkarır.',
             genre_ids: [28, 878],
             genres: ['Aksiyon', 'Bilimkurgu'],
             directors: ['Christopher Nolan'],
@@ -52,7 +53,7 @@ function ContentDetail() {
             poster_path: 'https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
             release_date: '1999-03-31',
             vote_average: 8.7,
-            overview: 'A computer hacker learns about the true nature of reality.',
+            overview: 'Thomas Anderson, gündüzleri bir yazılım şirketinde programcı olarak çalışan, geceleri ise "Neo" adıyla bilinen bir bilgisayar korsanıdır. Bir gün, "Matrix" adı verilen gerçekliğin aslında bir simülasyon olduğunu keşfeder. Morpheus adında gizemli bir lider, Neo\'ya iki seçenek sunar: Mavi hapı alıp normal hayatına devam edebilir veya kırmızı hapı alıp Matrix\'in gerçek doğasını öğrenebilir. Neo kırmızı hapı seçer ve gerçek dünyanın aslında makineler tarafından kontrol edilen bir distopya olduğunu öğrenir. İnsanlar, makinelerin enerji kaynağı olarak kullanılmaktadır ve Matrix, onların zihinlerini kontrol altında tutan bir simülasyondur. Neo, kendisini "Seçilmiş Kişi" (The One) olarak keşfeder ve Matrix\'i yok etmek için bir savaşa girer. Film, gerçeklik, özgür irade ve teknolojinin insanlık üzerindeki etkisi gibi derin temaları ele alır.',
             genre_ids: [28, 878],
             genres: ['Aksiyon', 'Bilimkurgu'],
             directors: ['Lana Wachowski', 'Lilly Wachowski'],
@@ -75,7 +76,7 @@ function ContentDetail() {
             poster_path: 'https://covers.openlibrary.org/b/id/7222246-L.jpg',
             release_date: '1949-06-08',
             vote_average: 9.1,
-            overview: 'Totaliter bir gelecekte yaşayan Winston Smith\'in hikayesi.',
+            overview: '1984, distopik bir gelecekte geçen, totaliter bir rejimin kontrolü altındaki bir dünyayı anlatır. Winston Smith, Okyanusya\'da yaşayan ve Büyük Birader\'in gözetimi altında çalışan bir devlet memurudur. Her hareketi izlenmekte, her düşüncesi kontrol edilmektedir. Winston, bu totaliter sistemden nefret eder ve gizlice bir günlük tutmaya başlar. Julia adında bir kadınla tanışır ve ikisi birlikte sisteme karşı gelmeye başlarlar. Ancak düşünce polisi onları yakalar ve Winston, işkence yoluyla sistemin gerçekliğini kabul etmeye zorlanır. Roman, totaliter rejimlerin tehlikelerini, gerçekliğin manipülasyonunu ve bireysel özgürlüğün önemini güçlü bir şekilde ele alır. Orwell\'in bu eseri, modern dünyada hala geçerliliğini koruyan bir uyarı niteliğindedir.',
             genre_ids: [1, 5, 10],
             genres: ['Roman', 'Fantastik', 'Klasik'],
             authors: ['George Orwell'],
@@ -89,7 +90,7 @@ function ContentDetail() {
             poster_path: 'https://covers.openlibrary.org/b/id/7222247-L.jpg',
             release_date: '1866-01-01',
             vote_average: 9.2,
-            overview: 'Raskolnikov\'un işlediği cinayet ve sonrasında yaşadığı vicdan azabı.',
+            overview: 'Suç ve Ceza, St. Petersburg\'da yaşayan eski bir öğrenci olan Rodion Raskolnikov\'un hikayesini anlatır. Raskolnikov, ahlaki değerlerden bağımsız olarak "üstün insanlar"ın suç işleyebileceğine inanır ve bu teorisini test etmek için bir tefeci kadını öldürür. Ancak cinayetten sonra, beklediği özgürlük yerine ağır bir vicdan azabı ve psikolojik çöküntü yaşar. Polis müfettişi Porfiry Petrovich, Raskolnikov\'dan şüphelenir ve onu zekice sorgular. Bu süreçte Raskolnikov, Sonya adında genç bir kadınla tanışır ve onun aracılığıyla kurtuluş yolunu bulur. Roman, suç, ceza, pişmanlık ve kefaret temalarını derinlemesine işler ve insan ruhunun karmaşıklığını gözler önüne serer. Dostoyevski\'nin bu başyapıtı, psikolojik gerilim ve ahlaki sorgulama açısından edebiyat tarihinin en önemli eserlerinden biridir.',
             genre_ids: [1, 10, 20],
             genres: ['Roman', 'Klasik', 'Edebiyat'],
             authors: ['Fyodor Dostoyevsky'],
@@ -109,14 +110,101 @@ function ContentDetail() {
     }, 500);
   }, [type, id]);
 
-  // Mock custom lists
+  // Mock custom lists - In real app, fetch from API
   useEffect(() => {
-    setCustomLists([
-      { id: 1, name: 'En İyi Bilimkurgu Filmlerim' },
-      { id: 2, name: 'İzlenmesi Gerekenler' },
-      { id: 3, name: 'Favori Kitaplarım' }
-    ]);
+    setIsLoadingLists(true);
+    // Simulate API call
+    setTimeout(() => {
+      const mockLists = [
+        { 
+          list_id: 1, 
+          list_name: 'En İyi Bilimkurgu Filmlerim', 
+          name: 'En İyi Bilimkurgu Filmlerim',
+          items: [
+            { id: 1, title: 'Inception', type: 'Film' },
+            { id: 2, title: 'The Matrix', type: 'Film' }
+          ]
+        },
+        { 
+          list_id: 2, 
+          list_name: 'Okunacak Klasikler', 
+          name: 'Okunacak Klasikler',
+          items: [
+            { id: 3, title: '1984', type: 'Kitap' }
+          ]
+        },
+        { 
+          list_id: 3, 
+          list_name: 'Favori Aksiyon Filmleri', 
+          name: 'Favori Aksiyon Filmleri',
+          items: []
+        }
+      ];
+      setCustomLists(mockLists);
+      setIsLoadingLists(false);
+    }, 300);
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsListDropdownOpen(false);
+      }
+    };
+
+    if (isListDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isListDropdownOpen]);
+
+  const handleAddToList = (listId) => {
+    if (!content) return;
+
+    setAddingToListId(listId);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const contentId = content.id || parseInt(id);
+      const contentTitle = content.title;
+      const contentType = type === 'movie' ? 'Film' : 'Kitap';
+      
+      // Check if content already exists in the list
+      const list = customLists.find(l => l.list_id === listId);
+      if (list && list.items) {
+        const exists = list.items.some(item => item.id === contentId);
+        if (exists) {
+          alert('Bu içerik zaten listede!');
+          setAddingToListId(null);
+          return;
+        }
+      }
+      
+      // Add content to the list
+      const updatedLists = customLists.map(list => {
+        if (list.list_id === listId) {
+          return {
+            ...list,
+            items: [...(list.items || []), {
+              id: contentId,
+              title: contentTitle,
+              type: contentType
+            }]
+          };
+        }
+        return list;
+      });
+      
+      setCustomLists(updatedLists);
+      alert('İçerik listeye eklendi!');
+      setIsListDropdownOpen(false);
+      setAddingToListId(null);
+    }, 500);
+  };
 
   const handleLogout = () => setLogoutModalOpen(true);
   
@@ -160,20 +248,7 @@ function ContentDetail() {
     // In real app, update API
   };
 
-  const handleAddToList = (listId) => {
-    // In real app, add to list via API
-    setShowListMenu(false);
-  };
 
-  // Position menu when it opens
-  useEffect(() => {
-    if (showListMenu && customListWrapperRef.current && customListMenuRef.current) {
-      const wrapperRect = customListWrapperRef.current.getBoundingClientRect();
-      const menu = customListMenuRef.current;
-      menu.style.top = `${wrapperRect.bottom + 8}px`;
-      menu.style.left = `${wrapperRect.left}px`;
-    }
-  }, [showListMenu]);
 
   if (loading) {
     return (
@@ -321,26 +396,25 @@ function ContentDetail() {
 
               {/* Library Buttons and Custom List */}
               <div className="library-actions-row">
-                <div className="library-buttons">
-                  {type === 'movie' ? (
-                    <>
-                      <button
-                        type="button"
-                        className={`library-btn ${isInWatched ? 'active' : ''}`}
-                        onClick={handleWatchedToggle}
-                      >
-                        {isInWatched ? <FaCheck /> : <FaPlus />}
-                        <span>{isInWatched ? 'İzledim' : 'İzledim'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`library-btn ${isInToWatch ? 'active' : ''}`}
-                        onClick={handleToWatchToggle}
-                      >
-                        {isInToWatch ? <FaCheck /> : <FaPlus />}
-                        <span>{isInToWatch ? 'İzlenecek' : 'İzlenecek'}</span>
-                      </button>
-                    </>
+                {type === 'movie' ? (
+                  <>
+                    <button
+                      type="button"
+                      className={`library-btn ${isInWatched ? 'active' : ''}`}
+                      onClick={handleWatchedToggle}
+                    >
+                      {isInWatched ? <FaCheck /> : <FaPlus />}
+                      <span>{isInWatched ? 'İzledim' : 'İzledim'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`library-btn ${isInToWatch ? 'active' : ''}`}
+                      onClick={handleToWatchToggle}
+                    >
+                      {isInToWatch ? <FaCheck /> : <FaPlus />}
+                      <span>{isInToWatch ? 'İzlenecek' : 'İzlenecek'}</span>
+                    </button>
+                  </>
                   ) : (
                     <>
                       <button
@@ -361,34 +435,56 @@ function ContentDetail() {
                       </button>
                     </>
                   )}
-                </div>
 
                 {/* Add to Custom List */}
-                <div className="custom-list-wrapper" ref={customListWrapperRef}>
+                <div className="custom-list-dropdown-wrapper" ref={dropdownRef}>
                   <button
                     type="button"
                     className="custom-list-btn"
-                    onClick={() => setShowListMenu(!showListMenu)}
+                    onClick={() => setIsListDropdownOpen(!isListDropdownOpen)}
                   >
                     <FaPlus />
                     <span>Özel Listeye Ekle</span>
                   </button>
-                  {showListMenu && (
-                    <div className="custom-list-menu" ref={customListMenuRef}>
-                      {customLists.length > 0 ? (
-                        customLists.map(list => (
-                          <button
-                            key={list.id}
-                            type="button"
-                            className="custom-list-item"
-                            onClick={() => handleAddToList(list.id)}
-                          >
-                            {list.name}
-                          </button>
-                        ))
+                  
+                  {isListDropdownOpen && (
+                    <div className="custom-list-dropdown">
+                      {isLoadingLists ? (
+                        <div className="dropdown-loading">
+                          <div className="spinner-small"></div>
+                          <span>Yükleniyor...</span>
+                        </div>
+                      ) : customLists.length === 0 ? (
+                        <div className="dropdown-empty">
+                          <FaList />
+                          <span>Henüz özel listeniz yok</span>
+                        </div>
                       ) : (
-                        <div className="custom-list-empty">
-                          <p>Henüz özel listeniz yok</p>
+                        <div className="dropdown-list">
+                          {customLists.map((list) => (
+                            <button
+                              key={list.list_id}
+                              type="button"
+                              className="dropdown-item"
+                              onClick={() => handleAddToList(list.list_id)}
+                              disabled={addingToListId === list.list_id}
+                            >
+                              {addingToListId === list.list_id ? (
+                                <>
+                                  <div className="spinner-small"></div>
+                                  <span>Ekleniyor...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FaList />
+                                  <span>{list.list_name || list.name}</span>
+                                  {list.items && (
+                                    <span className="item-count">({list.items.length})</span>
+                                  )}
+                                </>
+                              )}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -400,10 +496,12 @@ function ContentDetail() {
         </div>
 
         {/* Overview Section */}
-        <div className="content-overview">
-          <h2 className="overview-title">Özet</h2>
-          <p className="overview-text">{content.overview}</p>
-        </div>
+        {content.overview && (
+          <div className="content-overview">
+            <h2 className="overview-title">Özet</h2>
+            <p className="overview-text">{content.overview}</p>
+          </div>
+        )}
       </div>
 
       <BottomNav 
