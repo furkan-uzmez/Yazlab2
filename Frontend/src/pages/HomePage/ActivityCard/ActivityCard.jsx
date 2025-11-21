@@ -69,14 +69,22 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen }) {
         {activity.type === 'rating' ? (
           <div className="rating-activity">
             <div className="content-poster">
-              <img 
-                src={activity.contentPoster || '/api/placeholder/200/300'} 
-                alt={activity.contentTitle}
-                className="poster-image"
-              />
+              <Link 
+                to={`/content/${activity.contentType === 'Film' ? 'movie' : 'book'}/${activity.contentId || activity.id}`}
+                className="poster-link"
+              >
+                <img 
+                  src={activity.contentPoster || '/api/placeholder/200/300'} 
+                  alt={activity.contentTitle}
+                  className="poster-image"
+                />
+              </Link>
               <div className="content-info">
                 <div className="content-header">
-                  <Link to="#" className="content-title-link">
+                  <Link 
+                    to={`/content/${activity.contentType === 'Film' ? 'movie' : 'book'}/${activity.contentId || activity.id}`} 
+                    className="content-title-link"
+                  >
                     <ShinyText text={activity.contentTitle} speed={4} className="content-title" />
                   </Link>
                   <div className={`content-type-badge ${activity.contentType === 'Film' ? 'film-badge' : 'book-badge'}`}>
@@ -93,14 +101,22 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen }) {
         ) : activity.type === 'review' ? (
           <div className="review-activity">
             <div className="content-poster">
-              <img 
-                src={activity.contentPoster || '/api/placeholder/200/300'} 
-                alt={activity.contentTitle}
-                className="poster-image"
-              />
+              <Link 
+                to={`/content/${activity.contentType === 'Film' ? 'movie' : 'book'}/${activity.contentId || activity.id}`}
+                className="poster-link"
+              >
+                <img 
+                  src={activity.contentPoster || '/api/placeholder/200/300'} 
+                  alt={activity.contentTitle}
+                  className="poster-image"
+                />
+              </Link>
               <div className="content-info">
                 <div className="content-header">
-                  <Link to="#" className="content-title-link">
+                  <Link 
+                    to={`/content/${activity.contentType === 'Film' ? 'movie' : 'book'}/${activity.contentId || activity.id}`} 
+                    className="content-title-link"
+                  >
                     <ShinyText text={activity.contentTitle} speed={4} className="content-title" />
                   </Link>
                   <div className={`content-type-badge ${activity.contentType === 'Film' ? 'film-badge' : 'book-badge'}`}>

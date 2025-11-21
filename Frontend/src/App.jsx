@@ -8,6 +8,7 @@ import Home from './pages/HomePage/Home';
 import Profile from './pages/Profile/Profile';
 import Movies from './pages/Movies/Movies';
 import Books from './pages/Books/Books';
+import ContentDetail from './pages/ContentDetail/ContentDetail';
 import './App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/profile/:userId?" element={<Profile />} />
         <Route path="/movies" element={<Movies />} />
         <Route path="/books" element={<Books />} />
+        <Route path="/content/:type/:id" element={<ContentDetail />} />
         <Route path="/search" element={<Home />} />
         <Route path="/review/:reviewId" element={<Home />} />
       </Routes>

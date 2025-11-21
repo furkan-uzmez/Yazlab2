@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaFilter, FaSort, FaSearch, FaStar, FaCalendarAlt, FaTimes, FaChevronDown } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
@@ -476,7 +477,12 @@ function Books() {
         ) : filteredAndSortedBooks.length > 0 ? (
           <div className="books-grid">
             {filteredAndSortedBooks.map((book, index) => (
-              <div key={book.id} className="book-card" style={{ animationDelay: `${index * 0.03}s` }}>
+              <Link
+                key={book.id}
+                to={`/content/book/${book.id}`}
+                className="book-card"
+                style={{ animationDelay: `${index * 0.03}s` }}
+              >
                 <div className="book-poster-wrapper">
                   <img
                     src={book.poster_path || '/placeholder.jpg'}
@@ -499,7 +505,7 @@ function Books() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

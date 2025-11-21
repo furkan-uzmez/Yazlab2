@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaFilter, FaSort, FaSearch, FaStar, FaCalendarAlt, FaTimes, FaChevronDown } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
@@ -475,7 +476,12 @@ function Movies() {
         ) : filteredAndSortedMovies.length > 0 ? (
           <div className="movies-grid">
             {filteredAndSortedMovies.map((movie, index) => (
-              <div key={movie.id} className="movie-card" style={{ animationDelay: `${index * 0.03}s` }}>
+              <Link
+                key={movie.id}
+                to={`/content/movie/${movie.id}`}
+                className="movie-card"
+                style={{ animationDelay: `${index * 0.03}s` }}
+              >
                 <div className="movie-poster-wrapper">
                   <img
                     src={movie.poster_path || '/placeholder.jpg'}
@@ -498,7 +504,7 @@ function Movies() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
