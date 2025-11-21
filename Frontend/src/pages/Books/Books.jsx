@@ -5,6 +5,7 @@ import { FaFilter, FaSort, FaSearch, FaStar, FaCalendarAlt, FaTimes, FaChevronDo
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
+import BookCardSkeleton from '../../components/BookCardSkeleton';
 import './Books.css';
 
 function Books() {
@@ -470,9 +471,10 @@ function Books() {
 
         {/* Books Grid */}
         {loading ? (
-          <div className="books-loading">
-            <div className="spinner"></div>
-            <p>Yükleniyor...</p>
+          <div className="books-grid">
+            {[...Array(12)].map((_, index) => (
+              <BookCardSkeleton key={`skeleton-${index}`} />
+            ))}
           </div>
         ) : filteredAndSortedBooks.length > 0 ? (
           <div className="books-grid">

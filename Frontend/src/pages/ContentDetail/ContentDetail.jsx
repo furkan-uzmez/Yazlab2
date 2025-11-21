@@ -4,6 +4,7 @@ import { FaStar, FaCalendarAlt, FaClock, FaBookOpen, FaUser, FaFilm, FaBook, FaC
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
+import ContentDetailSkeleton from '../../components/ContentDetailSkeleton';
 import './ContentDetail.css';
 
 function ContentDetail() {
@@ -258,9 +259,8 @@ function ContentDetail() {
           isSearchMode={isSearchMode}
           onSearchModeChange={setIsSearchMode}
         />
-        <div className="content-detail-loading">
-          <div className="spinner"></div>
-          <p>Yükleniyor...</p>
+        <div className="content-detail-content">
+          <ContentDetailSkeleton />
         </div>
         <BottomNav 
           onSearchClick={() => setIsSearchMode(true)}

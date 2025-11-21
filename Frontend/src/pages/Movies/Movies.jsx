@@ -5,6 +5,7 @@ import { FaFilter, FaSort, FaSearch, FaStar, FaCalendarAlt, FaTimes, FaChevronDo
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
+import MovieCardSkeleton from '../../components/MovieCardSkeleton';
 import './Movies.css';
 
 function Movies() {
@@ -469,9 +470,10 @@ function Movies() {
 
         {/* Movies Grid */}
         {loading ? (
-          <div className="movies-loading">
-            <div className="spinner"></div>
-            <p>Yükleniyor...</p>
+          <div className="movies-grid">
+            {[...Array(12)].map((_, index) => (
+              <MovieCardSkeleton key={`skeleton-${index}`} />
+            ))}
           </div>
         ) : filteredAndSortedMovies.length > 0 ? (
           <div className="movies-grid">
