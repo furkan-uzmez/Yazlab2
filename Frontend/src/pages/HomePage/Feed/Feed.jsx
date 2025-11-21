@@ -71,21 +71,27 @@ function Feed({
   return (
     <main className="feed-container" ref={feedContainerRef}>
       <div className={`feed-header ${isHeaderVisible ? 'visible' : 'hidden'}`}>
-        <div className="feed-tabs">
-          <button
-            type="button"
-            className={`feed-tab ${activeTab === 'for-you' ? 'active' : ''}`}
-            onClick={() => handleTabChange('for-you')}
-          >
-            Senin için
-          </button>
-          <button
-            type="button"
-            className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
-            onClick={() => handleTabChange('following')}
-          >
-            Takip Ettiklerin
-          </button>
+        <div className="feed-header-content">
+          <div className="feed-tabs">
+            <button
+              type="button"
+              className={`feed-tab ${activeTab === 'for-you' ? 'active' : ''}`}
+              onClick={() => handleTabChange('for-you')}
+            >
+              Senin için
+            </button>
+            <button
+              type="button"
+              className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
+              onClick={() => handleTabChange('following')}
+            >
+              Takip Ettiklerin
+            </button>
+          </div>
+          <div className="feed-header-logo">
+            <img src="/readditlogo.png" alt="Readdit Logo" className="feed-logo" />
+          </div>
+          <div className="feed-header-spacer"></div>
         </div>
       </div>
 

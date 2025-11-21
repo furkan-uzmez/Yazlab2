@@ -9,6 +9,7 @@ function Login() {
     email: '',
     password: ''
   });
+  const [showSplash, setShowSplash] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -43,8 +44,13 @@ function Login() {
         
         localStorage.setItem("email", data.email)
 
-        // Ana sayfaya yönlendir
-        navigate('/home'); 
+        // Splash ekranını göster
+        setShowSplash(true);
+        
+        // 2.3 saniye sonra ana sayfaya yönlendir
+        setTimeout(() => {
+          navigate('/home');
+        }, 2300); 
 
       } else {
         // 3. Hatalı (4xx, 5xx) cevabı (örn: 401 Yetkisiz) yakala
@@ -61,20 +67,26 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="beams-background">
-        <Beams
-          beamWidth={2}
-          beamHeight={15}
-          beamNumber={12}
-          lightColor="#ffffff"
-          speed={2}
-          noiseIntensity={1.75}
-          scale={0.2}
-          rotation={35}
-        />
-      </div>
-      <div className="login-card">
+    <>
+      {showSplash && (
+        <div className="splash-screen">
+          <img src="/readditlogo.png" alt="Readdit Logo" className="splash-logo" />
+        </div>
+      )}
+      <div className="login-container">
+        <div className="beams-background">
+          <Beams
+            beamWidth={2}
+            beamHeight={15}
+            beamNumber={12}
+            lightColor="#ffffff"
+            speed={2}
+            noiseIntensity={1.75}
+            scale={0.2}
+            rotation={35}
+          />
+        </div>
+        <div className="login-card">
         <h1 className="login-title">Giriş Yap</h1>
         <p className="login-subtitle">Hesabınıza giriş yapın</p>
         
@@ -133,6 +145,7 @@ function Login() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
