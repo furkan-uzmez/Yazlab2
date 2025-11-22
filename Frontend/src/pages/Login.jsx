@@ -22,49 +22,62 @@ function Login() {
     e.preventDefault();
     
     try {
-      // 1. Backend'inize (FastAPI) login isteği atın
-      const response = await fetch("http://localhost:8000/auth/login", {
+      // --- 1. ADIM: LOGIN İSTEĞİ ---
+      const loginResponse = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // formData state'i, backend'in beklediği {email, password}
-        // formatıyla zaten uyumlu
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData), 
       });
 
-      // 2. Başarılı (2xx) cevabı kontrol et
-      if (response.ok) {
-        const data = await response.json();
-        // data = {"message": "Login successful"}
-        
-        // ÖNEMLİ: Gerçekte, backend'in burada bir JWT token 
-        // döndürmesi ve sizin bunu localStorage'a kaydetmeniz gerekir.
-        console.log("Giriş başarılı:", data);
-        
-        localStorage.setItem("email", data.email)
-
-        // Splash ekranını göster
-        setShowSplash(true);
-        
-        // 2.3 saniye sonra ana sayfaya yönlendir
-        setTimeout(() => {
-          navigate('/home');
-        }, 2300); 
-
-      } else {
-        // 3. Hatalı (4xx, 5xx) cevabı (örn: 401 Yetkisiz) yakala
-        const errorData = await response.json();
-        // errorData = {"detail": "Invalid email or password"}
+      if (!loginResponse.ok) {
+        const errorData = await loginResponse.json();
         alert(errorData.detail || "E-posta veya şifre hatalı!");
+        return;
       }
 
+      const loginData = await loginResponse.json();
+      console.log("Giriş başarılı:", loginData);
+      
+      // Token'ı kaydet (Varsa)
+      if (loginData.access_token) {
+          localStorage.setItem("token", loginData.access_token);
+      }
+      
+      // E-postayı kaydet
+      localStorage.setItem("email", formData.email);
+
+      // --- 2. ADIM: KULLANICI DETAYLARINI ÇEKME ---
+      const userUrl = `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(formData.email)}`;
+      const userResponse = await fetch(userUrl);
+
+      if (userResponse.ok) {
+        const userDataRaw = await userResponse.json();
+        console.log("Kullanıcı Verisi (Ham):", userDataRaw);
+
+        // API yanıtını işle (results dizisi mi yoksa user objesi mi?)
+        let userData = null;
+        if (userDataRaw.user) {
+            userData = userDataRaw.user;
+        } else if (Array.isArray(userDataRaw.results) && userDataRaw.results.length > 0) {
+            userData = userDataRaw.results[0];
+        } else if (userDataRaw.results) {
+            userData = userDataRaw.results;
+        }
+
+        if (userData) {
+             localStorage.setItem("profileusername", userData.username);
+             localStorage.setItem("profilebio", userData.bio);
+             localStorage.setItem("profileimage_url", userData.avatar_url);
+          }
+      }
+      // --- 4. ADIM: YÖNLENDİRME ---
+      navigate('/home'); 
     } catch (error) {
-      // 4. Sunucuya ulaşılamazsa (Network error) hatayı yakala
-      console.error("Giriş isteği başarısız:", error);
+      console.error("İşlem hatası:", error);
       alert("Sunucuya bağlanılamadı!");
     }
   };
+
 
   return (
     <>
