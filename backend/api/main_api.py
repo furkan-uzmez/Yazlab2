@@ -10,6 +10,8 @@ from backend.api.user.get_followers_api import router as get_followers_router
 from backend.api.user.get_user_api import router as get_user_router
 from backend.api.feed.get_user_feed_api import router as get_user_feed_router
 from backend.api.content.search_api import router as search_content_router
+from backend.api.interactions.add_comments_api import router as add_comment_router
+from backend.api.interactions.get_comments_api import router as get_comments_router
 from database.create_tables import create_tables
 from database.insert_users_data import insert_initial_data
 from database.insert_feed import insert_mock_activities
@@ -32,6 +34,8 @@ api.include_router(get_followers_router)
 api.include_router(get_user_router)
 api.include_router(get_user_feed_router)
 api.include_router(search_content_router)
+api.include_router(add_comment_router)
+api.include_router(get_comments_router)
 
 if __name__ == "__main__":
     create_tables()
