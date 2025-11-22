@@ -70,8 +70,14 @@ function Login() {
              localStorage.setItem("profileimage_url", userData.avatar_url);
           }
       }
-      // --- 4. ADIM: YÖNLENDİRME ---
-      navigate('/home'); 
+      
+      // --- 3. ADIM: SPLASH EKRANINI GÖSTER ---
+      setShowSplash(true);
+      
+      // --- 4. ADIM: 2.3 SANİYE SONRA YÖNLENDİRME ---
+      setTimeout(() => {
+        navigate('/home');
+      }, 2300); 
     } catch (error) {
       console.error("İşlem hatası:", error);
       alert("Sunucuya bağlanılamadı!");
