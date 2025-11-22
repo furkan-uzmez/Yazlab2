@@ -29,22 +29,54 @@ function Profile() {
   const [profileUser, setProfileUser] = useState(null); // Başlangıçta null olsun, veri gelince dolsun
   const [loadingProfile, setLoadingProfile] = useState(true); // Yükleniyor durumu
 
-  // --- YENİ: KULLANICI VERİSİNİ ÇEKME (API) ---
   useEffect(() => {
     const fetchUserProfile = async () => {
       setLoadingProfile(true);
+
+      // --- 1. KENDİ PROFİLİMİZ Mİ? (LocalStorage Kontrolü) ---
+      if (!userId) {
+        // Verileri localStorage'dan oku
+        const localUsername = localStorage.getItem("profileusername");
+        const localBio = localStorage.getItem("profilebio");
+        const localAvatar = localStorage.getItem("profileimage_url");
+        console.log("LocalStorage'dan okunan profil verileri:", {
+          localUsername,
+          localBio,
+          localAvatar
+        });
+        const localEmail = localStorage.getItem("email");
+        // user_id'yi de kaydetmenizi öneririm, yoksa geçici 1 veriyoruz
+        const localUserId = localStorage.getItem("user_id"); 
+
+        // Eğer veriler varsa, API isteği atma! Direkt bunları kullan.
+        if (localUsername) {
+          console.log("Profil verisi LocalStorage'dan alındı (Hızlı Yükleme)");
+          setProfileUser({
+            user_id: localUserId || 1,
+            username: localUsername,
+            email: localEmail,
+            avatar_url: localAvatar || `https://i.pravatar.cc/150?img=1`,
+            bio: localBio || 'Henüz bir biyografi eklenmemiş.'
+          });
+          setLoadingProfile(false);
+          return; // <--- FONKSİYONDAN ÇIK (API'yi Engelle)
+        }
+      }
+
+      // --- 2. BAŞKASININ PROFİLİ VEYA LOCALSTORAGE BOŞ İSE (API İsteği) ---
       try {
         let url = '';
         
-        // 1. URL Belirleme Mantığı (Aynı kalacak)
-        const email = localStorage.getItem('email');
-        if (!userId) { // Kendi profilimiz
+        if (!userId) { 
+            // Kendi profilimiz ama localStorage boşmuş, mecburen API'ye soruyoruz
+            const email = localStorage.getItem('email');
             if (!email) {
                 setLoadingProfile(false);
                 return;
             }
             url = `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(email)}`;
-        } else { // Başkasının profili
+        } else { 
+            // Başkasının profili, mecburen API'ye soruyoruz
             url = `http://localhost:8000/user/get_user?user_name=${encodeURIComponent(userId)}`;
         }
 
@@ -52,45 +84,46 @@ function Profile() {
         
         if (response.ok) {
           const data = await response.json();
-          console.log("API'den gelen veri (tam):", data); 
-
-          // --- DÜZELTME BURADA ---
           
+          // API veri yapısı kontrolü (user veya results dizisi)
           let userData = null;
-
-          // 1. İhtimalleri kontrol et
           if (data.user) {
-            // Eğer API 'user' döndürdüyse (tek obje)
             userData = data.user;
           } else if (Array.isArray(data.results) && data.results.length > 0) {
-            // Eğer API 'results' döndürdüyse ve bu bir DİZİ ise (logunuza göre durum bu)
-            userData = data.results[0]; // Dizinin İLK elemanını al
+            userData = data.results[0];
           } else if (data.results) {
-            // Eğer 'results' bir obje ise
             userData = data.results;
           }
 
-          console.log("İşlenen userData:", userData); // Kontrol et
-
           if (userData) {
-             setProfileUser({
-                 // Veritabanından gelen alanların dolu olup olmadığını kontrol et
-                 user_id: userData.user_id, 
+             const newProfileData = {
+                 user_id: userData.user_id,
                  username: userData.username,
                  email: userData.email,
                  avatar_url: userData.avatar_url || `https://i.pravatar.cc/150?img=${userData.user_id || 1}`, 
                  bio: userData.bio || 'Henüz bir biyografi eklenmemiş.'
-             });
+             };
+
+             setProfileUser(newProfileData);
+
+             // Eğer bu "kendi profilimizse", API'den taze gelen veriyi
+             // LocalStorage'a da yedekleyelim ki bir dahaki sefere hızlı açılsın.
+             if (!userId) {
+                 localStorage.setItem("profileusername", newProfileData.username);
+                 localStorage.setItem("profilebio", newProfileData.bio);
+                 localStorage.setItem("profileimage_url", newProfileData.avatar_url);
+                 localStorage.setItem("user_id", newProfileData.user_id);
+             }
+
           } else {
-             console.error("API yanıtında kullanıcı verisi bulunamadı.");
              setProfileUser(null);
           }
         } else {
-          console.error("Kullanıcı profili alınamadı:", response.status);
           setProfileUser(null);
         }
       } catch (error) {
         console.error("Profil yükleme hatası:", error);
+        setProfileUser(null);
       } finally {
         setLoadingProfile(false);
       }
