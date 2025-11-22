@@ -50,41 +50,36 @@ function Home() {
     setLogoutModalOpen(false);
   };
 
-  // --- YORUMLARI GÖSTERME FONKSİYONU (GÜNCELLENDİ) ---
   const handleCommentClick = async (activity) => {
-    // 1. Paneli aç ve seçili aktiviteyi ayarla
     setSelectedActivity(activity);
     setCommentPanelOpen(true);
-    setPanelComments([]); // Önceki yorumları temizle (Yükleniyor hissi için)
+    setPanelComments([]); 
 
     try {
-      // 2. API'den TÜM yorumları çek (Burası optimize edilebilir)
-      // İdealde: `.../get_comments?content_id=${activity.contentId}` olmalıydı.
-      // Ancak eldeki API ile tümünü çekip filtreleyeceğiz.
       const response = await fetch("http://localhost:8000/interactions/get_all_comments");
       
       if (response.ok) {
         const data = await response.json();
         const allComments = data.comments || [];
 
-        // 3. Sadece SEÇİLİ İÇERİĞE ait yorumları filtrele
-        // activity.contentId (Frontend'deki ID) === comment.content_id (API'deki ID)
+        // 1. Sadece SEÇİLİ İÇERİĞE (activity_id) ait yorumları filtrele
+        // Backend'de 'activity_id' olarak geliyor
+        // Frontend'de activity.id olarak tutuluyor
         const relatedComments = allComments.filter(
-            comment => comment.content_id === activity.contentId
+            comment => String(comment.activity_id) === String(activity.id)
         );
 
-        // 4. Yorumları Frontend formatına dönüştür (Mapping)
+        // 2. Yorumları Frontend formatına dönüştür (Mapping)
         const formattedComments = relatedComments.map(c => ({
-            id: c.review_id,
-            userId: c.username, // Veya c.user_id varsa onu kullanın
-            userName: c.username,
-            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            id: c.comment_id, // Backend: comment_id -> Frontend: id
+            userId: c.username, // ID yerine username kullanıyoruz (veya c.user_id varsa onu)
+            userName: c.username, // Backend: username -> Frontend: userName
+            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default', // Backend: avatar_url -> Frontend: userAvatar
             text: c.text,
             date: c.created_at,
-            likes: 0 // API'den gelmiyorsa 0
+            likes: 0
         }));
 
-        // 5. Filtrelenmiş yorumları panele yükle
         setPanelComments(formattedComments);
 
       } else {
