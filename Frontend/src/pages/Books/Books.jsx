@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { FaFilter, FaSort, FaSearch, FaStar, FaCalendarAlt, FaTimes, FaChevronDown } from 'react-icons/fa';
+import { FaFilter, FaSearch, FaStar, FaCalendarAlt } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
 import BookCardSkeleton from '../../components/BookCardSkeleton';
-import './Books.css';
+import FilterModal from './components/FilterModal/FilterModal';
+import { genres } from './utils/genres';
+import { filterBooks, sortBooks, hasActiveFilters } from './utils/filterUtils';
+import './styles/Books.css';
 
 function Books() {
   const navigate = useNavigate();
@@ -28,29 +31,6 @@ function Books() {
     ratingTo: ''
   });
 
-  // Mock genres for books
-  const genres = [
-    { id: 1, name: 'Roman' },
-    { id: 2, name: 'Bilimkurgu' },
-    { id: 3, name: 'Polisiye' },
-    { id: 4, name: 'Gerilim' },
-    { id: 5, name: 'Fantastik' },
-    { id: 6, name: 'Tarih' },
-    { id: 7, name: 'Biyografi' },
-    { id: 8, name: 'Felsefe' },
-    { id: 9, name: 'Psikoloji' },
-    { id: 10, name: 'Klasik' },
-    { id: 11, name: 'Çocuk' },
-    { id: 12, name: 'Genç Yetişkin' },
-    { id: 13, name: 'Romantik' },
-    { id: 14, name: 'Macera' },
-    { id: 15, name: 'Korku' },
-    { id: 16, name: 'Mizah' },
-    { id: 17, name: 'Şiir' },
-    { id: 18, name: 'Deneme' },
-    { id: 19, name: 'Araştırma' },
-    { id: 20, name: 'Edebiyat' }
-  ];
 
   // Mock books data - Frontend only
   useEffect(() => {
@@ -306,15 +286,6 @@ function Books() {
     setActiveCategory(category);
   };
 
-  const handleGenreToggle = (genreId) => {
-    setFilters(prev => ({
-      ...prev,
-      genres: prev.genres.includes(genreId)
-        ? prev.genres.filter(id => id !== genreId)
-        : [...prev.genres, genreId]
-    }));
-  };
-
   const handleClearFilters = () => {
     setFilters({
       genres: [],
@@ -325,58 +296,17 @@ function Books() {
     });
   };
 
-  const hasActiveFilters = filters.genres.length > 0 || filters.yearFrom || filters.yearTo || filters.ratingFrom || filters.ratingTo;
+  const handleFilterModalClose = () => {
+    setIsFilterModalClosing(true);
+    setTimeout(() => {
+      setIsFilterModalOpen(false);
+      setIsFilterModalClosing(false);
+    }, 300);
+  };
 
   // Filter and sort books
-  const filteredAndSortedBooks = books
-    .filter(book => {
-      // Search filter
-      const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Category filter
-      let matchesCategory = true;
-      const currentYear = new Date().getFullYear();
-      const bookYear = new Date(book.release_date).getFullYear();
-      
-      switch (activeCategory) {
-        case 'new':
-          matchesCategory = bookYear >= currentYear - 2;
-          break;
-        case 'top-rated':
-          matchesCategory = book.vote_average >= 8.0;
-          break;
-        case 'popular':
-        default:
-          matchesCategory = true;
-      }
-
-      // Genre filter
-      const matchesGenre = filters.genres.length === 0 || 
-        filters.genres.some(genreId => book.genre_ids.includes(genreId));
-
-      // Year filter
-      const matchesYear = (!filters.yearFrom || bookYear >= parseInt(filters.yearFrom)) &&
-                         (!filters.yearTo || bookYear <= parseInt(filters.yearTo));
-
-      // Rating filter
-      const matchesRating = (!filters.ratingFrom || book.vote_average >= parseFloat(filters.ratingFrom)) &&
-                           (!filters.ratingTo || book.vote_average <= parseFloat(filters.ratingTo));
-
-      return matchesSearch && matchesCategory && matchesGenre && matchesYear && matchesRating;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'rating':
-          return b.vote_average - a.vote_average;
-        case 'date':
-          return new Date(b.release_date) - new Date(a.release_date);
-        case 'title':
-          return a.title.localeCompare(b.title);
-        case 'popularity':
-        default:
-          return 0;
-      }
-    });
+  const filteredBooks = filterBooks(books, searchQuery, activeCategory, filters);
+  const filteredAndSortedBooks = sortBooks(filteredBooks, sortBy);
 
   return (
     <div className="books-container">
@@ -439,7 +369,7 @@ function Books() {
           <div className="books-filters">
             <button
               type="button"
-              className={`filter-btn ${hasActiveFilters ? 'active' : ''}`}
+              className={`filter-btn ${hasActiveFilters(filters) ? 'active' : ''}`}
               onClick={() => {
                 setIsFilterModalOpen(true);
                 setIsFilterModalClosing(false);
@@ -447,7 +377,7 @@ function Books() {
             >
               <FaFilter className="filter-icon" />
               <span>Filtrele</span>
-              {hasActiveFilters && <span className="filter-badge">{filters.genres.length + (filters.yearFrom ? 1 : 0) + (filters.yearTo ? 1 : 0) + (filters.ratingFrom ? 1 : 0) + (filters.ratingTo ? 1 : 0)}</span>}
+              {hasActiveFilters(filters) && <span className="filter-badge">{filters.genres.length + (filters.yearFrom ? 1 : 0) + (filters.yearTo ? 1 : 0) + (filters.ratingFrom ? 1 : 0) + (filters.ratingTo ? 1 : 0)}</span>}
             </button>
             <select
               className="filter-select"
@@ -513,7 +443,7 @@ function Books() {
         ) : (
           <div className="books-empty">
             <p>Kitap bulunamadı</p>
-            {hasActiveFilters && (
+            {hasActiveFilters(filters) && (
               <button
                 type="button"
                 className="clear-filters-btn"
@@ -527,134 +457,15 @@ function Books() {
       </div>
 
       {/* Filter Modal */}
-      {isFilterModalOpen && (
-        <div 
-          className={`filter-modal-overlay ${isFilterModalClosing ? 'closing' : ''}`}
-          onClick={() => {
-            setIsFilterModalClosing(true);
-            setTimeout(() => {
-              setIsFilterModalOpen(false);
-              setIsFilterModalClosing(false);
-            }, 300);
-          }}
-        >
-          <div 
-            className={`filter-modal ${isFilterModalClosing ? 'closing' : ''}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="filter-modal-header">
-              <h2>Filtrele</h2>
-              <button
-                type="button"
-                className="filter-modal-close"
-                onClick={() => {
-                  setIsFilterModalClosing(true);
-                  setTimeout(() => {
-                    setIsFilterModalOpen(false);
-                    setIsFilterModalClosing(false);
-                  }, 300);
-                }}
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <div className="filter-modal-content">
-              {/* Genres */}
-              <div className="filter-section">
-                <h3 className="filter-section-title">Türler</h3>
-                <div className="genres-grid">
-                  {genres.map(genre => (
-                    <button
-                      key={genre.id}
-                      type="button"
-                      className={`genre-chip ${filters.genres.includes(genre.id) ? 'active' : ''}`}
-                      onClick={() => handleGenreToggle(genre.id)}
-                    >
-                      {genre.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Year Range */}
-              <div className="filter-section">
-                <h3 className="filter-section-title">Yıl Aralığı</h3>
-                <div className="year-range">
-                  <input
-                    type="number"
-                    className="year-input"
-                    placeholder="Başlangıç"
-                    value={filters.yearFrom}
-                    onChange={(e) => setFilters(prev => ({ ...prev, yearFrom: e.target.value }))}
-                    min="1000"
-                    max={new Date().getFullYear()}
-                  />
-                  <span className="year-separator">-</span>
-                  <input
-                    type="number"
-                    className="year-input"
-                    placeholder="Bitiş"
-                    value={filters.yearTo}
-                    onChange={(e) => setFilters(prev => ({ ...prev, yearTo: e.target.value }))}
-                    min="1000"
-                    max={new Date().getFullYear()}
-                  />
-                </div>
-              </div>
-
-              {/* Rating Range */}
-              <div className="filter-section">
-                <h3 className="filter-section-title">Puan Aralığı</h3>
-                <div className="rating-range">
-                  <input
-                    type="number"
-                    className="rating-input"
-                    placeholder="Min"
-                    value={filters.ratingFrom}
-                    onChange={(e) => setFilters(prev => ({ ...prev, ratingFrom: e.target.value }))}
-                    min="0"
-                    max="10"
-                    step="0.1"
-                  />
-                  <span className="rating-separator">-</span>
-                  <input
-                    type="number"
-                    className="rating-input"
-                    placeholder="Max"
-                    value={filters.ratingTo}
-                    onChange={(e) => setFilters(prev => ({ ...prev, ratingTo: e.target.value }))}
-                    min="0"
-                    max="10"
-                    step="0.1"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="filter-modal-actions">
-              <button
-                type="button"
-                className="filter-clear-btn"
-                onClick={handleClearFilters}
-              >
-                Temizle
-              </button>
-              <button
-                type="button"
-                className="filter-apply-btn"
-                onClick={() => {
-                  setIsFilterModalClosing(true);
-                  setTimeout(() => {
-                    setIsFilterModalOpen(false);
-                    setIsFilterModalClosing(false);
-                  }, 300);
-                }}
-              >
-                Uygula
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        isClosing={isFilterModalClosing}
+        onClose={handleFilterModalClose}
+        filters={filters}
+        onFilterChange={setFilters}
+        onClearFilters={handleClearFilters}
+        genres={genres}
+      />
 
       <BottomNav 
         onSearchClick={() => setIsSearchMode(true)}

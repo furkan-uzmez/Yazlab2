@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { FaFilter, FaSort, FaSearch, FaStar, FaCalendarAlt, FaTimes, FaChevronDown } from 'react-icons/fa';
+import { FaFilter, FaSearch, FaStar, FaCalendarAlt } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
 import MovieCardSkeleton from '../../components/MovieCardSkeleton';
-import './Movies.css';
+import FilterModal from './components/FilterModal/FilterModal';
+import { genres } from './utils/genres';
+import { filterMovies, sortMovies, hasActiveFilters } from './utils/filterUtils';
+import './styles/Movies.css';
 
 function Movies() {
   const navigate = useNavigate();
@@ -28,28 +31,6 @@ function Movies() {
     ratingTo: ''
   });
 
-  // Mock genres
-  const genres = [
-    { id: 28, name: 'Aksiyon' },
-    { id: 12, name: 'Macera' },
-    { id: 16, name: 'Animasyon' },
-    { id: 35, name: 'Komedi' },
-    { id: 80, name: 'Suç' },
-    { id: 99, name: 'Belgesel' },
-    { id: 18, name: 'Drama' },
-    { id: 10751, name: 'Aile' },
-    { id: 14, name: 'Fantastik' },
-    { id: 36, name: 'Tarih' },
-    { id: 27, name: 'Korku' },
-    { id: 10402, name: 'Müzik' },
-    { id: 9648, name: 'Gizem' },
-    { id: 10749, name: 'Romantik' },
-    { id: 878, name: 'Bilimkurgu' },
-    { id: 10770, name: 'TV Filmi' },
-    { id: 53, name: 'Gerilim' },
-    { id: 10752, name: 'Savaş' },
-    { id: 37, name: 'Batı' }
-  ];
 
   // Mock movies data - Frontend only
   useEffect(() => {
@@ -305,15 +286,6 @@ function Movies() {
     setActiveCategory(category);
   };
 
-  const handleGenreToggle = (genreId) => {
-    setFilters(prev => ({
-      ...prev,
-      genres: prev.genres.includes(genreId)
-        ? prev.genres.filter(id => id !== genreId)
-        : [...prev.genres, genreId]
-    }));
-  };
-
   const handleClearFilters = () => {
     setFilters({
       genres: [],
@@ -324,58 +296,17 @@ function Movies() {
     });
   };
 
-  const hasActiveFilters = filters.genres.length > 0 || filters.yearFrom || filters.yearTo || filters.ratingFrom || filters.ratingTo;
+  const handleFilterModalClose = () => {
+    setIsFilterModalClosing(true);
+    setTimeout(() => {
+      setIsFilterModalOpen(false);
+      setIsFilterModalClosing(false);
+    }, 300);
+  };
 
   // Filter and sort movies
-  const filteredAndSortedMovies = movies
-    .filter(movie => {
-      // Search filter
-      const matchesSearch = movie.title.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Category filter
-      let matchesCategory = true;
-      const currentYear = new Date().getFullYear();
-      const movieYear = new Date(movie.release_date).getFullYear();
-      
-      switch (activeCategory) {
-        case 'new':
-          matchesCategory = movieYear >= currentYear - 2;
-          break;
-        case 'top-rated':
-          matchesCategory = movie.vote_average >= 8.0;
-          break;
-        case 'popular':
-        default:
-          matchesCategory = true;
-      }
-
-      // Genre filter
-      const matchesGenre = filters.genres.length === 0 || 
-        filters.genres.some(genreId => movie.genre_ids.includes(genreId));
-
-      // Year filter
-      const matchesYear = (!filters.yearFrom || movieYear >= parseInt(filters.yearFrom)) &&
-                         (!filters.yearTo || movieYear <= parseInt(filters.yearTo));
-
-      // Rating filter
-      const matchesRating = (!filters.ratingFrom || movie.vote_average >= parseFloat(filters.ratingFrom)) &&
-                           (!filters.ratingTo || movie.vote_average <= parseFloat(filters.ratingTo));
-
-      return matchesSearch && matchesCategory && matchesGenre && matchesYear && matchesRating;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'rating':
-          return b.vote_average - a.vote_average;
-        case 'date':
-          return new Date(b.release_date) - new Date(a.release_date);
-        case 'title':
-          return a.title.localeCompare(b.title);
-        case 'popularity':
-        default:
-          return 0;
-      }
-    });
+  const filteredMovies = filterMovies(movies, searchQuery, activeCategory, filters);
+  const filteredAndSortedMovies = sortMovies(filteredMovies, sortBy);
 
   return (
     <div className="movies-container">
@@ -438,7 +369,7 @@ function Movies() {
           <div className="movies-filters">
             <button
               type="button"
-              className={`filter-btn ${hasActiveFilters ? 'active' : ''}`}
+              className={`filter-btn ${hasActiveFilters(filters) ? 'active' : ''}`}
               onClick={() => {
                 setIsFilterModalOpen(true);
                 setIsFilterModalClosing(false);
@@ -446,7 +377,7 @@ function Movies() {
             >
               <FaFilter className="filter-icon" />
               <span>Filtrele</span>
-              {hasActiveFilters && <span className="filter-badge">{filters.genres.length + (filters.yearFrom ? 1 : 0) + (filters.yearTo ? 1 : 0) + (filters.ratingFrom ? 1 : 0) + (filters.ratingTo ? 1 : 0)}</span>}
+              {hasActiveFilters(filters) && <span className="filter-badge">{filters.genres.length + (filters.yearFrom ? 1 : 0) + (filters.yearTo ? 1 : 0) + (filters.ratingFrom ? 1 : 0) + (filters.ratingTo ? 1 : 0)}</span>}
             </button>
             <select
               className="filter-select"
@@ -512,7 +443,7 @@ function Movies() {
         ) : (
           <div className="movies-empty">
             <p>Film bulunamadı</p>
-            {hasActiveFilters && (
+            {hasActiveFilters(filters) && (
               <button
                 type="button"
                 className="clear-filters-btn"
@@ -526,134 +457,15 @@ function Movies() {
       </div>
 
       {/* Filter Modal */}
-      {isFilterModalOpen && (
-        <div 
-          className={`filter-modal-overlay ${isFilterModalClosing ? 'closing' : ''}`}
-          onClick={() => {
-            setIsFilterModalClosing(true);
-            setTimeout(() => {
-              setIsFilterModalOpen(false);
-              setIsFilterModalClosing(false);
-            }, 300);
-          }}
-        >
-          <div 
-            className={`filter-modal ${isFilterModalClosing ? 'closing' : ''}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="filter-modal-header">
-              <h2>Filtrele</h2>
-              <button
-                type="button"
-                className="filter-modal-close"
-                onClick={() => {
-                  setIsFilterModalClosing(true);
-                  setTimeout(() => {
-                    setIsFilterModalOpen(false);
-                    setIsFilterModalClosing(false);
-                  }, 300);
-                }}
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <div className="filter-modal-content">
-              {/* Genres */}
-              <div className="filter-section">
-                <h3 className="filter-section-title">Türler</h3>
-                <div className="genres-grid">
-                  {genres.map(genre => (
-                    <button
-                      key={genre.id}
-                      type="button"
-                      className={`genre-chip ${filters.genres.includes(genre.id) ? 'active' : ''}`}
-                      onClick={() => handleGenreToggle(genre.id)}
-                    >
-                      {genre.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Year Range */}
-              <div className="filter-section">
-                <h3 className="filter-section-title">Yıl Aralığı</h3>
-                <div className="year-range">
-                  <input
-                    type="number"
-                    className="year-input"
-                    placeholder="Başlangıç"
-                    value={filters.yearFrom}
-                    onChange={(e) => setFilters(prev => ({ ...prev, yearFrom: e.target.value }))}
-                    min="1900"
-                    max={new Date().getFullYear()}
-                  />
-                  <span className="year-separator">-</span>
-                  <input
-                    type="number"
-                    className="year-input"
-                    placeholder="Bitiş"
-                    value={filters.yearTo}
-                    onChange={(e) => setFilters(prev => ({ ...prev, yearTo: e.target.value }))}
-                    min="1900"
-                    max={new Date().getFullYear()}
-                  />
-                </div>
-              </div>
-
-              {/* Rating Range */}
-              <div className="filter-section">
-                <h3 className="filter-section-title">Puan Aralığı</h3>
-                <div className="rating-range">
-                  <input
-                    type="number"
-                    className="rating-input"
-                    placeholder="Min"
-                    value={filters.ratingFrom}
-                    onChange={(e) => setFilters(prev => ({ ...prev, ratingFrom: e.target.value }))}
-                    min="0"
-                    max="10"
-                    step="0.1"
-                  />
-                  <span className="rating-separator">-</span>
-                  <input
-                    type="number"
-                    className="rating-input"
-                    placeholder="Max"
-                    value={filters.ratingTo}
-                    onChange={(e) => setFilters(prev => ({ ...prev, ratingTo: e.target.value }))}
-                    min="0"
-                    max="10"
-                    step="0.1"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="filter-modal-actions">
-              <button
-                type="button"
-                className="filter-clear-btn"
-                onClick={handleClearFilters}
-              >
-                Temizle
-              </button>
-              <button
-                type="button"
-                className="filter-apply-btn"
-                onClick={() => {
-                  setIsFilterModalClosing(true);
-                  setTimeout(() => {
-                    setIsFilterModalOpen(false);
-                    setIsFilterModalClosing(false);
-                  }, 300);
-                }}
-              >
-                Uygula
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        isClosing={isFilterModalClosing}
+        onClose={handleFilterModalClose}
+        filters={filters}
+        onFilterChange={setFilters}
+        onClearFilters={handleClearFilters}
+        genres={genres}
+      />
 
       <BottomNav 
         onSearchClick={() => setIsSearchMode(true)}
