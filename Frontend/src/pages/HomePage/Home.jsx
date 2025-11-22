@@ -6,7 +6,6 @@ import Feed from './Feed/Feed';
 import RightPanel from './RightPanel/RightPanel';
 import CommentPanel from './CommentPanel/CommentPanel';
 import LogoutModal from './LogoutModal/LogoutModal';
-// import { allMockActivities } from './utils/mockData'; // ARTIK GEREK YOK
 import './Home.css';
 
 function Home() {
@@ -39,6 +38,9 @@ function Home() {
       // localStorage'dan token ve kullanıcı bilgilerini temizle
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('profileimage_url');
+      localStorage.removeItem('profileusername');
+      localStorage.removeItem('profilebio'); 
       // Ana giriş sayfasına yönlendir
       navigate('/');
     }, 1300);
@@ -48,10 +50,49 @@ function Home() {
     setLogoutModalOpen(false);
   };
 
-  const handleCommentClick = (activity, comments) => {
+  // --- YORUMLARI GÖSTERME FONKSİYONU (GÜNCELLENDİ) ---
+  const handleCommentClick = async (activity) => {
+    // 1. Paneli aç ve seçili aktiviteyi ayarla
     setSelectedActivity(activity);
-    setPanelComments(comments);
     setCommentPanelOpen(true);
+    setPanelComments([]); // Önceki yorumları temizle (Yükleniyor hissi için)
+
+    try {
+      // 2. API'den TÜM yorumları çek (Burası optimize edilebilir)
+      // İdealde: `.../get_comments?content_id=${activity.contentId}` olmalıydı.
+      // Ancak eldeki API ile tümünü çekip filtreleyeceğiz.
+      const response = await fetch("http://localhost:8000/interactions/get_all_comments");
+      
+      if (response.ok) {
+        const data = await response.json();
+        const allComments = data.comments || [];
+
+        // 3. Sadece SEÇİLİ İÇERİĞE ait yorumları filtrele
+        // activity.contentId (Frontend'deki ID) === comment.content_id (API'deki ID)
+        const relatedComments = allComments.filter(
+            comment => comment.content_id === activity.contentId
+        );
+
+        // 4. Yorumları Frontend formatına dönüştür (Mapping)
+        const formattedComments = relatedComments.map(c => ({
+            id: c.review_id,
+            userId: c.username, // Veya c.user_id varsa onu kullanın
+            userName: c.username,
+            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            text: c.text,
+            date: c.created_at,
+            likes: 0 // API'den gelmiyorsa 0
+        }));
+
+        // 5. Filtrelenmiş yorumları panele yükle
+        setPanelComments(formattedComments);
+
+      } else {
+        console.error("Yorumlar yüklenemedi:", response.status);
+      }
+    } catch (error) {
+      console.error("Yorum API hatası:", error);
+    }
   };
 
   const handleCloseCommentPanel = () => {
@@ -65,29 +106,51 @@ function Home() {
     }, 400); // Animasyon süresi ile eşleşmeli
   };
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (commentText.trim()) {
-      const newComment = {
-        id: panelComments.length + 1,
-        userId: 999,
-        userName: 'Sen',
-        userAvatar: 'https://i.pravatar.cc/150?img=20',
-        text: commentText,
-        date: new Date(),
-        likes: 0
-      };
-      setPanelComments([...panelComments, newComment]);
-      setCommentText('');
-      
-      // Gönderinin yorum sayısını artır
-      if (selectedActivity) {
-        setSelectedActivity({
-          ...selectedActivity,
-          comments: (selectedActivity.comments || 0) + 1
-        });
+    
+    if (!commentText.trim() || !selectedActivity) return;
+
+    try {
+      const userEmail = localStorage.getItem("email");
+      if (!userEmail) {
+        console.error("Kullanıcı girişi yapılmamış.");
+        return;
+      }
+
+      // --- API İSTEĞİ ---
+      const response = await fetch("http://localhost:8000/interactions/add_comment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_email: userEmail,
+          content_id: selectedActivity.contentId, // <-- DİKKAT: contentId'nin activity objesinde olduğundan emin olun
+          comment_text: commentText
+        }),
+      });
+
+      console.log("Username", localStorage.getItem("username"));
+
+      if (response.ok) {
+        // --- BAŞARILI ---
+        // 1. Yorumu yerel state'e (panelComments) ekle (Anında görünmesi için)
+        const newComment = {
+          id: Date.now(), // Geçici ID
+          userId: 999, // Veya userEmail'den gelen bilgi
+          userName: localStorage.getItem('profileusername'), // Veya localStorage'dan username
+          userAvatar: localStorage.getItem('profileimage_url'), // Veya localStorage'dan avatar
+          text: commentText,
+          date: new Date(),
+          likes: 0
+        };
+        setPanelComments([...panelComments, newComment]);
         
-        // Activity card'daki yorum sayısını da güncelle
+        // 2. Input alanını temizle
+        setCommentText('');
+        
+        // 3. Aktivitedeki yorum sayısını artır
         setActivities(prevActivities => 
           prevActivities.map(activity => 
             activity.id === selectedActivity.id 
@@ -95,7 +158,15 @@ function Home() {
               : activity
           )
         );
+
+      } else {
+        const errorData = await response.json();
+        console.error("Yorum eklenemedi:", errorData.detail);
+        alert("Yorum eklenirken bir hata oluştu.");
       }
+
+    } catch (error) {
+      console.error("Yorum API hatası:", error);
     }
   };
 
@@ -212,6 +283,7 @@ function Home() {
           contentTitle: item.content_title,
           contentType: item.content_type === 'movie' ? 'Film' : 'Kitap', // Türkçe'ye çevir
           contentPoster: item.content_poster,
+          contentId: item.content_id,
           rating: item.rating_score, // Rating varsa (yoksa null gelir)
           reviewText: item.review_text, // Review varsa (yoksa null gelir)
           date: item.created_at, // Tarih string olarak gelir, ActivityCard bunu işlemeli
