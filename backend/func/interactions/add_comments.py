@@ -1,8 +1,9 @@
 import mysql.connector
 
-def add_comment(connection, user_email: str, content_id: int, comment_text: str) -> bool:
+def add_comment(connection, user_email: str, activity_id: int, comment_text: str) -> bool:
     """
-    Bir içeriğe yorum ekler ve bu eylemi 'activities' tablosuna kaydeder.
+    Bir aktiviteye (Activity Card) yorum ekler.
+    Tablo: activity_comments
     """
     if connection is None:
         return False
@@ -20,36 +21,24 @@ def add_comment(connection, user_email: str, content_id: int, comment_text: str)
         
         user_id = user['user_id']
 
-        # 2. ADIM: Yorumu 'reviews' tablosuna ekle
-        # (Sütun adları şemanıza göre düzeltildi: user_id, content_id, text)
-        insert_review_query = """
-            INSERT INTO reviews (user_id, content_id, text) 
+        # 2. ADIM: Yorumu 'activity_comments' tablosuna ekle
+        insert_comment_query = """
+            INSERT INTO activity_comments (activity_id, user_id, text) 
             VALUES (%s, %s, %s)
         """
-        cursor.execute(insert_review_query, (user_id, content_id, comment_text))
+        cursor.execute(insert_comment_query, (activity_id, user_id, comment_text))
         
-        # Eklenen yorumun ID'sini al (Aktivite tablosu için gerekli)
-        new_review_id = cursor.lastrowid
-
-        # 3. ADIM: Bu eylemi 'activities' tablosuna kaydet
-        # type='review', reference_id=new_review_id
-        insert_activity_query = """
-            INSERT INTO activities (user_id, type, reference_id) 
-            VALUES (%s, 'review', %s)
-        """
-        cursor.execute(insert_activity_query, (user_id, new_review_id))
-
-        # Hepsini tek seferde onayla
+        # Değişiklikleri onayla
         connection.commit()
         cursor.close()
         
-        print("Yorum başarıyla eklendi ve akışa işlendi.")
+        print(f"Yorum başarıyla {activity_id} nolu aktiviteye eklendi.")
         return True
 
     except mysql.connector.Error as e:
         print(f"HATA: Yorum eklenirken SQL hatası: {e}")
         if connection:
-            connection.rollback() # Hata olursa işlemleri geri al
+            connection.rollback()
         return False
     except Exception as e:
         print(f"HATA: Beklenmedik hata: {e}")
