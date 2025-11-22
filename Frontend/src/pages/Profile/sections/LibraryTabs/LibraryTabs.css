@@ -208,12 +208,85 @@
   color: #ffffff;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
-  font-size: 0.95rem;
-  animation: fadeIn 0.5s ease-in-out;
+.library-item-add {
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.library-item-add:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-4px);
+}
+
+.add-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.add-icon {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.library-item-add:hover .add-poster {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.library-item-add:hover .add-icon {
+  color: rgba(255, 255, 255, 0.9);
+  transform: rotate(90deg);
+}
+
+.library-item-add span {
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.3s ease;
+}
+
+.library-item-add:hover span {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.show-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.show-more-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+.show-more-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.show-more-btn:hover svg {
+  transform: translateX(4px);
 }
 
 @media (max-width: 1024px) {

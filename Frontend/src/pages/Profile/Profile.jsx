@@ -6,6 +6,7 @@ import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
 import CreateListModal from './components/CreateListModal/CreateListModal';
 import EditListModal from './components/EditListModal/EditListModal';
 import EditProfileModal from './components/EditProfileModal/EditProfileModal';
+import AddContentModal from './components/AddContentModal/AddContentModal';
 import ProfileHeader from './sections/ProfileHeader/ProfileHeader';
 import LibraryTabs from './sections/LibraryTabs/LibraryTabs';
 import CustomLists from './sections/CustomLists/CustomLists';
@@ -167,8 +168,8 @@ function Profile() {
     }
   };
   
-  // Mock library data
-  const libraryData = {
+  // Library data - now using state
+  const [libraryData, setLibraryData] = useState({
     watched: [
       { title: 'Inception', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
       { title: 'The Matrix', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
@@ -188,6 +189,46 @@ function Profile() {
       { title: 'Foundation', poster_url: 'https://covers.openlibrary.org/b/id/8739162-M.jpg' },
       { title: 'Brave New World', poster_url: 'https://covers.openlibrary.org/b/id/7222247-M.jpg' }
     ]
+  });
+
+  // Add content modal state
+  const [isAddContentModalOpen, setIsAddContentModalOpen] = useState(false);
+  const [isAddContentModalClosing, setIsAddContentModalClosing] = useState(false);
+  const [addContentType, setAddContentType] = useState(null);
+
+  const handleAddContentClick = (type) => {
+    setAddContentType(type);
+    setIsAddContentModalOpen(true);
+  };
+
+  const handleCloseAddContentModal = () => {
+    setIsAddContentModalClosing(true);
+    setTimeout(() => {
+      setIsAddContentModalOpen(false);
+      setIsAddContentModalClosing(false);
+      setAddContentType(null);
+    }, 300);
+  };
+
+  const handleAddContent = (content) => {
+    if (!addContentType) return;
+
+    setLibraryData(prev => {
+      const newData = { ...prev };
+      const targetArray = newData[addContentType];
+      
+      // Check if content already exists
+      const exists = targetArray.some(item => item.id === content.id);
+      if (!exists) {
+        newData[addContentType] = [...targetArray, {
+          id: content.id,
+          title: content.title,
+          poster_url: content.poster_url
+        }];
+      }
+      
+      return newData;
+    });
   };
   
   // Mock custom lists - now using state
@@ -522,6 +563,8 @@ function Profile() {
           onTabChange={handleTabChange}
           isTabTransitioning={isTabTransitioning}
           libraryData={libraryData}
+          isOwnProfile={isOwnProfile}
+          onAddContentClick={handleAddContentClick}
         />
 
         {/* Custom Lists */}
@@ -588,6 +631,15 @@ function Profile() {
         onRemoveFromList={handleRemoveFromList}
         onUpdateList={handleUpdateList}
         onDeleteList={handleDeleteList}
+      />
+
+      {/* Add Content Modal */}
+      <AddContentModal
+        isOpen={isAddContentModalOpen}
+        isClosing={isAddContentModalClosing}
+        onClose={handleCloseAddContentModal}
+        contentType={addContentType}
+        onAddContent={handleAddContent}
       />
     </div>
   );
