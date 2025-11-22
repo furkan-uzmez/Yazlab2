@@ -272,7 +272,7 @@ function Home() {
         // ActivityCard'ın beklediği prop isimleri farklı olduğu için bu dönüşüm şart.
         const formattedActivities = apiFeedItems.map(item => ({
           id: item.activity_id,
-          userId: item.activity_user_username, // Username'i ID gibi kullandık (veya ID varsa onu kullanın)
+          userId: item.activity_user_username,
           userName: item.activity_user_username,
           userAvatar: item.activity_user_avatar,
           type: item.type,
@@ -281,14 +281,15 @@ function Home() {
             ? `bir ${item.content_type === 'movie' ? 'filmi' : 'kitabı'} oyladı`
             : `bir ${item.content_type === 'movie' ? 'film' : 'kitap'} hakkında yorum yaptı`,
           contentTitle: item.content_title,
-          contentType: item.content_type === 'movie' ? 'Film' : 'Kitap', // Türkçe'ye çevir
-          contentPoster: item.content_poster,
+          contentType: item.content_type === 'movie' ? 'Film' : 'Kitap',
+          // Poster URL'ini kontrol et - null, undefined veya boş string ise null olarak işaretle
+          contentPoster: item.content_poster && item.content_poster.trim() !== '' ? item.content_poster : null,
           contentId: item.content_id,
-          rating: item.rating_score, // Rating varsa (yoksa null gelir)
-          reviewText: item.review_text, // Review varsa (yoksa null gelir)
-          date: item.created_at, // Tarih string olarak gelir, ActivityCard bunu işlemeli
-          likes: 0, // API'den gelmiyorsa varsayılan 0
-          comments: 0 // API'den gelmiyorsa varsayılan 0
+          rating: item.rating_score,
+          reviewText: item.review_text,
+          date: item.created_at,
+          likes: 0,
+          comments: 0
         }));
 
         setActivities(prev => [...prev, ...formattedActivities]);

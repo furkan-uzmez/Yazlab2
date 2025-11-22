@@ -160,19 +160,29 @@
   display: block;
   flex-shrink: 0;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 12px;
   transition: opacity 0.2s ease;
+  width: 120px;
+  height: 180px;
 }
 
 .poster-image {
   width: 120px;
   height: 180px;
+  min-width: 120px;
+  min-height: 180px;
+  max-width: 120px;
+  max-height: 180px;
   object-fit: cover;
+  object-position: center;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: opacity 0.2s ease;
-  display: block;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .poster-link:hover .poster-image {

@@ -74,9 +74,12 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen }) {
                 className="poster-link"
               >
                 <img 
-                  src={activity.contentPoster || '/api/placeholder/200/300'} 
+                  src={activity.contentPoster || 'https://via.placeholder.com/200x300/1a1a1a/ffffff?text=No+Image'} 
                   alt={activity.contentTitle}
                   className="poster-image"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/200x300/1a1a1a/ffffff?text=No+Image';
+                  }}
                 />
               </Link>
               <div className="content-info">
@@ -106,9 +109,12 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen }) {
                 className="poster-link"
               >
                 <img 
-                  src={activity.contentPoster || '/api/placeholder/200/300'} 
+                  src={activity.contentPoster || 'https://via.placeholder.com/200x300/1a1a1a/ffffff?text=No+Image'} 
                   alt={activity.contentTitle}
                   className="poster-image"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/200x300/1a1a1a/ffffff?text=No+Image';
+                  }}
                 />
               </Link>
               <div className="content-info">

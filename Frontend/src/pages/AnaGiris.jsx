@@ -7,6 +7,7 @@ import BlurText from '../components/BlurText';
 import GooeyNav from '../components/GooeyNav';
 import GradualBlur from '../components/GradualBlur';
 import TextPressure from '../components/TextPressure';
+import PosterCarousel from '../components/PosterCarousel';
 import './AnaGiris.css';
 
 function AnaGiris() {
@@ -19,6 +20,14 @@ function AnaGiris() {
 
   const handleBlurAnimationComplete = () => {
     console.log('Animation completed!');
+  };
+
+  const scrollToPosters = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const posterSection = document.querySelector('.poster-carousel-section');
+    if (posterSection) {
+      posterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const scrollToHakkimizda = (e) => {
@@ -197,6 +206,9 @@ function AnaGiris() {
         exponential={true}
         opacity={1}
       />
+
+      {/* Poster Carousel */}
+      <PosterCarousel />
 
       {/* Nasıl Çalışır Bölümü */}
       <section className="how-it-works-section">
