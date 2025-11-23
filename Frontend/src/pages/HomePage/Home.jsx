@@ -54,10 +54,14 @@ function Home() {
     setSelectedActivity(activity);
     setCommentPanelOpen(true);
     setPanelComments([]); 
-
+// --- DEBUG 1: Tıkladığım aktivitenin ID'si ne? ---
+    console.log("Tıklanan Aktivite ID:", activity.id); 
+    console.log("Tıklanan Aktivite Tipi:", typeof activity.id);
     try {
-      const response = await fetch("http://localhost:8000/interactions/get_all_comments");
+      const userEmail = localStorage.getItem("email");
       
+      const response = await fetch(`http://localhost:8000/interactions/get_all_comments?email=${userEmail}`);
+     
       if (response.ok) {
         const data = await response.json();
         const allComments = data.comments || [];
@@ -77,10 +81,19 @@ function Home() {
             userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default', // Backend: avatar_url -> Frontend: userAvatar
             text: c.text,
             date: c.created_at,
-            likes: c.like_count
+            likes: c.like_count,
+            isLiked: c.is_liked_by_me > 0
         }));
-
+        
         setPanelComments(formattedComments);
+
+        const newLikedSet = new Set();
+        formattedComments.forEach(c => {
+            if (c.isLiked) {
+                newLikedSet.add(c.id);
+            }
+        });
+        setLikedComments(newLikedSet);
 
       } else {
         console.error("Yorumlar yüklenemedi:", response.status);
@@ -137,7 +150,7 @@ function Home() {
           userAvatar: localStorage.getItem('profileimage_url'), // Veya localStorage'dan avatar
           text: commentText,
           date: new Date(),
-          likes: 0
+          likes: 0 
         };
         setPanelComments([...panelComments, newComment]);
         
@@ -218,18 +231,78 @@ function Home() {
     }
   };
 
-  const handleCommentLike = (commentId) => {
-    setLikedComments(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(commentId)) {
-        newSet.delete(commentId);
-      } else {
-        newSet.add(commentId);
-      }
-      return newSet;
-    });
-  };
+  const handleCommentLike = async (commentId) => {
+    try {
+      const username = localStorage.getItem("profileusername");
+      if (!username) return;
 
+      // 1. Tıklama anındaki durumu al (State'den değil, o anki Set'ten)
+      // React Strict Mode'da bile bu değer o an için sabittir.
+      const isCurrentlyLiked = likedComments.has(commentId);
+      const willLike = !isCurrentlyLiked;
+      const changeAmount = willLike ? 1 : -1;
+
+      // 2. Önce UI'ı güncelle (Optimistic Update)
+      // Bu sayede kullanıcı anında tepki görür
+      setLikedComments(prev => {
+          const newSet = new Set(prev);
+          if (willLike) newSet.add(commentId);
+          else newSet.delete(commentId);
+          return newSet;
+      });
+
+      setPanelComments(prevComments =>
+        prevComments.map(comment => {
+          if (comment.id === commentId) {
+            return {
+              ...comment,
+              likes: Math.max(0, (comment.likes || 0) + changeAmount)
+            };
+          }
+          return comment;
+        })
+      );
+
+      // 3. Sonra API isteğini gönder (Arka planda)
+      const response = await fetch("http://localhost:8000/interactions/like_comment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          comment_id: commentId,
+          username: username
+        }),
+      });
+
+      if (!response.ok) {
+        // HATA OLURSA: Değişiklikleri geri al (Rollback)
+        console.error("Beğeni API hatası, geri alınıyor...");
+        
+        setLikedComments(prev => {
+            const newSet = new Set(prev);
+            if (willLike) newSet.delete(commentId); // Eklendiyse sil
+            else newSet.add(commentId); // Silindiyse ekle
+            return newSet;
+        });
+
+        setPanelComments(prevComments =>
+          prevComments.map(comment => {
+            if (comment.id === commentId) {
+              return {
+                ...comment,
+                likes: Math.max(0, (comment.likes || 0) - changeAmount) // Tersi işlem
+              };
+            }
+            return comment;
+          })
+        );
+      }
+
+    } catch (error) {
+      console.error("Yorum beğeni hatası:", error);
+      // Hata durumunda rollback (yukarıdaki ile aynı mantık) yapılabilir
+    }
+  };
+  
   const handleCommentEdit = (commentId, newText) => {
     setPanelComments(prevComments =>
       prevComments.map(comment =>

@@ -172,10 +172,17 @@ function CommentPanel({
             {comments.length > 0 ? (
               comments.map((comment) => {
                 const isLiked = likedComments.has(comment.id);
-                const likeCount = (comment.likes || 0) + (isLiked ? 1 : 0);
+                
+                // --- DÜZELTME ---
+                const likeCount = comment.likes || 0; 
+                // ----------------
+                
                 const isOwnComment = comment.userId === currentUserId;
-                const isEditing = editingCommentId === comment.id;
-
+                
+                // --- BU SATIRIN BURADA OLDUĞUNDAN EMİN OLUN ---
+                const isEditing = editingCommentId === comment.id; 
+                // ----------------------------------------------
+                
                 return (
                   <div key={comment.id} className="comment-panel-item">
                     <img 

@@ -7,9 +7,8 @@ from backend.func.interactions.get_comments import get_comments as get_comments_
 router = APIRouter(prefix="/interactions", tags=["interactions"])
 
 @router.get("/get_all_comments")
-async def get_comments():
+async def get_comments(email: str):
     """
-    Belirli bir aktiviteye ait yorumları getirir.
     Kullanım: GET /interactions/get_comments/{activity_id}
     """
     connection = open_db_connection()
@@ -21,7 +20,7 @@ async def get_comments():
         )
     
     try:
-        comments = get_comments_func(connection)
+        comments = get_comments_func(connection,email)
     except Exception as e:
         print(f"HATA: Yorumlar alınamadı: {e}")
         raise HTTPException(
