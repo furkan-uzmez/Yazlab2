@@ -10,6 +10,7 @@ function Feed({
   initialLoading, 
   hasMore, 
   onCommentClick, 
+  onLike,
   commentPanelOpen, 
   selectedActivity,
   loadingRef,
@@ -117,6 +118,7 @@ function Feed({
                     <ActivityCard 
                       activity={activity} 
                       onCommentClick={onCommentClick}
+                      onLike={onLike}
                       isCommentPanelOpen={commentPanelOpen && selectedActivity?.id === activity.id}
                     />
                   </div>

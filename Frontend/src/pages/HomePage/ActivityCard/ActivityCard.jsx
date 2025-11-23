@@ -7,19 +7,23 @@ import { formatTimeAgo, truncateText } from '../utils/utils';
 import './ActivityCard.css';
 
 // Aktivite Kartı Bileşeni
-function ActivityCard({ activity, onCommentClick, isCommentPanelOpen }) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [comments] = useState(getMockComments(activity.id));
+function ActivityCard({ activity, onCommentClick, isCommentPanelOpen ,onLike}) {
+  //const [isLiked, setIsLiked] = useState(false);
+  //const [comments] = useState(getMockComments(activity.id));
 
   const handleLike = (e) => {
     e.preventDefault();
-    setIsLiked(!isLiked);
+    if (onLike) {
+      onLike(activity.id); // Üst bileşendeki fonksiyonu çağır
+    }
   };
 
   const handleCommentToggle = (e) => {
     e.preventDefault();
     if (onCommentClick) {
-      onCommentClick(activity, comments);
+      // Mock yorumlar yerine sadece aktiviteyi gönderiyoruz.
+      // Yorumları Home.js API'den çekecek.
+      onCommentClick(activity);
     }
   };
 
@@ -147,24 +151,29 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen }) {
         ) : null}
       </div>
 
-      {/* Alt Bilgi (Footer) / Etkileşim */}
       <div className="activity-footer">
         <button 
-          className={`interaction-btn like-btn ${isLiked ? 'active' : ''}`}
+          // DÜZELTME 1: 'isLiked' yerine 'activity.isLiked'
+          className={`interaction-btn like-btn ${activity.isLiked ? 'active' : ''}`}
           onClick={handleLike}
         >
           <FaRegThumbsUp className="btn-icon" />
-          {(activity.likes > 0 || isLiked) && (
-            <span className="count">{activity.likes + (isLiked ? 1 : 0)}</span>
+          
+          {/* DÜZELTME 2: Karmaşık hesaplama yerine direkt 'activity.likes' */}
+          {activity.likes > 0 && (
+            <span className="count">{activity.likes}</span>
           )}
         </button>
+
         <button 
           className={`interaction-btn comment-btn ${isCommentPanelOpen ? 'active' : ''}`}
           onClick={handleCommentToggle}
         >
           <FaRegCommentDots className="btn-icon" />
-          {(activity.comments > 0 || comments.length > 0) && (
-            <span className="count">{activity.comments > 0 ? activity.comments : comments.length}</span>
+          
+          {/* DÜZELTME 3: 'comments.length' yerine direkt 'activity.comments' */}
+          {activity.comments > 0 && (
+            <span className="count">{activity.comments}</span>
           )}
         </button>
       </div>

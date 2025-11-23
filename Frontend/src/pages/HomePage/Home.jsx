@@ -77,7 +77,7 @@ function Home() {
             userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default', // Backend: avatar_url -> Frontend: userAvatar
             text: c.text,
             date: c.created_at,
-            likes: 0
+            likes: c.like_count
         }));
 
         setPanelComments(formattedComments);
@@ -126,7 +126,6 @@ function Home() {
         }),
       });
 
-      console.log("Username", localStorage.getItem("username"));
 
       if (response.ok) {
         // --- BAŞARILI ---
@@ -162,6 +161,60 @@ function Home() {
 
     } catch (error) {
       console.error("Yorum API hatası:", error);
+    }
+  };
+
+  // --- AKTİVİTE BEĞENME FONKSİYONU ---
+  const handleActivityLike = async (activityId) => {
+    try {
+      const userEmail = localStorage.getItem("email");
+      // Eğer user_id'yi localStorage'da tutuyorsanız onu kullanın,
+      // tutmuyorsanız email'den bulmanız gerekebilir veya backend'iniz email kabul etmeli.
+      // Sizin API'niz şu an 'user_id: int' bekliyor.
+      // Bu yüzden localStorage'dan user_id'yi almalısınız.
+      const username = localStorage.getItem("profileusername"); 
+
+      console.log('activity',activityId)
+
+      if (!username) {
+        console.error("Kullanıcı adı bulunamadı.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8000/feed/like_review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          activity_id: activityId,
+          username: username // Backend int bekliyor
+        }),
+      });
+
+      if (response.ok) {
+        setActivities(prevActivities => 
+          prevActivities.map(activity => {
+            if (activity.id === activityId) {
+              // Mevcut durumu tersine çevir
+              const isLikedNow = !activity.isLiked; 
+              
+              return {
+                ...activity,
+                // Beğendiyse (+1), Vazgeçtiyse (-1)
+                likes: activity.likes + (isLikedNow ? 1 : -1),
+                // Durumu güncelle (Mavi/Gri olması için)
+                isLiked: isLikedNow 
+              };
+            }
+            return activity;
+          })
+        );
+      } else {
+        console.error("Beğeni işlemi başarısız");
+      }
+    } catch (error) {
+      console.error("Beğeni API hatası:", error);
     }
   };
 
@@ -242,14 +295,10 @@ function Home() {
       
       if (!userEmail) {
         console.error("Email bulunamadı, lütfen giriş yapın.");
-        // navigate('/login'); // İsterseniz login'e yönlendirebilirsiniz
         return;
       }
 
-      // 2. API URL'ini oluştur (Sizin paylaştığınız örnekteki gibi)
-      // Not: 'search' kelimesi API tanımınızda var mı kontrol edin, 
-      // önceki konuşmamızda kaldırmanızı önermiştim ama URL'nizde duruyorsa kalsın.
-      const url = `http://localhost:8000/feed/${userEmail}/search?email=${userEmail}`;
+      const url = `http://localhost:8000/feed/search?email=${userEmail}`;
 
       const response = await fetch(url);
       
@@ -283,8 +332,9 @@ function Home() {
           rating: item.rating_score,
           reviewText: item.review_text,
           date: item.created_at,
-          likes: 0,
-          comments: 0
+          likes: item.like_count,
+          comments: item.comment_count,
+          isLiked: item.is_liked_by_me > 0
         }));
 
         setActivities(prev => [...prev, ...formattedActivities]);
@@ -335,6 +385,7 @@ function Home() {
         initialLoading={initialLoading}
         hasMore={hasMore}
         onCommentClick={handleCommentClick}
+        onLike={handleActivityLike}
         commentPanelOpen={commentPanelOpen}
         selectedActivity={selectedActivity}
         loadingRef={loadingRef}

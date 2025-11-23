@@ -7,7 +7,7 @@ from backend.func.feed.get_user_feed import get_user_feed as get_user_feed_func
 router = APIRouter(prefix="/feed", tags=["feed"])
 
 
-@router.get("/{email}/search")
+@router.get("/search")
 async def get_feed(email: str):
     print(f"Kullanıcı beslemesi isteniyor: {email}")
     connection = open_db_connection()
