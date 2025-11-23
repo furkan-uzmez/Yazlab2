@@ -23,6 +23,7 @@ def get_followers(connection, email: str) -> list:
         # 2. 'u' -> Takip eden kişilerin (follower_id) detaylarını almak için.
         query = """
             SELECT 
+                u.user_id,
                 u.username,
                 u.avatar_url
             FROM 

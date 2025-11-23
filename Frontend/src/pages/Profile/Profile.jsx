@@ -171,23 +171,23 @@ function Profile() {
   // Library data - now using state
   const [libraryData, setLibraryData] = useState({
     watched: [
-      { title: 'Inception', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
-      { title: 'The Matrix', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
-      { title: 'Interstellar', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' },
-      { title: 'The Dark Knight', poster_url: 'https://image.tmdb.org/t/p/w200/qJ2tW6WMUDux911r6m7haRef0WH.jpg' }
+      { id: 27205, title: 'Inception', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
+      { id: 603, title: 'The Matrix', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
+      { id: 157336, title: 'Interstellar', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' },
+      { id: 155, title: 'The Dark Knight', poster_url: 'https://image.tmdb.org/t/p/w200/qJ2tW6WMUDux911r6m7haRef0WH.jpg' }
     ],
     toWatch: [
-      { title: 'Dune', poster_url: 'https://image.tmdb.org/t/p/w200/d5NXSklXo0qyIhbkgX2r5Y5D3vT.jpg' },
-      { title: 'Blade Runner 2049', poster_url: 'https://image.tmdb.org/t/p/w200/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg' }
+      { id: 438631, title: 'Dune', poster_url: 'https://image.tmdb.org/t/p/w200/d5NXSklXo0qyIhbkgX2r5Y5D3vT.jpg' },
+      { id: 335984, title: 'Blade Runner 2049', poster_url: 'https://image.tmdb.org/t/p/w200/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg' }
     ],
     read: [
-      { title: '1984', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
-      { title: 'Dune', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
-      { title: 'The Lord of the Rings', poster_url: 'https://covers.openlibrary.org/b/id/6979861-M.jpg' }
+      { id: 'OL82565W', title: '1984', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
+      { id: 'OL82566W', title: 'Dune', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
+      { id: 'OL82567W', title: 'The Lord of the Rings', poster_url: 'https://covers.openlibrary.org/b/id/6979861-M.jpg' }
     ],
     toRead: [
-      { title: 'Foundation', poster_url: 'https://covers.openlibrary.org/b/id/8739162-M.jpg' },
-      { title: 'Brave New World', poster_url: 'https://covers.openlibrary.org/b/id/7222247-M.jpg' }
+      { id: 'OL82568W', title: 'Foundation', poster_url: 'https://covers.openlibrary.org/b/id/8739162-M.jpg' },
+      { id: 'OL82569W', title: 'Brave New World', poster_url: 'https://covers.openlibrary.org/b/id/7222247-M.jpg' }
     ]
   });
 
@@ -195,6 +195,18 @@ function Profile() {
   const [isAddContentModalOpen, setIsAddContentModalOpen] = useState(false);
   const [isAddContentModalClosing, setIsAddContentModalClosing] = useState(false);
   const [addContentType, setAddContentType] = useState(null);
+
+  // Follow/Followers modal state
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [isFollowersModalClosing, setIsFollowersModalClosing] = useState(false);
+  const [isFollowersModalOpening, setIsFollowersModalOpening] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [isFollowingModalClosing, setIsFollowingModalClosing] = useState(false);
+  const [isFollowingModalOpening, setIsFollowingModalOpening] = useState(false);
+  const [followersList, setFollowersList] = useState([]);
+  const [followingList, setFollowingList] = useState([]);
+  const [loadingFollowers, setLoadingFollowers] = useState(false);
+  const [loadingFollowing, setLoadingFollowing] = useState(false);
 
   const handleAddContentClick = (type) => {
     setAddContentType(type);
@@ -269,6 +281,149 @@ function Profile() {
   const handleFollow = async () => {
     // TODO: Implement follow/unfollow API call
     setIsFollowing(!isFollowing);
+  };
+
+  const handleFollowersClick = async () => {
+    if (!profileUser?.email) return;
+    
+    setShowFollowersModal(true);
+    setLoadingFollowers(true);
+    
+    // Açılış animasyonu için kısa bir gecikme
+    setTimeout(() => {
+      setIsFollowersModalOpening(true);
+    }, 10);
+    
+    try {
+      const response = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/followers`);
+      if (response.ok) {
+        const data = await response.json();
+        setFollowersList(data.followers || []);
+      }
+    } catch (error) {
+      console.error('Takipçiler alınamadı:', error);
+      setFollowersList([]);
+    } finally {
+      setLoadingFollowers(false);
+    }
+  };
+
+  const handleFollowingClick = async () => {
+    if (!profileUser?.email) return;
+    
+    setShowFollowingModal(true);
+    setLoadingFollowing(true);
+    
+    // Açılış animasyonu için kısa bir gecikme
+    setTimeout(() => {
+      setIsFollowingModalOpening(true);
+    }, 10);
+    
+    try {
+      const response = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/following`);
+      if (response.ok) {
+        const data = await response.json();
+        setFollowingList(data.following || []);
+      }
+    } catch (error) {
+      console.error('Takip edilenler alınamadı:', error);
+      setFollowingList([]);
+    } finally {
+      setLoadingFollowing(false);
+    }
+  };
+
+  const handleCloseFollowersModal = () => {
+    setIsFollowersModalClosing(true);
+    setIsFollowersModalOpening(false);
+    setTimeout(() => {
+      setShowFollowersModal(false);
+      setIsFollowersModalClosing(false);
+    }, 300);
+  };
+
+  const handleCloseFollowingModal = () => {
+    setIsFollowingModalClosing(true);
+    setIsFollowingModalOpening(false);
+    setTimeout(() => {
+      setShowFollowingModal(false);
+      setIsFollowingModalClosing(false);
+    }, 300);
+  };
+
+  const handleUserClick = (username) => {
+    navigate(`/profile/${username}`);
+    setShowFollowersModal(false);
+    setShowFollowingModal(false);
+  };
+
+  const handleUnfollow = async (e, userId) => {
+    e.stopPropagation(); // Modal'ın kapanmasını engelle
+    
+    const currentUserId = profileUser?.user_id;
+    if (!currentUserId || !userId) return;
+
+    try {
+      const response = await fetch('http://localhost:8000/user/unfollow', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          follower_id: currentUserId,
+          followed_id: userId
+        })
+      });
+
+      if (response.ok) {
+        // Listeden kaldır
+        setFollowingList(prevList => prevList.filter(user => user.user_id !== userId));
+        // Sayıyı güncelle
+        setFollowingCount(prev => Math.max(0, prev - 1));
+      } else {
+        console.error('Takipten çıkma başarısız');
+      }
+    } catch (error) {
+      console.error('Takipten çıkma hatası:', error);
+    }
+  };
+
+  const handleRemoveFollower = async (e, followerId) => {
+    e.stopPropagation(); // Modal'ın kapanmasını engelle
+    
+    const currentUserId = profileUser?.user_id;
+    if (!currentUserId || !followerId) return;
+
+    try {
+      const response = await fetch('http://localhost:8000/user/unfollow', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          follower_id: followerId, // Takipçinin user_id'si
+          followed_id: currentUserId // Sizin user_id'niz
+        })
+      });
+
+      if (response.ok) {
+        // Listeden kaldır
+        setFollowersList(prevList => prevList.filter(user => user.user_id !== followerId));
+        // Sayıyı güncelle
+        setFollowersCount(prev => Math.max(0, prev - 1));
+      } else {
+        console.error('Takipçiyi çıkarma başarısız');
+      }
+    } catch (error) {
+      console.error('Takipçiyi çıkarma hatası:', error);
+    }
+  };
+
+  const handleListsClick = () => {
+    const customListsSection = document.getElementById('custom-lists-section');
+    if (customListsSection) {
+      customListsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const handleEditProfile = () => {
@@ -555,6 +710,9 @@ function Profile() {
           onEditProfile={handleEditProfile}
           onCreateList={handleCreateList}
           onFollow={handleFollow}
+          onFollowersClick={handleFollowersClick}
+          onFollowingClick={handleFollowingClick}
+          onListsClick={handleListsClick}
         />
 
         {/* Library Tabs */}
@@ -641,6 +799,88 @@ function Profile() {
         contentType={addContentType}
         onAddContent={handleAddContent}
       />
+
+      {/* Takipçiler Modal */}
+      {showFollowersModal && (
+        <div className={`follow-modal-overlay ${isFollowersModalOpening && !isFollowersModalClosing ? 'active' : ''}`} onClick={handleCloseFollowersModal}>
+          <div className={`follow-modal ${isFollowersModalClosing ? 'closing' : isFollowersModalOpening ? 'opening' : ''}`} onClick={(e) => e.stopPropagation()}>
+            <div className="follow-modal-header">
+              <h2>Takipçiler</h2>
+            </div>
+            <div className="follow-modal-content">
+              {loadingFollowers ? (
+                <div className="follow-modal-loading">Yükleniyor...</div>
+              ) : followersList.length > 0 ? (
+                <div className="follow-modal-list">
+                  {followersList.map((user, index) => (
+                    <div 
+                      key={index} 
+                      className="follow-modal-user-item"
+                      onClick={() => handleUserClick(user.username)}
+                    >
+                      <img 
+                        src={user.avatar_url || `https://i.pravatar.cc/150?img=${index + 1}`}
+                        alt={user.username}
+                        className="follow-modal-user-avatar"
+                      />
+                      <span className="follow-modal-username">{user.username}</span>
+                      <button 
+                        className="follow-modal-remove-btn"
+                        onClick={(e) => handleRemoveFollower(e, user.user_id)}
+                      >
+                        Takipçiyi Çıkar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="follow-modal-empty">Henüz takipçi yok</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Takip Edilenler Modal */}
+      {showFollowingModal && (
+        <div className={`follow-modal-overlay ${isFollowingModalOpening && !isFollowingModalClosing ? 'active' : ''}`} onClick={handleCloseFollowingModal}>
+          <div className={`follow-modal ${isFollowingModalClosing ? 'closing' : isFollowingModalOpening ? 'opening' : ''}`} onClick={(e) => e.stopPropagation()}>
+            <div className="follow-modal-header">
+              <h2>Takip Edilenler</h2>
+            </div>
+            <div className="follow-modal-content">
+              {loadingFollowing ? (
+                <div className="follow-modal-loading">Yükleniyor...</div>
+              ) : followingList.length > 0 ? (
+                <div className="follow-modal-list">
+                  {followingList.map((user, index) => (
+                    <div 
+                      key={index} 
+                      className="follow-modal-user-item"
+                      onClick={() => handleUserClick(user.username)}
+                    >
+                      <img 
+                        src={user.avatar_url || `https://i.pravatar.cc/150?img=${index + 1}`}
+                        alt={user.username}
+                        className="follow-modal-user-avatar"
+                      />
+                      <span className="follow-modal-username">{user.username}</span>
+                      <button 
+                        className="follow-modal-unfollow-btn"
+                        onClick={(e) => handleUnfollow(e, user.user_id)}
+                      >
+                        Takipten Çık
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="follow-modal-empty">Henüz kimseyi takip etmiyor</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

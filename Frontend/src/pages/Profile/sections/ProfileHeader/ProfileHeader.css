@@ -87,6 +87,29 @@
   border: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
+  font-family: inherit;
+  text-align: left;
+}
+
+.profile-stat.clickable-stat {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  margin: -0.5rem;
+}
+
+.profile-stat.clickable-stat:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.profile-stat.clickable-stat:active {
+  transform: translateY(0);
+}
+
+.profile-stat.clickable-stat:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .stat-value {
@@ -201,4 +224,5 @@
     font-size: 1.5rem;
   }
 }
+
 

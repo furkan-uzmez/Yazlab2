@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaFilm, FaBook, FaClock, FaPlus, FaChevronRight } from 'react-icons/fa';
 import './LibraryTabs.css';
 
@@ -10,12 +11,21 @@ function LibraryTabs({
   isOwnProfile,
   onAddContentClick
 }) {
+  const navigate = useNavigate();
   const [showMore, setShowMore] = useState({
     watched: false,
     toWatch: false,
     read: false,
     toRead: false
   });
+
+  const handleItemClick = (item) => {
+    if (!item.id) return; // Eğer id yoksa tıklanabilir değil
+    
+    // Tab'a göre type belirle
+    const contentType = (activeTab === 'watched' || activeTab === 'toWatch') ? 'movie' : 'book';
+    navigate(`/content/${contentType}/${item.id}`);
+  };
 
   const getItemsToShow = (items, tabKey) => {
     const totalItems = items.length + (isOwnProfile ? 1 : 0);
@@ -78,7 +88,12 @@ function LibraryTabs({
           <>
             <div className="library-items">
               {getItemsToShow(libraryData.watched, 'watched').map((item, index) => (
-                <div key={index} className="library-item">
+                <div 
+                  key={index} 
+                  className="library-item"
+                  onClick={() => handleItemClick(item)}
+                  style={{ cursor: item.id ? 'pointer' : 'default' }}
+                >
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>
@@ -107,7 +122,12 @@ function LibraryTabs({
           <>
             <div className="library-items">
               {getItemsToShow(libraryData.toWatch, 'toWatch').map((item, index) => (
-                <div key={index} className="library-item">
+                <div 
+                  key={index} 
+                  className="library-item"
+                  onClick={() => handleItemClick(item)}
+                  style={{ cursor: item.id ? 'pointer' : 'default' }}
+                >
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>
@@ -136,7 +156,12 @@ function LibraryTabs({
           <>
             <div className="library-items">
               {getItemsToShow(libraryData.read, 'read').map((item, index) => (
-                <div key={index} className="library-item">
+                <div 
+                  key={index} 
+                  className="library-item"
+                  onClick={() => handleItemClick(item)}
+                  style={{ cursor: item.id ? 'pointer' : 'default' }}
+                >
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>
@@ -165,7 +190,12 @@ function LibraryTabs({
           <>
             <div className="library-items">
               {getItemsToShow(libraryData.toRead, 'toRead').map((item, index) => (
-                <div key={index} className="library-item">
+                <div 
+                  key={index} 
+                  className="library-item"
+                  onClick={() => handleItemClick(item)}
+                  style={{ cursor: item.id ? 'pointer' : 'default' }}
+                >
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>

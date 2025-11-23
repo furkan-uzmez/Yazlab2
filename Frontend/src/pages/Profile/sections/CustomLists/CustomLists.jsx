@@ -3,7 +3,7 @@ import './CustomLists.css';
 
 function CustomLists({ customLists, onEditList }) {
   return (
-    <div className="profile-custom-lists-section">
+    <div id="custom-lists-section" className="profile-custom-lists-section">
       <h2 className="section-title">
         <FaList />
         <span>Özel Listelerim</span>
