@@ -34,7 +34,8 @@ def create_tables():
     sql_scripts = ['database.sql','user.sql','contents.sql','genres.sql'
                   ,'content_genres.sql','ratings.sql','reviews.sql'
                   ,'lists.sql','list_items.sql','follows.sql'
-                  ,'activities.sql','activities_comments.sql']
+                  ,'activities.sql','activities_comments.sql'
+                  ,'activities_likes.sql','comments_likes.sql']
     try:
         connection = create_db_connection()
     except Exception as e:
