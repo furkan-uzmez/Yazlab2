@@ -75,8 +75,10 @@ function Profile() {
                  user_id: userData.user_id,
                  username: userData.username,
                  email: userData.email,
-                 avatar_url: userData.avatar_url || `https://i.pravatar.cc/150?img=${userData.user_id || 1}`, 
-                 bio: userData.bio || 'Henüz bir biyografi eklenmemiş.'
+                 avatar_url: userData.avatar_url, 
+                 bio: userData.bio || 'Henüz bir biyografi eklenmemiş.',
+                 followers_count: userData.followers_count || 0,
+                 following_count: userData.following_count || 0
              });
           } else {
              console.error("API yanıtında kullanıcı verisi bulunamadı.");

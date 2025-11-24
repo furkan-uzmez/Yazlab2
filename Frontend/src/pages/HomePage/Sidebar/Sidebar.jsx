@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation , useNavigate } from 'react-router-dom';
 import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaSun, FaMoon, FaCog, FaInfoCircle, FaQuestionCircle, FaArrowRight } from 'react-icons/fa';
 import ShinyText from '../../../components/ShinyText';
 import './Sidebar.css';
 
 function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChange }) {
   const location = useLocation();
+
+  const navigate = useNavigate();
+
   const [internalSearchMode, setInternalSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -69,7 +72,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   }, [isSearchMode]);
 
   // --- ASIL ARAMA FONKSİYONU (GÜNCELLENDİ) ---
-  const executeSearch = async () => {
+const executeSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
@@ -78,11 +81,9 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
     try {
       let url = '';
       
-      // URL OLUŞTURMA KISMI
       if (searchType === 'movie' || searchType === 'book') {
         url = `http://localhost:8000/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${searchType}`;
       } else if (searchType === 'user') {
-        // Kullanıcı arama endpoint'i (Önceki konuşmamızda eklemiştik)
         url = `http://localhost:8000/user/search?query=${encodeURIComponent(searchQuery)}`;
       }
 
@@ -94,9 +95,8 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
 
         let formattedResults = [];
 
-        // --- VERİ DÖNÜŞTÜRME (MAPPING) ---
         if (searchType === 'movie') {
-          const items = data.results?.results || [];
+          const items = data.results?.results || data.results || [];
           formattedResults = items.map(movie => ({
             id: movie.id,
             title: movie.title, 
@@ -106,7 +106,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
           }));
 
         } else if (searchType === 'book') {
-          const items = data.results?.items || [];
+          const items = data.results?.items || data.items || [];
           formattedResults = items.map(book => {
             const info = book.volumeInfo;
             return {
@@ -119,20 +119,23 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
           });
 
         } else if (searchType === 'user') { 
-          // --- YENİ: KULLANICI VERİSİ DÖNÜŞTÜRME ---
-          // Backend'den { results: [...] } dönüyor.
-          const items = data.results || []; 
-
-          console.log("Kullanıcı Arama Sonuçları:", items);
+          // Veri yapısı kontrolü
+          let items = [];
+          if (Array.isArray(data.results)) {
+            items = data.results;
+          } else if (data.results && typeof data.results === 'object') {
+            items = [data.results]; // Tek objeyi diziye çevir
+          } else if (data.user) {
+             items = [data.user]; // Tek objeyi diziye çevir
+          }
           
           formattedResults = items.map(user => ({
-            // user_id yoksa username'i, o da yoksa random bir değeri ID olarak kullan
             id: user.user_id || user.username || Math.random(), 
-            title: user.username || "Bilinmeyen Kullanıcı", 
+            title: user.username, 
             image: user.avatar_url || 'https://i.pravatar.cc/150?img=default', 
             subtitle: user.bio 
               ? (user.bio.length > 30 ? user.bio.substring(0, 30) + '...' : user.bio) 
-              : 'Kullanıcı', 
+              : 'Kullanıcı',
             type: 'user'
           }));
         }
@@ -224,6 +227,26 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
       setIsMoreMenuClosing(false);
     }
   };
+
+const handleResultClick = (item) => {
+    if (searchType === 'user') {
+      // Kullanıcı araması ise profile git (title=username)
+      navigate(`/profile/${item.title}`);
+    } else if (searchType === 'movie') {
+      // Film ise detay sayfasına git
+      navigate(`/content/movie/${item.id}`);
+    } else if (searchType === 'book') {
+      // Kitap ise detay sayfasına git
+      navigate(`/content/book/${item.id}`);
+    }
+    
+    // Mobildeysek menüyü kapatmak isteyebilirsiniz:
+    if (window.innerWidth <= 768 && onSearchModeChange) {
+        onSearchModeChange(false);
+    }
+  };
+
+
   // ... (Diğer handler'lar: handleChangeView, handleSettings vb. aynı)
   const handleChangeView = () => { setIsDarkMode(!isDarkMode); setIsMoreMenuOpen(false); };
   const handleSettings = () => {
@@ -414,29 +437,23 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
                    {/* --- SONUÇ LİSTESİ --- */}
                     <div className="search-results-list">
                         {searchResults.map((item, index) => (
-                          // key olarak item.id yoksa index kullanın
-                          <div key={item.id || index} className="search-result-item">
-                            {/* Görsel */}
+                          <div 
+                            key={item.id || index} 
+                            className="search-result-item"
+                            // --- GÜNCELLENDİ: onClick olayı eklendi ---
+                            onClick={() => handleResultClick(item)}
+                            style={{ cursor: 'pointer' }}
+                          >
                             <img 
                               src={item.image} 
                               alt={item.title} 
                               className="search-result-img" 
                               onError={(e) => { e.target.src = '/api/placeholder/50/75'; }} 
                             />
-                            
                             <div className="search-result-info">
-                              {/* Başlık */}
-                              <h4 className="search-result-title">
-                                {item.title}
-                              </h4>
-                              
-                              {/* Alt Bilgi (Yıl veya Yazar) */}
-                              <p className="search-result-subtitle">
-                                {item.subtitle}
-                              </p>
+                              <h4 className="search-result-title">{item.title}</h4>
+                              <p className="search-result-subtitle">{item.subtitle}</p>
                             </div>
-                            
-                            {/* Git Butonu */}
                             <button className="search-result-action">
                               <FaArrowRight />
                             </button>
