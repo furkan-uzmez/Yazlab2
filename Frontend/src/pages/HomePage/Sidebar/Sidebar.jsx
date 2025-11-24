@@ -437,12 +437,10 @@ const handleResultClick = (item) => {
                    {/* --- SONUÇ LİSTESİ --- */}
                     <div className="search-results-list">
                         {searchResults.map((item, index) => (
-                          <div 
+                          <button 
                             key={item.id || index} 
                             className="search-result-item"
-                            // --- GÜNCELLENDİ: onClick olayı eklendi ---
                             onClick={() => handleResultClick(item)}
-                            style={{ cursor: 'pointer' }}
                           >
                             <img 
                               src={item.image} 
@@ -454,10 +452,7 @@ const handleResultClick = (item) => {
                               <h4 className="search-result-title">{item.title}</h4>
                               <p className="search-result-subtitle">{item.subtitle}</p>
                             </div>
-                            <button className="search-result-action">
-                              <FaArrowRight />
-                            </button>
-                          </div>
+                          </button>
                         ))}
                     </div>
                   </div>
