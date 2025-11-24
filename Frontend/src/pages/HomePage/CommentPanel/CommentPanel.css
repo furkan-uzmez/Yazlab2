@@ -496,7 +496,7 @@
 }
 
 .comment-edit-input {
-  width: 350px;
+  width: 350px !important;
   padding: 0.625rem 1rem;
   background: linear-gradient(
     135deg,
