@@ -29,6 +29,70 @@ function Profile() {
   // Mock profile user - now using state (BAŞLANGIÇ DEĞERİNİ GÜNCELLEYİN)
   const [profileUser, setProfileUser] = useState(null); // Başlangıçta null olsun, veri gelince dolsun
   const [loadingProfile, setLoadingProfile] = useState(true); // Yükleniyor durumu
+  //const [customLists, setCustomLists] = useState([]); // <-- BOŞ BAŞLIYOR
+  const [loadingLists, setLoadingLists] = useState(false); // Yükleme durumu
+
+// ... (diğer state'ler)
+
+  // ... (diğer state'ler) ...
+
+  // 1. Library data state'ini BOŞ olarak başlatın
+  const [libraryData, setLibraryData] = useState({
+    watched: [],
+    toWatch: [],
+    read: [],
+    toRead: []
+  });
+  const [loadingLibrary, setLoadingLibrary] = useState(false); // Yükleniyor state'i
+
+  // ... (fetchUserProfile useEffect'i aynı kalsın) ...
+
+  // 2. KÜTÜPHANE VERİSİNİ ÇEKEN YENİ useEffect
+  useEffect(() => {
+    const fetchLibraryData = async () => {
+      setLoadingLibrary(true);
+      
+      // Kullanıcı adını belirle
+      let targetUsername = userId;
+      if (!targetUsername) {
+          targetUsername = localStorage.getItem("profileusername");
+      }
+      
+      if (!targetUsername) {
+          setLoadingLibrary(false);
+          return;
+      }
+
+      try {
+        // API isteği
+        const response = await fetch(`http://localhost:8000/list/get_library?username=${encodeURIComponent(targetUsername)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Backend'den gelen veri zaten doğru formatta:
+          // { "watched": [...], "read": [...], ... }
+          
+          // State'i güncelle
+          setLibraryData({
+            watched: data.watched || [],
+            toWatch: data.toWatch || [],
+            read: data.read || [],
+            toRead: data.toRead || []
+          });
+        } else {
+          console.error("Kütüphane yüklenemedi:", response.status);
+        }
+      } catch (error) {
+        console.error("Kütüphane API hatası:", error);
+      } finally {
+        setLoadingLibrary(false);
+      }
+    };
+
+    fetchLibraryData();
+  }, [userId]); // userId değişince tekrar çalışır
+
+  // ... (CustomLists useEffect'i ve diğerleri aynı kalsın) ...
 
 // --- YENİ: KULLANICI VERİSİNİ ÇEKME (API) ---
   useEffect(() => {
@@ -99,6 +163,63 @@ function Profile() {
     fetchUserProfile();
   }, [userId]);
 
+
+
+  useEffect(() => {
+    const fetchUserLists = async () => {
+      setLoadingLists(true);
+      
+      let targetUsername = userId;
+      if (!targetUsername) {
+          targetUsername = localStorage.getItem("profileusername");
+      }
+      
+      if (!targetUsername) {
+          setLoadingLists(false);
+          return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/list/get_lists?username=${encodeURIComponent(targetUsername)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const apiLists = data.lists || [];
+          
+          // --- DÜZELTME BURADA: STANDART LİSTELERİ FİLTRELE ---
+          // Bu listeler zaten LibraryTabs içinde gösteriliyor, 
+          // CustomLists içinde tekrar göstermemek için filtreliyoruz.
+          const standardListNames = ["İzledim", "İzlenecek", "Okudum", "Okunacak"];
+          
+          const customListsOnly = apiLists.filter(list => 
+              !standardListNames.includes(list.name)
+          );
+          // ----------------------------------------------------
+
+          const formattedLists = customListsOnly.map(list => ({
+              id: list.list_id,
+              name: list.name,
+              description: list.description,
+              items: [], // İçerik detayları için ayrı istek gerekebilir
+              itemCount: list.item_count
+          }));
+
+          setCustomLists(formattedLists);
+        } else {
+          console.error("Listeler yüklenemedi:", response.status);
+        }
+      } catch (error) {
+        console.error("Liste API hatası:", error);
+      } finally {
+        setLoadingLists(false);
+      }
+    };
+
+    fetchUserLists();
+  }, [userId]);
+
+
+
   // Library tabs
   const [activeLibraryTab, setActiveLibraryTab] = useState('watched');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
@@ -134,28 +255,6 @@ function Profile() {
     }
   };
   
-  // Library data - now using state
-  const [libraryData, setLibraryData] = useState({
-    watched: [
-      { id: 27205, title: 'Inception', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
-      { id: 603, title: 'The Matrix', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
-      { id: 157336, title: 'Interstellar', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' },
-      { id: 155, title: 'The Dark Knight', poster_url: 'https://image.tmdb.org/t/p/w200/qJ2tW6WMUDux911r6m7haRef0WH.jpg' }
-    ],
-    toWatch: [
-      { id: 438631, title: 'Dune', poster_url: 'https://image.tmdb.org/t/p/w200/d5NXSklXo0qyIhbkgX2r5Y5D3vT.jpg' },
-      { id: 335984, title: 'Blade Runner 2049', poster_url: 'https://image.tmdb.org/t/p/w200/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg' }
-    ],
-    read: [
-      { id: 'OL82565W', title: '1984', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
-      { id: 'OL82566W', title: 'Dune', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
-      { id: 'OL82567W', title: 'The Lord of the Rings', poster_url: 'https://covers.openlibrary.org/b/id/6979861-M.jpg' }
-    ],
-    toRead: [
-      { id: 'OL82568W', title: 'Foundation', poster_url: 'https://covers.openlibrary.org/b/id/8739162-M.jpg' },
-      { id: 'OL82569W', title: 'Brave New World', poster_url: 'https://covers.openlibrary.org/b/id/7222247-M.jpg' }
-    ]
-  });
 
   // Add content modal state
   const [isAddContentModalOpen, setIsAddContentModalOpen] = useState(false);
