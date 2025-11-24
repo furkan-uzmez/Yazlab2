@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+import { FaPlus } from 'react-icons/fa';
 import ActivityCard from '../ActivityCard/ActivityCard';
 import ActivityCardSkeleton from '../../../components/ActivityCardSkeleton';
 import GradualBlur from '../../../components/GradualBlur';
+import AddPostModal from './AddPostModal/AddPostModal';
 import './Feed.css';
 
 function Feed({ 
@@ -14,12 +16,14 @@ function Feed({
   commentPanelOpen, 
   selectedActivity,
   loadingRef,
-  followedUsers = new Set()
+  followedUsers = new Set(),
+  onRefreshFeed
 }) {
   const [activeTab, setActiveTab] = useState('for-you'); // 'for-you' or 'following'
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
   const feedContainerRef = useRef(null);
 
   // Tab'a göre aktiviteleri filtrele
@@ -172,6 +176,27 @@ function Feed({
           target="parent"
         />
       </div>
+
+      {/* Add Post Button */}
+      <button
+        type="button"
+        className="feed-add-post-btn"
+        onClick={() => setIsAddPostModalOpen(true)}
+        title="Yeni Gönderi"
+      >
+        <FaPlus />
+      </button>
+
+      {/* Add Post Modal */}
+      <AddPostModal
+        isOpen={isAddPostModalOpen}
+        onClose={() => setIsAddPostModalOpen(false)}
+        onPostAdded={() => {
+          if (onRefreshFeed) {
+            onRefreshFeed();
+          }
+        }}
+      />
     </main>
   );
 }

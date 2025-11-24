@@ -137,7 +137,7 @@ function Home() {
         },
         body: JSON.stringify({
           user_email: userEmail,
-          content_id: selectedActivity.contentId, // <-- DİKKAT: contentId'nin activity objesinde olduğundan emin olun
+          activity_id: selectedActivity.id, // Activity ID'si ile yorum ekle
           comment_text: commentText
         }),
       });
@@ -146,21 +146,43 @@ function Home() {
       if (response.ok) {
         const data = await response.json(); 
         const realCommentId = data.new_comment_id; // <-- Backend'den gelen ID
-        // --- BAŞARILI ---
-        // 1. Yorumu yerel state'e (panelComments) ekle (Anında görünmesi için)
-        const newComment = {
-          id: realCommentId, // Geçici ID
-          userId: 999, // Veya userEmail'den gelen bilgi
-          userName: localStorage.getItem('profileusername'), // Veya localStorage'dan username
-          userAvatar: localStorage.getItem('profileimage_url'), // Veya localStorage'dan avatar
-          text: commentText,
-          date: new Date(),
-          likes: 0 
-        };
-        setPanelComments([...panelComments, newComment]);
         
-        // 2. Input alanını temizle
+        // --- BAŞARILI ---
+        // 1. Input alanını temizle
         setCommentText('');
+        
+        // 2. Yorumları veritabanından yeniden yükle (güncel veriler için)
+        const userEmail = localStorage.getItem("email");
+        if (userEmail) {
+          const refreshResponse = await fetch(`http://localhost:8000/interactions/get_all_comments?email=${userEmail}`);
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            const allComments = refreshData.comments || [];
+            const relatedComments = allComments.filter(
+              comment => String(comment.activity_id) === String(selectedActivity.id)
+            );
+            const formattedComments = relatedComments.map(c => ({
+              id: c.comment_id,
+              userId: c.user_id,
+              userName: c.username,
+              userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+              text: c.text,
+              date: c.created_at,
+              likes: c.like_count,
+              isLiked: c.is_liked_by_me > 0
+            }));
+            setPanelComments(formattedComments);
+            
+            // Beğeni durumlarını güncelle
+            const newLikedSet = new Set();
+            formattedComments.forEach(c => {
+              if (c.isLiked) {
+                newLikedSet.add(c.id);
+              }
+            });
+            setLikedComments(newLikedSet);
+          }
+        }
         
         // 3. Aktivitedeki yorum sayısını artır
         setActivities(prevActivities => 
@@ -415,7 +437,20 @@ function Home() {
           isLiked: item.is_liked_by_me > 0
         }));
 
-        setActivities(prev => [...prev, ...formattedActivities]);
+        // 4. Review activity'si için rating_score varsa, type'ı rating_and_review olarak işaretle
+        const processedActivities = formattedActivities.map(activity => {
+          // Eğer review activity'si için rating_score varsa, hem rating hem review var demektir
+          if (activity.type === 'review' && activity.rating) {
+            return {
+              ...activity,
+              type: 'rating_and_review',
+              actionText: `bir ${activity.contentType === 'Film' ? 'filmi' : 'kitabı'} oyladı ve yorum yaptı`
+            };
+          }
+          return activity;
+        });
+
+        setActivities(prev => [...prev, ...processedActivities]);
         setPage(prevPage => prevPage + 1);
       }
     } catch (error) {
@@ -430,6 +465,13 @@ function Home() {
 
   // ... (useEffect'ler ve return kısmı aynı kalacak) ...
   
+  const handleRefreshFeed = () => {
+    setActivities([]);
+    setPage(1);
+    setHasMore(true);
+    fetchActivities(1);
+  };
+
   useEffect(() => {
     fetchActivities(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -468,6 +510,7 @@ function Home() {
         selectedActivity={selectedActivity}
         loadingRef={loadingRef}
         followedUsers={followedUsers}
+        onRefreshFeed={handleRefreshFeed}
       />
       
       <RightPanel 

@@ -292,6 +292,55 @@
   .sidebar.search-mode ~ .feed-container .feed-gradual-blur-wrapper {
     left: 280px;
   }
+
+  .feed-add-post-btn {
+    right: 1rem;
+  }
+}
+
+/* Add Post Button */
+.feed-add-post-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: calc(320px + 1rem);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  color: #000000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  transition: background-color 0.2s ease;
+}
+
+.feed-add-post-btn:hover {
+  background: #e4e4e4;
+}
+
+.feed-add-post-btn:active {
+  background: #d4d4d4;
+}
+
+.feed-add-post-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #000000;
+  fill: #000000;
+}
+
+.feed-add-post-btn path {
+  fill: #000000;
+}
+
+@media (max-width: 1024px) {
+  .feed-add-post-btn {
+    right: 2rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -304,6 +353,18 @@
 
   .feed-gradual-blur-wrapper {
     display: none; /* Mobile'da gizle */
+  }
+
+  .feed-add-post-btn {
+    bottom: 6rem; /* Bottom nav'ın üstünde */
+    right: 1.5rem;
+    width: 56px;
+    height: 56px;
+  }
+
+  .feed-add-post-btn svg {
+    width: 20px;
+    height: 20px;
   }
 }
 

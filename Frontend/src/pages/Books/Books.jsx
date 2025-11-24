@@ -32,9 +32,59 @@ function Books() {
   });
 
 
-  // Mock books data - Frontend only
+  // Fetch books from API
   useEffect(() => {
-    setTimeout(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
+      try {
+        // Map category to API category
+        let apiCategory = 'popular';
+        if (activeCategory === 'new') {
+          apiCategory = 'new';
+        }
+        
+        const response = await fetch(
+          `http://localhost:8000/content/popular/books?category=${apiCategory}&max_results=40`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const booksList = data.items || [];
+          
+          // Format books data
+          const formattedBooks = booksList.map(book => {
+            const info = book.volumeInfo || {};
+            const imageLinks = info.imageLinks || {};
+            const thumbnail = imageLinks.thumbnail || imageLinks.smallThumbnail || imageLinks.medium || null;
+            
+            return {
+              id: book.id, // Google Books API ID - this will be used directly
+              title: info.title || '',
+              poster_path: thumbnail ? thumbnail.replace('http:', 'https:') : '/placeholder.jpg',
+              release_date: info.publishedDate || '',
+              vote_average: info.averageRating || 0,
+              overview: info.description || '',
+              genre_ids: info.categories || []
+            };
+          });
+          
+          setBooks(formattedBooks);
+        } else {
+          console.error("Kitaplar yüklenemedi:", response.status);
+        }
+      } catch (error) {
+        console.error("Kitaplar API hatası:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBooks();
+  }, [activeCategory]);
+
+  // Old mock data removed - now using API
+  useEffect(() => {
+    if (false) { // Disabled mock data
       const mockBooks = [
         {
           id: 1,
@@ -262,9 +312,8 @@ function Books() {
           genre_ids: [1, 14, 20]
         }
       ];
-      setBooks(mockBooks);
-      setLoading(false);
-    }, 500);
+      // Mock data disabled
+    }
   }, []);
 
   const handleLogout = () => setLogoutModalOpen(true);

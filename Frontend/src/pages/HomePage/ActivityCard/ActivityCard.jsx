@@ -70,8 +70,8 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen ,onLike}) {
 
       {/* Ana İçerik (Body) */}
       <div className="activity-body">
-        {activity.type === 'rating' ? (
-          <div className="rating-activity">
+        {(activity.type === 'rating' || activity.type === 'rating_and_review') ? (
+          <div className={activity.type === 'rating_and_review' ? 'rating-and-review-activity' : 'rating-activity'}>
             <div className="content-poster">
               <Link 
                 to={`/content/${activity.contentType === 'Film' ? 'movie' : 'book'}/${activity.contentId || activity.id}`}
@@ -101,9 +101,24 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen ,onLike}) {
                 </div>
               </div>
             </div>
-            <div className="rating-display">
-              {renderRatingStars(activity.rating)}
-            </div>
+            {activity.rating && (
+              <div className="rating-display">
+                {renderRatingStars(activity.rating)}
+              </div>
+            )}
+            {activity.type === 'rating_and_review' && activity.reviewText && (
+              <div className="review-excerpt">
+                <p>{truncateText(activity.reviewText)}</p>
+                {activity.reviewText.length > 200 && (
+                  <button 
+                    onClick={handleCommentToggle}
+                    className="read-more-link"
+                  >
+                    <ShinyText text="...daha fazlasını oku" speed={4} className="read-more-text" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         ) : activity.type === 'review' ? (
           <div className="review-activity">
@@ -138,7 +153,7 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen ,onLike}) {
             </div>
             <div className="review-excerpt">
               <p>{truncateText(activity.reviewText)}</p>
-              {activity.reviewText.length > 200 && (
+              {activity.reviewText && activity.reviewText.length > 200 && (
                 <button 
                   onClick={handleCommentToggle}
                   className="read-more-link"

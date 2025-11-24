@@ -32,9 +32,57 @@ function Movies() {
   });
 
 
-  // Mock movies data - Frontend only
+  // Fetch movies from API
   useEffect(() => {
-    setTimeout(() => {
+    const fetchMovies = async () => {
+      setLoading(true);
+      try {
+        // Map category to API category
+        let apiCategory = 'popular';
+        if (activeCategory === 'top-rated') {
+          apiCategory = 'top-rated';
+        } else if (activeCategory === 'new') {
+          apiCategory = 'new';
+        }
+        
+        const response = await fetch(
+          `http://localhost:8000/content/popular/movies?category=${apiCategory}&page=1`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const moviesList = data.results || [];
+          
+          // Format movies data
+          const formattedMovies = moviesList.map(movie => ({
+            id: movie.id, // TMDB API ID - this will be used directly
+            title: movie.title,
+            poster_path: movie.poster_path 
+              ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` 
+              : '/placeholder.jpg',
+            release_date: movie.release_date,
+            vote_average: movie.vote_average || 0,
+            overview: movie.overview || '',
+            genre_ids: movie.genre_ids || []
+          }));
+          
+          setMovies(formattedMovies);
+        } else {
+          console.error("Filmler yüklenemedi:", response.status);
+        }
+      } catch (error) {
+        console.error("Filmler API hatası:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchMovies();
+  }, [activeCategory]);
+
+  // Old mock data removed - now using API
+  useEffect(() => {
+    if (false) { // Disabled mock data
       const mockMovies = [
         {
           id: 1,
@@ -262,9 +310,8 @@ function Movies() {
           genre_ids: [16, 14, 10751]
         }
       ];
-      setMovies(mockMovies);
-      setLoading(false);
-    }, 500);
+      // Mock data disabled
+    }
   }, []);
 
   const handleLogout = () => setLogoutModalOpen(true);

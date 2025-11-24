@@ -8,14 +8,14 @@ router = APIRouter(prefix="/interactions", tags=["interactions"])
 
 class CommentRequest(BaseModel):
     user_email: str
-    content_id: int
+    activity_id: int  # Activity ID'si ile yorum ekle
     comment_text: str
 
 
 @router.post("/add_comment")
 async def add_comment(request: CommentRequest):
     """
-    Yorum ekler.
+    Bir aktiviteye (Activity Card) yorum ekler.
     Kullanım: POST /interactions/add_comment
     """
     connection = open_db_connection()
@@ -30,7 +30,7 @@ async def add_comment(request: CommentRequest):
         new_id = add_comment_func(
             connection,
             request.user_email,
-            request.content_id,
+            request.activity_id,
             request.comment_text
         )
         if new_id is False:

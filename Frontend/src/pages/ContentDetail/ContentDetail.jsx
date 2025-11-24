@@ -109,271 +109,90 @@ function ContentDetail() {
     fetchComments();
   }, [id, currentUserEmail]);
 
-  // Mock data - In real app, fetch from API
+  // Fetch content details from API
   useEffect(() => {
-    setTimeout(() => {
-      if (type === 'movie') {
-        const mockMovies = [
-          {
-            id: 1,
-            title: 'Inception',
-            poster_path: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
-            release_date: '2010-07-16',
-            vote_average: 8.8,
-            overview: 'Dom Cobb, yetenekli bir hırsız ve aynı zamanda zihin hırsızıdır. Rüyaların içine girerek insanların bilinçaltından sırları çalma konusunda uzmanlaşmıştır. Ancak bu yeteneği, onu ailesinden uzaklaştırmış ve kaçak durumuna düşürmüştür. Bir gün, Saito adında güçlü bir işadamından bir teklif alır: İmkansız görünen bir görev - fikir yerleştirme (inception). Eğer bu görevi başarıyla tamamlarsa, suçlu geçmişi silinecek ve çocuklarına kavuşabilecektir. Cobb, ekibini toplar ve hedefin rüyasına girerek, onun zihnine bir fikir yerleştirmeye çalışır. Ancak bu görev, rüya içinde rüya katmanları oluşturmayı gerektirir ve her katman daha tehlikeli hale gelir. Cobb\'un geçmişi ve karısı Mal\'ın hayaleti de bu görevi zorlaştırır. Film, gerçeklik ve rüya arasındaki çizgiyi bulanıklaştırarak, izleyiciyi derin bir psikolojik yolculuğa çıkarır.',
-            genre_ids: [28, 878],
-            genres: ['Aksiyon', 'Bilimkurgu'],
-            directors: ['Christopher Nolan'],
-            cast: ['Leonardo DiCaprio', 'Marion Cotillard', 'Tom Hardy', 'Ellen Page', 'Joseph Gordon-Levitt', 'Ken Watanabe', 'Cillian Murphy', 'Tom Berenger'],
-            runtime: 148,
-            platformRating: 8.8,
-            totalRatings: 12543
-          },
-          {
-            id: 2,
-            title: 'The Matrix',
-            poster_path: 'https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
-            release_date: '1999-03-31',
-            vote_average: 8.7,
-            overview: 'Thomas Anderson, gündüzleri bir yazılım şirketinde programcı olarak çalışan, geceleri ise "Neo" adıyla bilinen bir bilgisayar korsanıdır. Bir gün, "Matrix" adı verilen gerçekliğin aslında bir simülasyon olduğunu keşfeder. Morpheus adında gizemli bir lider, Neo\'ya iki seçenek sunar: Mavi hapı alıp normal hayatına devam edebilir veya kırmızı hapı alıp Matrix\'in gerçek doğasını öğrenebilir. Neo kırmızı hapı seçer ve gerçek dünyanın aslında makineler tarafından kontrol edilen bir distopya olduğunu öğrenir. İnsanlar, makinelerin enerji kaynağı olarak kullanılmaktadır ve Matrix, onların zihinlerini kontrol altında tutan bir simülasyondur. Neo, kendisini "Seçilmiş Kişi" (The One) olarak keşfeder ve Matrix\'i yok etmek için bir savaşa girer. Film, gerçeklik, özgür irade ve teknolojinin insanlık üzerindeki etkisi gibi derin temaları ele alır.',
-            genre_ids: [28, 878],
-            genres: ['Aksiyon', 'Bilimkurgu'],
-            directors: ['Lana Wachowski', 'Lilly Wachowski'],
-            cast: ['Keanu Reeves', 'Laurence Fishburne', 'Carrie-Anne Moss', 'Hugo Weaving', 'Joe Pantoliano', 'Marcus Chong', 'Gloria Foster'],
-            runtime: 136,
-            platformRating: 8.7,
-            totalRatings: 9876
-          },
-          {
-            id: 27205,
-            title: 'Inception',
-            poster_path: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
-            release_date: '2010-07-16',
-            vote_average: 8.8,
-            overview: 'Dom Cobb, yetenekli bir hırsız ve aynı zamanda zihin hırsızıdır. Rüyaların içine girerek insanların bilinçaltından sırları çalma konusunda uzmanlaşmıştır.',
-            genre_ids: [28, 878],
-            genres: ['Aksiyon', 'Bilimkurgu'],
-            directors: ['Christopher Nolan'],
-            cast: ['Leonardo DiCaprio', 'Marion Cotillard', 'Tom Hardy', 'Ellen Page', 'Joseph Gordon-Levitt', 'Ken Watanabe', 'Cillian Murphy', 'Tom Berenger'],
-            runtime: 148,
-            platformRating: 8.8,
-            totalRatings: 12543
-          },
-          {
-            id: 603,
-            title: 'The Matrix',
-            poster_path: 'https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
-            release_date: '1999-03-31',
-            vote_average: 8.7,
-            overview: 'Thomas Anderson, gündüzleri bir yazılım şirketinde programcı olarak çalışan, geceleri ise "Neo" adıyla bilinen bir bilgisayar korsanıdır.',
-            genre_ids: [28, 878],
-            genres: ['Aksiyon', 'Bilimkurgu'],
-            directors: ['Lana Wachowski', 'Lilly Wachowski'],
-            cast: ['Keanu Reeves', 'Laurence Fishburne', 'Carrie-Anne Moss', 'Hugo Weaving', 'Joe Pantoliano', 'Marcus Chong', 'Gloria Foster'],
-            runtime: 136,
-            platformRating: 8.7,
-            totalRatings: 9876
-          },
-          {
-            id: 157336,
-            title: 'Interstellar',
-            poster_path: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-            release_date: '2014-11-05',
-            vote_average: 8.6,
-            overview: 'Dünya\'nın geleceği tehlikede. İnsanlık, yeni bir gezegen bulmak için uzaya çıkmak zorunda.',
-            genre_ids: [878, 18],
-            genres: ['Bilimkurgu', 'Drama'],
-            directors: ['Christopher Nolan'],
-            cast: ['Matthew McConaughey', 'Anne Hathaway', 'Jessica Chastain', 'Michael Caine', 'Casey Affleck', 'Matt Damon', 'John Lithgow'],
-            runtime: 169,
-            platformRating: 8.6,
-            totalRatings: 11234
-          },
-          {
-            id: 155,
-            title: 'The Dark Knight',
-            poster_path: 'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
-            release_date: '2008-07-18',
-            vote_average: 9.0,
-            overview: 'Batman, Joker ile mücadele ederken Gotham şehrini kurtarmaya çalışır.',
-            genre_ids: [28, 80, 18],
-            genres: ['Aksiyon', 'Suç', 'Drama'],
-            directors: ['Christopher Nolan'],
-            cast: ['Christian Bale', 'Heath Ledger', 'Aaron Eckhart', 'Michael Caine', 'Gary Oldman', 'Maggie Gyllenhaal', 'Morgan Freeman'],
-            runtime: 152,
-            platformRating: 9.0,
-            totalRatings: 14567
-          },
-          {
-            id: 438631,
-            title: 'Dune',
-            poster_path: 'https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIhbkgX2r5Y5D3vT.jpg',
-            release_date: '2021-10-22',
-            vote_average: 8.0,
-            overview: 'Arrakis gezegeninde geçen epik bir bilimkurgu hikayesi.',
-            genre_ids: [878, 12],
-            genres: ['Bilimkurgu', 'Macera'],
-            directors: ['Denis Villeneuve'],
-            cast: ['Timothée Chalamet', 'Rebecca Ferguson', 'Oscar Isaac', 'Josh Brolin', 'Stellan Skarsgård', 'Dave Bautista', 'Zendaya', 'Jason Momoa'],
-            runtime: 155,
-            platformRating: 8.0,
-            totalRatings: 9876
-          },
-          {
-            id: 335984,
-            title: 'Blade Runner 2049',
-            poster_path: 'https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg',
-            release_date: '2017-10-06',
-            vote_average: 8.0,
-            overview: 'Gelecekteki Los Angeles\'ta bir Blade Runner\'ın hikayesi.',
-            genre_ids: [878, 9648],
-            genres: ['Bilimkurgu', 'Gizem'],
-            directors: ['Denis Villeneuve'],
-            cast: ['Ryan Gosling', 'Harrison Ford', 'Ana de Armas', 'Sylvia Hoeks', 'Robin Wright', 'Jared Leto', 'Dave Bautista'],
-            runtime: 164,
-            platformRating: 8.0,
-            totalRatings: 8765
+    const fetchContentDetails = async () => {
+      if (!id || !type) return;
+      
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:8000/content/details?content_id=${encodeURIComponent(id)}&content_type=${type}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const contentData = data.content;
+          
+          if (type === 'movie') {
+            // Format movie data
+            const formattedContent = {
+              id: contentData.id,
+              title: contentData.title,
+              poster_path: contentData.poster_path 
+                ? `https://image.tmdb.org/t/p/w500${contentData.poster_path}` 
+                : null,
+              backdrop_path: contentData.backdrop_path 
+                ? `https://image.tmdb.org/t/p/w1280${contentData.backdrop_path}` 
+                : null,
+              release_date: contentData.release_date,
+              vote_average: contentData.vote_average,
+              overview: contentData.overview,
+              runtime: contentData.runtime,
+              genres: contentData.genres || [],
+              directors: contentData.directors || [],
+              cast: contentData.cast || [],
+              tagline: contentData.tagline,
+              production_companies: contentData.production_companies || [],
+              production_countries: contentData.production_countries || [],
+              spoken_languages: contentData.spoken_languages || [],
+              budget: contentData.budget,
+              revenue: contentData.revenue,
+              status: contentData.status
+            };
+            
+            setContent(formattedContent);
+            setPlatformRating(contentData.vote_average || 0);
+            setTotalRatings(0); // TMDB'den rating sayısı gelmiyorsa 0
+          } else if (type === 'book') {
+            // Format book data
+            const imageLinks = contentData.imageLinks || {};
+            const thumbnail = imageLinks.thumbnail || imageLinks.smallThumbnail || imageLinks.medium || null;
+            
+            const formattedContent = {
+              id: contentData.id,
+              title: contentData.title,
+              subtitle: contentData.subtitle || '',
+              poster_path: thumbnail ? thumbnail.replace('http:', 'https:') : null,
+              release_date: contentData.publishedDate,
+              vote_average: contentData.averageRating || 0,
+              overview: contentData.description || '',
+              pageCount: contentData.pageCount || 0,
+              genres: contentData.categories || [],
+              authors: contentData.authors || [],
+              language: contentData.language || '',
+              publisher: contentData.publisher || '',
+              previewLink: contentData.previewLink || '',
+              infoLink: contentData.infoLink || ''
+            };
+            
+            setContent(formattedContent);
+            setPlatformRating(contentData.averageRating || 0);
+            setTotalRatings(contentData.ratingsCount || 0);
           }
-        ];
-        // Id'yi normalize et (string veya number olabilir)
-        const normalizedId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
-        
-        // Önce id'ye göre ara - tüm olası formatları dene
-        let found = mockMovies.find(m => {
-          const movieId = typeof m.id === 'number' ? m.id : (typeof m.id === 'string' && !isNaN(parseInt(m.id)) ? parseInt(m.id) : m.id);
-          return movieId === normalizedId || 
-                 movieId.toString() === id.toString() || 
-                 m.id.toString() === id.toString() ||
-                 (typeof normalizedId === 'number' && movieId === normalizedId);
-        });
-        
-        if (found) {
-          setContent(found);
-          setPlatformRating(found.platformRating);
-          setTotalRatings(found.totalRatings);
+        } else {
+          console.error("İçerik detayları yüklenemedi:", response.status);
         }
-      } else if (type === 'book') {
-        const mockBooks = [
-          {
-            id: 1,
-            title: '1984',
-            poster_path: 'https://covers.openlibrary.org/b/id/7222246-L.jpg',
-            release_date: '1949-06-08',
-            vote_average: 9.1,
-            overview: '1984, distopik bir gelecekte geçen, totaliter bir rejimin kontrolü altındaki bir dünyayı anlatır. Winston Smith, Okyanusya\'da yaşayan ve Büyük Birader\'in gözetimi altında çalışan bir devlet memurudur. Her hareketi izlenmekte, her düşüncesi kontrol edilmektedir. Winston, bu totaliter sistemden nefret eder ve gizlice bir günlük tutmaya başlar. Julia adında bir kadınla tanışır ve ikisi birlikte sisteme karşı gelmeye başlarlar. Ancak düşünce polisi onları yakalar ve Winston, işkence yoluyla sistemin gerçekliğini kabul etmeye zorlanır. Roman, totaliter rejimlerin tehlikelerini, gerçekliğin manipülasyonunu ve bireysel özgürlüğün önemini güçlü bir şekilde ele alır. Orwell\'in bu eseri, modern dünyada hala geçerliliğini koruyan bir uyarı niteliğindedir.',
-            genre_ids: [1, 5, 10],
-            genres: ['Roman', 'Fantastik', 'Klasik'],
-            authors: ['George Orwell'],
-            pageCount: 328,
-            platformRating: 9.1,
-            totalRatings: 15234
-          },
-          {
-            id: 2,
-            title: 'Suç ve Ceza',
-            poster_path: 'https://covers.openlibrary.org/b/id/7222247-L.jpg',
-            release_date: '1866-01-01',
-            vote_average: 9.2,
-            overview: 'Suç ve Ceza, St. Petersburg\'da yaşayan eski bir öğrenci olan Rodion Raskolnikov\'un hikayesini anlatır. Raskolnikov, ahlaki değerlerden bağımsız olarak "üstün insanlar"ın suç işleyebileceğine inanır ve bu teorisini test etmek için bir tefeci kadını öldürür. Ancak cinayetten sonra, beklediği özgürlük yerine ağır bir vicdan azabı ve psikolojik çöküntü yaşar. Polis müfettişi Porfiry Petrovich, Raskolnikov\'dan şüphelenir ve onu zekice sorgular. Bu süreçte Raskolnikov, Sonya adında genç bir kadınla tanışır ve onun aracılığıyla kurtuluş yolunu bulur. Roman, suç, ceza, pişmanlık ve kefaret temalarını derinlemesine işler ve insan ruhunun karmaşıklığını gözler önüne serer. Dostoyevski\'nin bu başyapıtı, psikolojik gerilim ve ahlaki sorgulama açısından edebiyat tarihinin en önemli eserlerinden biridir.',
-            genre_ids: [1, 10, 20],
-            genres: ['Roman', 'Klasik', 'Edebiyat'],
-            authors: ['Fyodor Dostoyevsky'],
-            pageCount: 671,
-            platformRating: 9.2,
-            totalRatings: 13456
-          },
-          {
-            id: 'OL82565W',
-            title: '1984',
-            poster_path: 'https://covers.openlibrary.org/b/id/7222246-L.jpg',
-            release_date: '1949-06-08',
-            vote_average: 9.1,
-            overview: '1984, distopik bir gelecekte geçen, totaliter bir rejimin kontrolü altındaki bir dünyayı anlatır.',
-            genre_ids: [1, 5, 10],
-            genres: ['Roman', 'Fantastik', 'Klasik'],
-            authors: ['George Orwell'],
-            pageCount: 328,
-            platformRating: 9.1,
-            totalRatings: 15234
-          },
-          {
-            id: 'OL82566W',
-            title: 'Dune',
-            poster_path: 'https://covers.openlibrary.org/b/id/8739161-L.jpg',
-            release_date: '1965-08-01',
-            vote_average: 8.8,
-            overview: 'Arrakis gezegeninde geçen epik bir bilimkurgu romanı.',
-            genre_ids: [878, 1],
-            genres: ['Bilimkurgu', 'Roman'],
-            authors: ['Frank Herbert'],
-            pageCount: 688,
-            platformRating: 8.8,
-            totalRatings: 12345
-          },
-          {
-            id: 'OL82567W',
-            title: 'The Lord of the Rings',
-            poster_path: 'https://covers.openlibrary.org/b/id/6979861-L.jpg',
-            release_date: '1954-07-29',
-            vote_average: 9.3,
-            overview: 'Orta Dünya\'da geçen epik bir fantastik macera.',
-            genre_ids: [1, 2],
-            genres: ['Fantastik', 'Macera'],
-            authors: ['J.R.R. Tolkien'],
-            pageCount: 1178,
-            platformRating: 9.3,
-            totalRatings: 16789
-          },
-          {
-            id: 'OL82568W',
-            title: 'Foundation',
-            poster_path: 'https://covers.openlibrary.org/b/id/8739162-L.jpg',
-            release_date: '1951-05-01',
-            vote_average: 8.9,
-            overview: 'Galaktik İmparatorluğun çöküşü ve yeni bir medeniyetin doğuşu.',
-            genre_ids: [878, 1],
-            genres: ['Bilimkurgu', 'Roman'],
-            authors: ['Isaac Asimov'],
-            pageCount: 255,
-            platformRating: 8.9,
-            totalRatings: 11234
-          },
-          {
-            id: 'OL82569W',
-            title: 'Brave New World',
-            poster_path: 'https://covers.openlibrary.org/b/id/7222247-L.jpg',
-            release_date: '1932-01-01',
-            vote_average: 8.7,
-            overview: 'Gelecekteki bir distopyada geçen, teknoloji ve toplum üzerine bir eleştiri.',
-            genre_ids: [1, 5],
-            genres: ['Roman', 'Distopya'],
-            authors: ['Aldous Huxley'],
-            pageCount: 311,
-            platformRating: 8.7,
-            totalRatings: 9876
-          }
-        ];
-        // Id'yi normalize et (string veya number olabilir)
-        const normalizedId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
-        
-        // Önce id'ye göre ara
-        let found = mockBooks.find(b => {
-          const bookId = typeof b.id === 'number' ? b.id : (typeof b.id === 'string' && !isNaN(parseInt(b.id)) ? parseInt(b.id) : b.id);
-          return bookId === normalizedId || 
-                 bookId.toString() === id.toString() || 
-                 b.id.toString() === id.toString() ||
-                 (typeof normalizedId === 'number' && bookId === normalizedId);
-        });
-        
-        if (found) {
-          setContent(found);
-          setPlatformRating(found.platformRating);
-          setTotalRatings(found.totalRatings);
-        }
+      } catch (error) {
+        console.error("İçerik detayları API hatası:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }, 500);
+    };
+    
+    fetchContentDetails();
   }, [type, id]);
+
 
   // Mock custom lists - In real app, fetch from API
   useEffect(() => {
