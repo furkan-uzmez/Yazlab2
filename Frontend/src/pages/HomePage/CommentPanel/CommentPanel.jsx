@@ -119,8 +119,8 @@ function CommentPanel({
 
       if (response.ok) {
         // State'i güncelle
-        if (onCommentDelete) {
-          onCommentDelete(commentId);
+      if (onCommentDelete) {
+        onCommentDelete(commentId);
         }
       } else {
         const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
