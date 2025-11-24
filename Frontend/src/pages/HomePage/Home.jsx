@@ -29,6 +29,7 @@ function Home() {
   const [followedUsers, setFollowedUsers] = useState(new Set());
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   // ... (Handler fonksiyonları aynı kalacak: handleLogout, handleCommentClick vb.) ...
   const handleLogout = () => setLogoutModalOpen(true);
@@ -65,6 +66,8 @@ function Home() {
       if (response.ok) {
         const data = await response.json();
         const allComments = data.comments || [];
+        const fetchedCurrentUserId = data.current_user_id || null;
+        setCurrentUserId(fetchedCurrentUserId);
 
         // 1. Sadece SEÇİLİ İÇERİĞE (activity_id) ait yorumları filtrele
         // Backend'de 'activity_id' olarak geliyor
@@ -76,7 +79,7 @@ function Home() {
         // 2. Yorumları Frontend formatına dönüştür (Mapping)
         const formattedComments = relatedComments.map(c => ({
             id: c.comment_id, // Backend: comment_id -> Frontend: id
-            userId: c.username, // ID yerine username kullanıyoruz (veya c.user_id varsa onu)
+            userId: c.user_id, // Backend'den gelen user_id'yi kullanıyoruz
             userName: c.username, // Backend: username -> Frontend: userName
             userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default', // Backend: avatar_url -> Frontend: userAvatar
             text: c.text,
@@ -479,7 +482,7 @@ function Home() {
         comments={panelComments}
         likedComments={likedComments}
         commentText={commentText}
-        currentUserId={999}
+        currentUserId={currentUserId}
         onClose={handleCloseCommentPanel}
         onCommentLike={handleCommentLike}
         onCommentSubmit={handleCommentSubmit}

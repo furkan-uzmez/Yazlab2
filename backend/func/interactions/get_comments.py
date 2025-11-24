@@ -22,6 +22,7 @@ def get_comments(connection, email: str): # email parametresi eklendi
                 ac.text,
                 ac.created_at,
                 ac.activity_id,
+                ac.user_id,
                 u.username,
                 u.avatar_url,
                 
@@ -43,9 +44,14 @@ def get_comments(connection, email: str): # email parametresi eklendi
         cursor.close()
 
         if comments_data:
-            return comments_data
+            # Mevcut kullanıcının user_id'sini de ekle
+            result = {
+                'comments': comments_data,
+                'current_user_id': current_user_id
+            }
+            return result
         else:
-            return [] 
+            return {'comments': [], 'current_user_id': current_user_id} 
 
     except Exception as e:
         print(f"Hata: Yorumlar çekilemedi - {e}")

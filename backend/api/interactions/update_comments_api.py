@@ -36,16 +36,20 @@ async def update_comment(request: UpdateCommentRequest):
         
         if not success:
             # İşlem başarısızsa (yetki yoksa veya yorum yoksa)
+            connection.close()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Failed to update comment (Check permissions or if comment exists)"
             )
             
+    except HTTPException:
+        # HTTPException'ı tekrar fırlat (zaten uygun status code ve detail ile)
+        raise
     except Exception as e:
         print(f"API Hatası: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error"
+            detail=f"Internal Server Error: {str(e)}"
         )
     finally:
         connection.close()

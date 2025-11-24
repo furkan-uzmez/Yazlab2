@@ -30,11 +30,16 @@ async def get_comments(email: str):
     finally:
         connection.close()
 
-    if comments is False:
+    if comments is False or (isinstance(comments, dict) and not comments.get('comments')):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No comments found for the given activity"
         )
     
+    # Eğer dict döndüyse (yeni format), direkt döndür
+    if isinstance(comments, dict):
+        return {"Message": "Comments found", "comments": comments['comments'], "current_user_id": comments.get('current_user_id')}
+    
+    # Eski format için (geriye dönük uyumluluk)
     return {"Message": "Comments found", "comments": comments}
     

@@ -574,7 +574,13 @@ function ContentDetail() {
   };
 
   const handleSaveEdit = async (commentId) => {
-    if (!editingText.trim() || !currentUserEmail) return;
+    if (!editingText.trim()) return;
+    
+    const username = localStorage.getItem("profileusername");
+    if (!username) {
+      alert("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
     
     try {
       const response = await fetch('http://localhost:8000/interactions/update_comment', {
@@ -584,7 +590,7 @@ function ContentDetail() {
         },
         body: JSON.stringify({
           comment_id: commentId,
-          user_email: currentUserEmail,
+          username: username,
           new_text: editingText.trim()
         })
       });
@@ -613,17 +619,23 @@ function ContentDetail() {
           setComments(formattedComments);
         }
       } else {
-        console.error("Yorum güncellenemedi:", response.status);
-        alert("Yorum güncellenirken bir hata oluştu.");
+        const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
+        console.error("API Hatası:", errorData);
+        alert(`Yorum güncellenemedi: ${errorData.detail || "Bilinmeyen hata"}`);
       }
     } catch (error) {
       console.error("Yorum güncelleme hatası:", error);
-      alert("Yorum güncellenirken bir hata oluştu.");
+      alert("Yorum güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
 
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+    
+    if (!currentUserEmail) {
+      alert("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
     
     try {
       const response = await fetch('http://localhost:8000/interactions/delete_comment', {
@@ -659,12 +671,13 @@ function ContentDetail() {
           setComments(formattedComments);
         }
       } else {
-        console.error("Yorum silinemedi:", response.status);
-        alert("Yorum silinirken bir hata oluştu.");
+        const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
+        console.error("API Hatası:", errorData);
+        alert(`Yorum silinemedi: ${errorData.detail || "Bilinmeyen hata"}`);
       }
     } catch (error) {
       console.error("Yorum silme hatası:", error);
-      alert("Yorum silinirken bir hata oluştu.");
+      alert("Yorum silinirken bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
 

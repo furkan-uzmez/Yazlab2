@@ -36,7 +36,7 @@ function CommentPanel({
   comments, 
   likedComments,
   commentText,
-  currentUserId = 999, // Varsayılan olarak 999 (Home.jsx'teki gibi)
+  currentUserId = null, // Kullanıcı ID'si (user_id) olarak geçiriliyor
   onClose, 
   onCommentLike, 
   onCommentSubmit, 
@@ -64,11 +64,14 @@ function CommentPanel({
     
     const username = localStorage.getItem("profileusername");
 
-    console.log('Butona basıldı')
+    if (!username) {
+      alert("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
 
     try {
         const response = await fetch("http://localhost:8000/interactions/update_comment", {
-            method: "PUT", // PUT metodunu kullanıyoruz
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 comment_id: commentId,
@@ -81,19 +84,52 @@ function CommentPanel({
             // State'i güncelle (Optimistic UI)
             onCommentEdit(commentId, editingText);
             setEditingCommentId(null);
+            setEditingText('');
         } else {
-            alert("Yorum güncellenemedi.");
+            const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
+            console.error("API Hatası:", errorData);
+            alert(`Yorum güncellenemedi: ${errorData.detail || "Bilinmeyen hata"}`);
         }
     } catch (error) {
-        console.error("Hata:", error);
+        console.error("Yorum güncelleme hatası:", error);
+        alert("Yorum güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
     }
 };
 
-  const handleDelete = (commentId) => {
-    if (window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
-      if (onCommentDelete) {
-        onCommentDelete(commentId);
+  const handleDelete = async (commentId) => {
+    if (!window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
+      return;
+    }
+
+    const userEmail = localStorage.getItem("email");
+    if (!userEmail) {
+      alert("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/interactions/delete_comment", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          comment_id: commentId,
+          user_email: userEmail
+        })
+      });
+
+      if (response.ok) {
+        // State'i güncelle
+        if (onCommentDelete) {
+          onCommentDelete(commentId);
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
+        console.error("API Hatası:", errorData);
+        alert(`Yorum silinemedi: ${errorData.detail || "Bilinmeyen hata"}`);
       }
+    } catch (error) {
+      console.error("Yorum silme hatası:", error);
+      alert("Yorum silinirken bir hata oluştu. Lütfen tekrar deneyin.");
     }
   };
 
@@ -199,7 +235,9 @@ function CommentPanel({
                 const likeCount = comment.likes || 0; 
                 // ----------------
                 
-                const isOwnComment = comment.userId === currentUserId;
+                // user_id karşılaştırması (sayısal karşılaştırma)
+                const isOwnComment = comment.userId && currentUserId && 
+                  Number(comment.userId) === Number(currentUserId);
                 
                 // --- BU SATIRIN BURADA OLDUĞUNDAN EMİN OLUN ---
                 const isEditing = editingCommentId === comment.id; 
@@ -241,10 +279,7 @@ function CommentPanel({
                             <textarea
                               className="comment-edit-input"
                               value={editingText}
-                              onChange={(e) => {
-                                  console.log("Yazılıyor:", e.target.value); // LOG EKLEYİN
-                                  setEditingText(e.target.value);
-                              }}
+                              onChange={(e) => setEditingText(e.target.value)}
                               rows="3"
                               autoFocus
                             />
