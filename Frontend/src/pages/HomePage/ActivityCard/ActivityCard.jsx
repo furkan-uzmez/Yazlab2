@@ -59,7 +59,7 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen ,onLike}) {
             className="user-avatar"
           />
           <div className="user-details">
-            <Link to={`/profile/${activity.userId}`} className="user-name-link">
+            <Link to={`/profile/${activity.userName}`} className="user-name-link">
               <ShinyText text={activity.userName} speed={4} className="user-name" />
             </Link>
             <span className="action-text">{activity.actionText}</span>
