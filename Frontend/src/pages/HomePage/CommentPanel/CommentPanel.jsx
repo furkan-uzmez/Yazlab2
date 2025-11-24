@@ -59,13 +59,35 @@ function CommentPanel({
     setEditingText('');
   };
 
-  const handleSaveEdit = (commentId) => {
-    if (editingText.trim() && onCommentEdit) {
-      onCommentEdit(commentId, editingText.trim());
-      setEditingCommentId(null);
-      setEditingText('');
+  const handleSaveEdit = async (commentId) => {
+    if (!editingText.trim()) return;
+    
+    const username = localStorage.getItem("profileusername");
+
+    console.log('Butona basıldı')
+
+    try {
+        const response = await fetch("http://localhost:8000/interactions/update_comment", {
+            method: "PUT", // PUT metodunu kullanıyoruz
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                comment_id: commentId,
+                username: username,
+                new_text: editingText
+            })
+        });
+
+        if (response.ok) {
+            // State'i güncelle (Optimistic UI)
+            onCommentEdit(commentId, editingText);
+            setEditingCommentId(null);
+        } else {
+            alert("Yorum güncellenemedi.");
+        }
+    } catch (error) {
+        console.error("Hata:", error);
     }
-  };
+};
 
   const handleDelete = (commentId) => {
     if (window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
@@ -219,7 +241,10 @@ function CommentPanel({
                             <textarea
                               className="comment-edit-input"
                               value={editingText}
-                              onChange={(e) => setEditingText(e.target.value)}
+                              onChange={(e) => {
+                                  console.log("Yazılıyor:", e.target.value); // LOG EKLEYİN
+                                  setEditingText(e.target.value);
+                              }}
                               rows="3"
                               autoFocus
                             />

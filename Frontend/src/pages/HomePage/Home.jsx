@@ -141,10 +141,12 @@ function Home() {
 
 
       if (response.ok) {
+        const data = await response.json(); 
+        const realCommentId = data.new_comment_id; // <-- Backend'den gelen ID
         // --- BAŞARILI ---
         // 1. Yorumu yerel state'e (panelComments) ekle (Anında görünmesi için)
         const newComment = {
-          id: Date.now(), // Geçici ID
+          id: realCommentId, // Geçici ID
           userId: 999, // Veya userEmail'den gelen bilgi
           userName: localStorage.getItem('profileusername'), // Veya localStorage'dan username
           userAvatar: localStorage.getItem('profileimage_url'), // Veya localStorage'dan avatar

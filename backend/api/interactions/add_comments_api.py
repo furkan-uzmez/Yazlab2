@@ -27,13 +27,13 @@ async def add_comment(request: CommentRequest):
         )
     
     try:
-        added = add_comment_func(
+        new_id = add_comment_func(
             connection,
             request.user_email,
             request.content_id,
             request.comment_text
         )
-        if added is False:
+        if new_id is False:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Could not add comment"
@@ -47,4 +47,4 @@ async def add_comment(request: CommentRequest):
     finally:
         connection.close()
     
-    return {"message": "Comment added successfully"}
+    return {"message": "Comment added successfully","new_comment_id": new_id}

@@ -28,12 +28,14 @@ def add_comment(connection, user_email: str, activity_id: int, comment_text: str
         """
         cursor.execute(insert_comment_query, (activity_id, user_id, comment_text))
         
+        new_comment_id = cursor.lastrowid
+
         # Değişiklikleri onayla
         connection.commit()
         cursor.close()
         
         print(f"Yorum başarıyla {activity_id} nolu aktiviteye eklendi.")
-        return True
+        return new_comment_id
 
     except mysql.connector.Error as e:
         print(f"HATA: Yorum eklenirken SQL hatası: {e}")
