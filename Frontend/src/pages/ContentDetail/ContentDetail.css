@@ -615,6 +615,33 @@
 }
 
 /* Overview Section */
+.content-cast {
+  margin-top: 3rem;
+  padding: 0;
+  animation: fadeInUp 0.5s ease 0.2s both;
+  position: relative;
+  z-index: 1;
+}
+
+.cast-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.01em;
+}
+
+.cast-list {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.cast-item {
+  display: inline;
+}
+
 .content-overview {
   margin-top: 3rem;
   padding: 0;

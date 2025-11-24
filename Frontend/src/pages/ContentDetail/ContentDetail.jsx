@@ -44,6 +44,7 @@ function ContentDetail() {
             genre_ids: [28, 878],
             genres: ['Aksiyon', 'Bilimkurgu'],
             directors: ['Christopher Nolan'],
+            cast: ['Leonardo DiCaprio', 'Marion Cotillard', 'Tom Hardy', 'Ellen Page', 'Joseph Gordon-Levitt', 'Ken Watanabe', 'Cillian Murphy', 'Tom Berenger'],
             runtime: 148,
             platformRating: 8.8,
             totalRatings: 12543
@@ -58,6 +59,7 @@ function ContentDetail() {
             genre_ids: [28, 878],
             genres: ['Aksiyon', 'Bilimkurgu'],
             directors: ['Lana Wachowski', 'Lilly Wachowski'],
+            cast: ['Keanu Reeves', 'Laurence Fishburne', 'Carrie-Anne Moss', 'Hugo Weaving', 'Joe Pantoliano', 'Marcus Chong', 'Gloria Foster'],
             runtime: 136,
             platformRating: 8.7,
             totalRatings: 9876
@@ -72,6 +74,7 @@ function ContentDetail() {
             genre_ids: [28, 878],
             genres: ['Aksiyon', 'Bilimkurgu'],
             directors: ['Christopher Nolan'],
+            cast: ['Leonardo DiCaprio', 'Marion Cotillard', 'Tom Hardy', 'Ellen Page', 'Joseph Gordon-Levitt', 'Ken Watanabe', 'Cillian Murphy', 'Tom Berenger'],
             runtime: 148,
             platformRating: 8.8,
             totalRatings: 12543
@@ -86,6 +89,7 @@ function ContentDetail() {
             genre_ids: [28, 878],
             genres: ['Aksiyon', 'Bilimkurgu'],
             directors: ['Lana Wachowski', 'Lilly Wachowski'],
+            cast: ['Keanu Reeves', 'Laurence Fishburne', 'Carrie-Anne Moss', 'Hugo Weaving', 'Joe Pantoliano', 'Marcus Chong', 'Gloria Foster'],
             runtime: 136,
             platformRating: 8.7,
             totalRatings: 9876
@@ -100,6 +104,7 @@ function ContentDetail() {
             genre_ids: [878, 18],
             genres: ['Bilimkurgu', 'Drama'],
             directors: ['Christopher Nolan'],
+            cast: ['Matthew McConaughey', 'Anne Hathaway', 'Jessica Chastain', 'Michael Caine', 'Casey Affleck', 'Matt Damon', 'John Lithgow'],
             runtime: 169,
             platformRating: 8.6,
             totalRatings: 11234
@@ -114,6 +119,7 @@ function ContentDetail() {
             genre_ids: [28, 80, 18],
             genres: ['Aksiyon', 'Suç', 'Drama'],
             directors: ['Christopher Nolan'],
+            cast: ['Christian Bale', 'Heath Ledger', 'Aaron Eckhart', 'Michael Caine', 'Gary Oldman', 'Maggie Gyllenhaal', 'Morgan Freeman'],
             runtime: 152,
             platformRating: 9.0,
             totalRatings: 14567
@@ -128,6 +134,7 @@ function ContentDetail() {
             genre_ids: [878, 12],
             genres: ['Bilimkurgu', 'Macera'],
             directors: ['Denis Villeneuve'],
+            cast: ['Timothée Chalamet', 'Rebecca Ferguson', 'Oscar Isaac', 'Josh Brolin', 'Stellan Skarsgård', 'Dave Bautista', 'Zendaya', 'Jason Momoa'],
             runtime: 155,
             platformRating: 8.0,
             totalRatings: 9876
@@ -142,6 +149,7 @@ function ContentDetail() {
             genre_ids: [878, 9648],
             genres: ['Bilimkurgu', 'Gizem'],
             directors: ['Denis Villeneuve'],
+            cast: ['Ryan Gosling', 'Harrison Ford', 'Ana de Armas', 'Sylvia Hoeks', 'Robin Wright', 'Jared Leto', 'Dave Bautista'],
             runtime: 164,
             platformRating: 8.0,
             totalRatings: 8765
@@ -670,6 +678,21 @@ function ContentDetail() {
             </div>
           </div>
         </div>
+
+        {/* Cast Section */}
+        {type === 'movie' && content.cast && content.cast.length > 0 && (
+          <div className="content-cast">
+            <h2 className="cast-title">Oyuncu Kadrosu</h2>
+            <div className="cast-list">
+              {content.cast.map((actor, index) => (
+                <span key={index} className="cast-item">
+                  {actor}
+                  {index < content.cast.length - 1 && ', '}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Overview Section */}
         {content.overview && (
