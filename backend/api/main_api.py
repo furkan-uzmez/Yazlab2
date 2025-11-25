@@ -8,6 +8,7 @@ from backend.api.auth.register_api import router as register_router
 from backend.api.auth.forget_password_api import router as forget_password_router
 from backend.api.user.get_followers_api import router as get_followers_router
 from backend.api.user.get_following_api import router as get_following_router
+from backend.api.user.follow_api import router as follow_router
 from backend.api.user.get_user_api import router as get_user_router
 from backend.api.list.get_user_library_api import router as get_user_library_router
 from backend.api.list.get_user_list_api import router as get_user_list_router
@@ -45,6 +46,7 @@ api.include_router(register_router)
 api.include_router(forget_password_router)
 api.include_router(get_followers_router)
 api.include_router(get_following_router)
+api.include_router(follow_router)
 api.include_router(get_user_router)
 api.include_router(get_user_library_router)
 api.include_router(get_user_list_router)
