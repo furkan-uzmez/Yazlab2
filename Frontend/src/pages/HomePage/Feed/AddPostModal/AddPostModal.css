@@ -9,15 +9,19 @@
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 2000;
-  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: overlayFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes fadeIn {
+@keyframes overlayFadeIn {
   from {
     opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
   }
   to {
     opacity: 1;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 }
 
@@ -28,11 +32,11 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 90%;
-  max-width: 550px;
+  max-width: 700px;
   max-height: 90vh;
   background: #000000;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border-radius: 30px;
   box-shadow: none;
   z-index: 2001;
   display: flex;
@@ -53,6 +57,41 @@
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+.add-post-search-btn,
+.add-post-submit-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 30px;
+}
+
+.add-post-search-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-post-submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+/* Smooth step transitions */
+.add-post-type-selector,
+.add-post-search-section,
+.add-post-rating-section-full {
+  animation: contentFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -100,6 +139,8 @@
   background: transparent;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Custom Scrollbar */
@@ -142,12 +183,16 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .add-post-type-buttons {
   display: flex;
   gap: 0.75rem;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .add-post-type-btn {
@@ -155,17 +200,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 1rem;
   padding: 1rem 1.5rem;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 30px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.95rem;
   font-weight: 400;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  transform: scale(1);
 }
 
 .add-post-type-btn svg {
@@ -178,10 +224,12 @@
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.3);
   color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.02);
 }
 
 .add-post-type-btn:hover svg {
   color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.1);
 }
 
 .add-post-type-btn.active {
@@ -189,6 +237,20 @@
   color: #000000;
   border-color: #ffffff;
   font-weight: 500;
+  transform: scale(1);
+  animation: typeSelect 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes typeSelect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .add-post-type-btn.active svg {
@@ -204,7 +266,7 @@
   padding: 1rem 1.25rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
+  border-radius: 30px !important;
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.95rem;
   font-weight: 400;
@@ -231,6 +293,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .add-post-search-wrapper {
@@ -239,6 +304,7 @@
   align-items: stretch;
   position: relative;
   width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
   box-sizing: border-box;
 }
@@ -265,7 +331,7 @@
   padding: 0.875rem 1rem 0.875rem 2.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
+  border-radius: 30px;
   color: #ffffff;
   font-size: 0.95rem;
   font-family: inherit;
@@ -278,8 +344,10 @@
 
 .add-post-search-input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  transform: scale(1.01);
 }
 
 .add-post-search-input::placeholder {
@@ -290,7 +358,7 @@
   padding: 0.875rem 1.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
+  border-radius: 30px;
   color: rgba(255, 255, 255, 0.8);
   font-size: 1rem;
   cursor: pointer;
@@ -332,11 +400,30 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: resultItemFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.add-post-result-item:nth-child(1) { animation-delay: 0.05s; }
+.add-post-result-item:nth-child(2) { animation-delay: 0.1s; }
+.add-post-result-item:nth-child(3) { animation-delay: 0.15s; }
+.add-post-result-item:nth-child(4) { animation-delay: 0.2s; }
+.add-post-result-item:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes resultItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .add-post-result-item:hover {
   background: rgba(255, 255, 255, 0.05);
   padding-left: 0.5rem;
+  transform: translateX(4px);
 }
 
 .add-post-result-item:last-child {
@@ -404,11 +491,11 @@
 }
 
 .add-post-selected-poster {
-  width: 60px;
-  height: 90px;
+  width: 80px;
+  height: 120px;
   object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
@@ -444,7 +531,7 @@
   padding: 0.625rem 1.25rem;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 20px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.875rem;
   font-weight: 500;
@@ -490,20 +577,35 @@
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.25rem;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  transform: scale(1);
 }
 
 .add-post-star-btn:hover {
   color: rgba(255, 215, 0, 0.7);
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(5deg);
 }
 
 .add-post-star-btn.active {
   color: #ffd700;
+  transform: scale(1.1);
+  animation: starSelect 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes starSelect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3) rotate(-10deg);
+  }
+  100% {
+    transform: scale(1.1);
+  }
 }
 
 .add-post-rating-value {
@@ -526,87 +628,105 @@
   padding: 0.75rem;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 20px;
   color: #ffffff;
   font-size: 0.9rem;
   font-family: inherit;
   resize: vertical;
   min-height: 80px;
   max-height: 150px;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1.5;
   box-sizing: border-box;
 }
 
 .add-post-review-input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .add-post-review-input::placeholder {
   color: rgba(255, 255, 255, 0.3);
 }
 
-/* Step Indicator */
+/* Step Indicator - Basic, Dynamic & Professional */
 .add-post-step-indicator {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 0 1.5rem;
+  justify-content: space-between;
+  padding: 0;
   gap: 0;
   position: relative;
   width: 100%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 1.5rem;
-  overflow-x: hidden;
+  margin-bottom: 2rem;
+  overflow: visible;
   box-sizing: border-box;
+}
+
+.step-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+
+.step-wrapper:last-child {
+  flex: 0 0 auto;
 }
 
 .step-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  flex-shrink: 0;
 }
 
 .step-number {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 500;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  flex-shrink: 0;
 }
 
 .step-item.active .step-number {
   background: #ffffff;
   border-color: #ffffff;
   color: #000000;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
 }
 
 .step-item.completed .step-number {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #000000;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
 }
 
 .step-label {
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.4);
-  transition: all 0.3s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  margin-top: 0.5rem;
+  text-align: center;
+  line-height: 1.2;
+  margin-top: 0.25rem;
 }
 
 .step-item.active .step-label {
@@ -618,39 +738,32 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-.step-wrapper {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  position: relative;
-}
-
-.step-wrapper:last-child {
-  flex: 0 0 auto;
-}
-
 .step-connector {
   flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 0 0.75rem;
-  transition: all 0.3s ease;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 0.5rem;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  top: -14px;
-  min-width: 30px;
-  z-index: 0;
+  min-width: 20px;
+  z-index: 1;
+  border-radius: 10px;
+  align-self: center;
+  top: -10px;
 }
 
 .step-connector.active {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .step-title {
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: 1.125rem;
+  font-weight: 500;
   color: #ffffff;
   margin-bottom: 1.5rem;
   text-align: left;
+  letter-spacing: -0.3px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .add-post-step-content {
@@ -662,6 +775,25 @@
   flex: 1;
   overflow-x: hidden;
   box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Step Content Animation */
+.add-post-step-content > * {
+  animation: stepFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes stepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .add-post-no-results {
@@ -694,48 +826,146 @@
 .add-post-result-item-skeleton {
   display: flex;
   gap: 1rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: skeleton-fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-post-result-item-skeleton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: skeleton-sweep 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+.add-post-result-item-skeleton:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.add-post-result-item-skeleton:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.add-post-result-item-skeleton:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.add-post-result-item-skeleton:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.add-post-result-item-skeleton:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+@keyframes skeleton-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes skeleton-sweep {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .skeleton-poster {
   width: 50px;
   height: 75px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  animation: skeleton-loading 1.5s ease-in-out infinite;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  background-size: 200% 200%;
+  border-radius: 8px;
+  animation: skeleton-shimmer 2s ease-in-out infinite;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .skeleton-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.875rem;
   justify-content: center;
+  min-width: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .skeleton-title {
-  height: 16px;
-  width: 70%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  animation: skeleton-loading 1.5s ease-in-out infinite;
+  height: 20px;
+  width: 75%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  background-size: 200% 200%;
+  border-radius: 8px;
+  animation: skeleton-shimmer 2s ease-in-out infinite 0.2s;
+  position: relative;
 }
 
 .skeleton-year {
-  height: 12px;
-  width: 40%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  animation: skeleton-loading 1.5s ease-in-out infinite;
+  height: 16px;
+  width: 45%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  background-size: 200% 200%;
+  border-radius: 8px;
+  animation: skeleton-shimmer 2s ease-in-out infinite 0.4s;
+  position: relative;
 }
 
-@keyframes skeleton-loading {
-  0%, 100% {
-    opacity: 1;
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% -200%;
   }
   50% {
-    opacity: 0.5;
+    background-position: 200% 200%;
+  }
+  100% {
+    background-position: -200% -200%;
   }
 }
 
@@ -935,15 +1165,18 @@
   margin-top: auto;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .add-post-nav-btn {
   padding: 0.75rem 1.5rem;
-  border-radius: 12px;
+  border-radius: 30px;
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
   display: flex;
   align-items: center;
@@ -951,12 +1184,18 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: transparent;
   color: rgba(255, 255, 255, 0.7);
+  transform: scale(1);
 }
 
 .add-post-nav-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.3);
   color: #ffffff;
+  transform: scale(1.02);
+}
+
+.add-post-nav-btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .add-post-back-btn {
@@ -972,6 +1211,8 @@
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .add-post-back-btn {
@@ -994,7 +1235,12 @@
 
 .add-post-next-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.9);
-  transform: scale(1.02);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.add-post-next-btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .add-post-back-btn:disabled,

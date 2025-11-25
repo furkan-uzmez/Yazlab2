@@ -224,7 +224,7 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
           <div className="add-post-step-content">
             {/* Step 1: Tip Seç */}
             {step === 1 && (
-              <div className="add-post-type-selector">
+              <div key="step-1" className="add-post-type-selector">
                 <h3 className="step-title">{steps[0].title}</h3>
                 <div className="add-post-type-buttons">
                   <button
@@ -253,7 +253,7 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
 
             {/* Step 2: İçerik Seç */}
             {step === 2 && (
-              <div className="add-post-search-section">
+              <div key="step-2" className="add-post-search-section">
                 <h3 className="step-title">{steps[1].title}</h3>
                 <div className="add-post-search-wrapper">
                   <FaSearch className="add-post-search-icon" />
@@ -336,7 +336,7 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
 
             {/* Step 3: Puan Ver */}
             {step === 3 && selectedContent && (
-              <div className="add-post-rating-section-full">
+              <div key="step-3" className="add-post-rating-section-full">
                 <h3 className="step-title">{steps[2].title}</h3>
                 
                 {/* Selected Content Display */}
