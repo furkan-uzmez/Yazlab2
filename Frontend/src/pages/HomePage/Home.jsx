@@ -375,30 +375,29 @@ function Home() {
     });
   };
 
-  // --- API'DEN VERİ ÇEKME FONKSİYONU (GÜNCELLENDİ) ---
-  const fetchActivities = useCallback(async (pageNum) => {
-    if (loadingRefValue.current) return;
+const fetchActivities = useCallback(async (pageNum) => {
+    // --- DÜZELTME 1: hasMore kontrolü ekle ---
+    // Eğer yükleniyorsa veya (sayfa 1 değilse ve daha fazla veri yoksa) dur.
+    if (loadingRefValue.current || (pageNum > 1 && !hasMore)) return;
     
     loadingRefValue.current = true;
-    const isInitialLoad = pageNum === 1 && activities.length === 0;
     
-    if (isInitialLoad) {
+    if (pageNum === 1) {
       setInitialLoading(true);
     } else {
       setLoading(true);
     }
     
     try {
-      // 1. Kullanıcının email'ini localStorage'dan al
-      // (Login.js'de kaydetmiş olmalısınız)
       const userEmail = localStorage.getItem("email"); 
-      
       if (!userEmail) {
         console.error("Email bulunamadı, lütfen giriş yapın.");
         return;
       }
 
-      const url = `http://localhost:8000/feed/search?email=${userEmail}`;
+      // --- DÜZELTME 2: URL'e '&page=' parametresini ekle ---
+      // Bu olmazsa hep aynı 10 veriyi çeker.
+      const url = `http://localhost:8000/feed/search?email=${userEmail}&page=${pageNum}`;
 
       const response = await fetch(url);
       
@@ -412,21 +411,18 @@ function Home() {
       if (apiFeedItems.length === 0) {
         setHasMore(false);
       } else {
-        // 3. API Verisini Frontend Formatına Dönüştür
-        // ActivityCard'ın beklediği prop isimleri farklı olduğu için bu dönüşüm şart.
+        // 3. API Verisini Frontend Formatına Dönüştür (Mapping - Aynen kalıyor)
         const formattedActivities = apiFeedItems.map(item => ({
           id: item.activity_id,
           userId: item.activity_user_username,
           userName: item.activity_user_username,
           userAvatar: item.activity_user_avatar,
           type: item.type,
-          // actionText'i tipe göre oluştur
           actionText: item.type === 'rating' 
             ? `bir ${item.content_type === 'movie' ? 'filmi' : 'kitabı'} oyladı`
             : `bir ${item.content_type === 'movie' ? 'film' : 'kitap'} hakkında yorum yaptı`,
           contentTitle: item.content_title,
           contentType: item.content_type === 'movie' ? 'Film' : 'Kitap',
-          // Poster URL'ini kontrol et - null, undefined veya boş string ise null olarak işaretle
           contentPoster: item.content_poster && item.content_poster.trim() !== '' ? item.content_poster : null,
           contentId: item.content_id,
           rating: item.rating_score,
@@ -437,9 +433,8 @@ function Home() {
           isLiked: item.is_liked_by_me > 0
         }));
 
-        // 4. Review activity'si için rating_score varsa, type'ı rating_and_review olarak işaretle
+        // 4. Review activity'si için rating_score varsa (Aynen kalıyor)
         const processedActivities = formattedActivities.map(activity => {
-          // Eğer review activity'si için rating_score varsa, hem rating hem review var demektir
           if (activity.type === 'review' && activity.rating) {
             return {
               ...activity,
@@ -450,7 +445,23 @@ function Home() {
           return activity;
         });
 
-        setActivities(prev => [...prev, ...processedActivities]);
+        // --- DÜZELTME 3: Tekrar Eden ID'leri Filtrele ---
+        setActivities(prev => {
+            // Sayfa 1 ise direkt yeni veriyi koy (Reset durumu)
+            if (pageNum === 1) return processedActivities;
+
+            // Sayfa > 1 ise, listede zaten var olan ID'leri tekrar ekleme
+            const existingIds = new Set(prev.map(a => a.id));
+            const uniqueNewActivities = processedActivities.filter(a => !existingIds.has(a.id));
+            
+            // Eğer API veri döndü ama hepsi zaten bizde varsa, sonuna geldik demektir
+            if (uniqueNewActivities.length === 0 && processedActivities.length > 0) {
+                setHasMore(false);
+            }
+
+            return [...prev, ...uniqueNewActivities];
+        });
+
         setPage(prevPage => prevPage + 1);
       }
     } catch (error) {
@@ -461,7 +472,7 @@ function Home() {
       setInitialLoading(false);
       loadingRefValue.current = false;
     }
-  }, [activities.length]);
+  }, [hasMore]); // Dependency array'i sadeleştirdik
 
   // ... (useEffect'ler ve return kısmı aynı kalacak) ...
   
