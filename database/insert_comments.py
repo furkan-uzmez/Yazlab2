@@ -29,8 +29,8 @@ def insert_mock_comments():
         cursor = connection.cursor()
         query = """
                 INSERT INTO activity_comments 
-                    (activity_id, user_id, text, created_at) 
-                VALUES (%s, %s, %s, %s)
+                    (activity_id, user_id, text, just_content, created_at) 
+                VALUES (%s, %s, %s, %s, %s)
                 """
         print("\n--- Aktivite Yorumları Ekleniyor ---")
         
@@ -45,10 +45,13 @@ def insert_mock_comments():
                     mysql_date_str = dt_obj.strftime('%Y-%m-%d %H:%M:%S')
                     # --- DÖNÜŞTÜRME SONU ---
                     
+                    just_content = comment.get('just_content', 0)
+
                     cursor.execute(query, (
                         int(activity_id),
                         comment['userId'],
                         comment['text'],
+                        just_content,
                         mysql_date_str  # <-- 3. DÖNÜŞTÜRÜLMÜŞ TARİHİ KULLAN
                     ))
                     print(f"  -> Yorum eklendi (Aktivite ID: {activity_id}, Kullanıcı: {comment['userName']})")

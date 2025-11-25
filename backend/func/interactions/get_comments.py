@@ -36,6 +36,7 @@ def get_comments(connection, email: str): # email parametresi eklendi
 
             FROM activity_comments ac
             JOIN users u ON ac.user_id = u.user_id
+            WHERE ac.just_content = 0
             ORDER BY ac.created_at DESC
         """
         

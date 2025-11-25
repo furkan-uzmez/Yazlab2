@@ -30,7 +30,7 @@ def get_user_activities(connection, target_user_id: int, viewer_id: int = None, 
 
                     -- Toplam beğeni ve yorum sayısı
                     (SELECT COUNT(*) FROM activities_likes al WHERE al.activity_id = a.activity_id) AS like_count,
-                    (SELECT COUNT(*) FROM activity_comments ac WHERE ac.activity_id = a.activity_id) AS comment_count,
+                    (SELECT COUNT(*) FROM activity_comments ac WHERE ac.activity_id = a.activity_id AND ac.just_content = 0) AS comment_count,
 
                     -- Ben beğendim mi?
                     (SELECT COUNT(*) FROM activities_likes al2 

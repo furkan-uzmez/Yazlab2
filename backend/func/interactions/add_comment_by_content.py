@@ -75,8 +75,8 @@ def add_comment_by_content(connection, user_email: str, content_id: int, comment
         # 3. ADIM: Yorumu 'activity_comments' tablosuna ekle
         if activity_id:
             insert_comment_query = """
-                INSERT INTO activity_comments (activity_id, user_id, text) 
-                VALUES (%s, %s, %s)
+                INSERT INTO activity_comments (activity_id, user_id, text, just_content) 
+                VALUES (%s, %s, %s, 1)
             """
             cursor.execute(insert_comment_query, (activity_id, user_id, comment_text))
             

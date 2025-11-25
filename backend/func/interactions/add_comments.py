@@ -1,6 +1,6 @@
 import mysql.connector
 
-def add_comment(connection, user_email: str, activity_id: int, comment_text: str) -> bool:
+def add_comment(connection, user_email: str, activity_id: int, comment_text: str, just_content: int = 0) -> bool:
     """
     Bir aktiviteye (Activity Card) yorum ekler.
     Tablo: activity_comments
@@ -23,10 +23,10 @@ def add_comment(connection, user_email: str, activity_id: int, comment_text: str
 
         # 2. ADIM: Yorumu 'activity_comments' tablosuna ekle
         insert_comment_query = """
-            INSERT INTO activity_comments (activity_id, user_id, text) 
-            VALUES (%s, %s, %s)
+            INSERT INTO activity_comments (activity_id, user_id, text, just_content) 
+            VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(insert_comment_query, (activity_id, user_id, comment_text))
+        cursor.execute(insert_comment_query, (activity_id, user_id, comment_text, just_content))
         
         new_comment_id = cursor.lastrowid
 
