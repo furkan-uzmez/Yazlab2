@@ -885,28 +885,8 @@ function Profile() {
             </div>
           </>
         ) : (
-          <div className="private-account-message" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '60px 20px',
-            color: '#888',
-            textAlign: 'center',
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '12px',
-            margin: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div style={{
-              fontSize: '48px',
-              marginBottom: '20px',
-              color: '#666'
-            }}>
-              {/* Assuming FaLock is imported or defined elsewhere */}
-              {/* <FaLock /> */}
-            </div>
-            <h2 style={{ color: '#fff', marginBottom: '10px' }}>Bu Hesap Gizli</h2>
+          <div className="private-account-message">
+            <h2>Bu Hesap Gizli</h2>
             <p>Bu kullanıcının paylaşımlarını görmek için takip etmelisin.</p>
           </div>
         )}

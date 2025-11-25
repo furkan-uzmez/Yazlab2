@@ -5,23 +5,23 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
   z-index: 2000;
-  animation: overlayFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: overlayFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes overlayFadeIn {
   from {
     opacity: 0;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px) saturate(100%);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
   }
   to {
     opacity: 1;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
   }
 }
 
@@ -30,33 +30,89 @@
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) perspective(1000px);
   width: 90%;
   max-width: 700px;
   max-height: 90vh;
-  background: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+  backdrop-filter: blur(50px) saturate(180%);
+  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 30px;
-  box-shadow: none;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 1px 3px rgba(255, 255, 255, 0.1) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.4) inset,
+    0 0 100px rgba(0, 0, 0, 0.3);
   z-index: 2001;
   display: flex;
   flex-direction: column;
-  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   overflow-x: hidden;
   pointer-events: auto;
   visibility: visible;
   opacity: 1;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.add-post-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 30px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.add-post-modal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  border-radius: 30px 30px 0 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
+    transform: translate(-50%, -48%) scale(0.96) perspective(1000px) rotateX(5deg);
+    filter: blur(10px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1) perspective(1000px) rotateX(0deg);
+    filter: blur(0px);
   }
 }
 
@@ -100,8 +156,34 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   flex-shrink: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: 
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.3) inset;
+  position: relative;
+}
+
+.add-post-modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
 }
 
 .add-post-modal-header h2 {
@@ -110,6 +192,8 @@
   font-weight: 400;
   color: #ffffff;
   letter-spacing: -0.5px;
+  position: relative;
+  z-index: 2;
 }
 
 .add-post-modal-close {
@@ -123,6 +207,8 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
 }
 
 .add-post-modal-close:hover {
@@ -136,11 +222,19 @@
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
-  background: transparent;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    transparent 100%
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
+  z-index: 2;
 }
 
 /* Custom Scrollbar */
