@@ -37,7 +37,7 @@ def get_user_feed(connection, email: str, page: int = 1) -> list:
 
                 -- Toplam beğeni ve yorum sayısı
                 (SELECT COUNT(*) FROM activities_likes al WHERE al.activity_id = a.activity_id) AS like_count,
-                (SELECT COUNT(*) FROM activity_comments ac WHERE ac.activity_id = a.activity_id) AS comment_count,
+                (SELECT COUNT(*) FROM activity_comments ac WHERE ac.activity_id = a.activity_id AND ac.just_content = 0) AS comment_count,
 
                 -- --- YENİ KISIM: BEN BEĞENDİM Mİ? ---
                 -- Eğer sonuç 1 ise beğenmişimdir, 0 ise beğenmemişimdir.
