@@ -232,7 +232,6 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
                     className={`add-post-type-btn ${contentType === 'movie' ? 'active' : ''}`}
                     onClick={() => {
                       setContentType('movie');
-                      setStep(2);
                     }}
                   >
                     <FaFilm />
@@ -243,7 +242,6 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
                     className={`add-post-type-btn ${contentType === 'book' ? 'active' : ''}`}
                     onClick={() => {
                       setContentType('book');
-                      setStep(2);
                     }}
                   >
                     <FaBook />
@@ -415,6 +413,16 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
 
           {/* Navigation Buttons */}
           <div className="add-post-navigation">
+            {step === 1 && contentType && (
+              <button
+                type="button"
+                className="add-post-nav-btn add-post-next-btn"
+                onClick={() => setStep(2)}
+              >
+                İleri
+                <FaChevronRight />
+              </button>
+            )}
             {step > 1 && step < 3 && (
               <button
                 type="button"
