@@ -400,6 +400,7 @@ function Profile() {
 
   const handleFollowersClick = async () => {
     if (!profileUser?.email) return;
+    if (!isOwnProfile && !isFollowing) return;
 
     setShowFollowersModal(true);
     setLoadingFollowers(true);
@@ -425,6 +426,7 @@ function Profile() {
 
   const handleFollowingClick = async () => {
     if (!profileUser?.email) return;
+    if (!isOwnProfile && !isFollowing) return;
 
     setShowFollowingModal(true);
     setLoadingFollowing(true);

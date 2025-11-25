@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { FaEdit, FaPlus, FaUserPlus, FaUserCheck } from 'react-icons/fa';
 import './ProfileHeader.css';
 
-function ProfileHeader({ 
-  profileUser, 
-  isOwnProfile, 
-  isFollowing, 
-  customLists, 
-  libraryData, 
+function ProfileHeader({
+  profileUser,
+  isOwnProfile,
+  isFollowing,
+  customLists,
+  libraryData,
   recentActivities,
   onEditProfile,
   onCreateList,
@@ -72,7 +72,7 @@ function ProfileHeader({
   return (
     <div className="profile-header">
       <div className="profile-avatar-section">
-        <img 
+        <img
           src={avatarUrl}
           alt={username}
           className="profile-avatar"
@@ -81,34 +81,34 @@ function ProfileHeader({
       </div>
       <div className="profile-info-section">
         <h1 className="profile-username">{username}</h1>
-        
+
         {/* Bio varsa veya placeholder göstermek istiyorsak */}
         <p className="profile-bio">{bio}</p>
-        
+
         <div className="profile-stats">
           <button className="profile-stat clickable-stat">
             <span className="stat-value">{libraryData?.watched?.length + libraryData?.read?.length || 0}</span>
             <span className="stat-label">İçerik</span>
           </button>
-          <button 
-            className="profile-stat clickable-stat" 
+          <button
+            className="profile-stat clickable-stat"
             onClick={onListsClick}
           >
             <span className="stat-value">{customLists?.length || 0}</span>
             <span className="stat-label">Liste</span>
           </button>
-          <button 
-            className="profile-stat clickable-stat" 
+          <button
+            className="profile-stat clickable-stat"
             onClick={handleFollowingClick}
-            disabled={loadingCounts}
+            disabled={loadingCounts || (!isOwnProfile && !isFollowing)}
           >
             <span className="stat-value">{loadingCounts ? '...' : followingCount}</span>
             <span className="stat-label">Takip</span>
           </button>
-          <button 
-            className="profile-stat clickable-stat" 
+          <button
+            className="profile-stat clickable-stat"
             onClick={handleFollowersClick}
-            disabled={loadingCounts}
+            disabled={loadingCounts || (!isOwnProfile && !isFollowing)}
           >
             <span className="stat-value">{loadingCounts ? '...' : followersCount}</span>
             <span className="stat-label">Takipçi</span>
@@ -128,7 +128,7 @@ function ProfileHeader({
             </button>
           </>
         ) : (
-          <button 
+          <button
             className={`profile-action-btn ${isFollowing ? 'unfollow' : 'follow'}`}
             onClick={onFollow}
           >
