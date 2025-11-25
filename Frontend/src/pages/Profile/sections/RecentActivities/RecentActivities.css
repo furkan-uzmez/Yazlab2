@@ -26,6 +26,54 @@
   letter-spacing: -0.01em;
 }
 
+/* Activities Tabs */
+.activities-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.activity-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: #b3b3b3;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.activity-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.activity-tab.active {
+  background: rgba(74, 158, 255, 0.15);
+  border-color: rgba(74, 158, 255, 0.3);
+  color: #4a9eff;
+}
+
+.activity-tab svg {
+  font-size: 0.9rem;
+}
+
+.tab-count {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-left: 0.25rem;
+}
+
 .activities-list {
   display: flex;
   flex-direction: column;
@@ -130,4 +178,20 @@
     opacity: 1;
   }
 }
+
+/* Activity Card Wrapper for Posts Tab */
+.activities-posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.activity-card-wrapper {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.activity-card-wrapper:nth-child(1) { animation-delay: 0.1s; }
+.activity-card-wrapper:nth-child(2) { animation-delay: 0.15s; }
+.activity-card-wrapper:nth-child(3) { animation-delay: 0.2s; }
+.activity-card-wrapper:nth-child(4) { animation-delay: 0.25s; }
 

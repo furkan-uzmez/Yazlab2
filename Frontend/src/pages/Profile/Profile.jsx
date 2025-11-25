@@ -881,7 +881,7 @@ function Profile() {
             </div>
 
             <div className="profile-sidebar">
-              <RecentActivities recentActivities={recentActivities} />
+              <RecentActivities recentActivities={recentActivities} libraryData={libraryData} profileUser={profileUser} />
             </div>
           </>
         ) : (
