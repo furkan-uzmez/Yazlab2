@@ -46,3 +46,22 @@ def unfollow(connection, follower_id, followed_id) -> bool:
         print(f"HATA: Takipten çıkma işlemi başarısız: {e}")
         connection.rollback() # Değişiklikleri geri al
         return False # İşlem başarısız
+
+def check_follow_status(connection, follower_id, followed_id) -> bool:
+    """
+    Check if follower_id is following followed_id.
+
+    :param connection: Database connection object
+    :param follower_id: ID of the user who might be following
+    :param followed_id: ID of the user who might be followed
+    :return: True if following, False otherwise
+    """
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT 1 FROM follows WHERE follower_id = %s AND followed_id = %s"
+            cursor.execute(sql, (follower_id, followed_id))
+            result = cursor.fetchone()
+            return result is not None
+    except Exception as e:
+        print(f"HATA: Takip durumu kontrolü başarısız: {e}")
+        return False

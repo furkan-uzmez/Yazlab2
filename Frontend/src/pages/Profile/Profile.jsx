@@ -19,12 +19,12 @@ function Profile() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
-  
+
   // Mock data - Frontend only
   const isOwnProfile = !userId; // If no userId, it's own profile
-  const isFollowing = false;
-  
- // ... (diğer state'ler) ...
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  // ... (diğer state'ler) ...
 
   // Mock profile user - now using state (BAŞLANGIÇ DEĞERİNİ GÜNCELLEYİN)
   const [profileUser, setProfileUser] = useState(null); // Başlangıçta null olsun, veri gelince dolsun
@@ -32,7 +32,7 @@ function Profile() {
   //const [customLists, setCustomLists] = useState([]); // <-- BOŞ BAŞLIYOR
   const [loadingLists, setLoadingLists] = useState(false); // Yükleme durumu
 
-// ... (diğer state'ler)
+  // ... (diğer state'ler)
 
   // ... (diğer state'ler) ...
 
@@ -51,27 +51,27 @@ function Profile() {
   useEffect(() => {
     const fetchLibraryData = async () => {
       setLoadingLibrary(true);
-      
+
       // Kullanıcı adını belirle
       let targetUsername = userId;
       if (!targetUsername) {
-          targetUsername = localStorage.getItem("profileusername");
+        targetUsername = localStorage.getItem("profileusername");
       }
-      
+
       if (!targetUsername) {
-          setLoadingLibrary(false);
-          return;
+        setLoadingLibrary(false);
+        return;
       }
 
       try {
         // API isteği
         const response = await fetch(`http://localhost:8000/list/get_library?username=${encodeURIComponent(targetUsername)}`);
-        
+
         if (response.ok) {
           const data = await response.json();
           // Backend'den gelen veri zaten doğru formatta:
           // { "watched": [...], "read": [...], ... }
-          
+
           // State'i güncelle
           setLibraryData({
             watched: data.watched || [],
@@ -94,7 +94,7 @@ function Profile() {
 
   // ... (CustomLists useEffect'i ve diğerleri aynı kalsın) ...
 
-// --- YENİ: KULLANICI VERİSİNİ ÇEKME (API) ---
+  // --- YENİ: KULLANICI VERİSİNİ ÇEKME (API) ---
   useEffect(() => {
     const fetchUserProfile = async () => {
       setLoadingProfile(true);
@@ -103,25 +103,29 @@ function Profile() {
         let isOwnProfileView = !userId; // URL'de userId yoksa kendi profilimizdir
 
         if (isOwnProfileView) {
-            // Kendi profilimiz: Email ile ara
-            const email = localStorage.getItem('email');
-            if (!email) {
-                setLoadingProfile(false);
-                return;
-            }
-            // API: /user/search_by_email?query=...
-            url = `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(email)}`;
+          // Kendi profilimiz: Email ile ara
+          const email = localStorage.getItem('email');
+          if (!email) {
+            setLoadingProfile(false);
+            return;
+          }
+          // API: /user/search_by_email?query=...
+          url = `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(email)}`;
         } else {
-            // Başkasının profili: Username ile ara
-            // DÜZELTME BURADA: '/get_user' yerine '/search' kullanıldı
-            url = `http://localhost:8000/user/search?query=${encodeURIComponent(userId)}`;
+          // Başkasının profili: Username ile ara
+          // Viewer ID ekle (takip durumunu kontrol etmek için)
+          const currentUserId = localStorage.getItem('user_id');
+          url = `http://localhost:8000/user/search?query=${encodeURIComponent(userId)}`;
+          if (currentUserId) {
+            url += `&viewer_id=${currentUserId}`;
+          }
         }
 
         const response = await fetch(url);
-        
+
         if (response.ok) {
           const data = await response.json();
-          
+
           // API'den gelen veri yapısını kontrol et (results bir dizi olabilir)
           let userData = null;
 
@@ -129,24 +133,29 @@ function Profile() {
             userData = data.user;
           } else if (Array.isArray(data.results) && data.results.length > 0) {
             // /user/search endpoint'i bir liste döndürür, ilk elemanı alıyoruz
-            userData = data.results[0]; 
+            userData = data.results[0];
           } else if (data.results) {
             userData = data.results;
           }
 
           if (userData) {
-             setProfileUser({
-                 user_id: userData.user_id,
-                 username: userData.username,
-                 email: userData.email,
-                 avatar_url: userData.avatar_url, 
-                 bio: userData.bio || 'Henüz bir biyografi eklenmemiş.',
-                 followers_count: userData.followers_count || 0,
-                 following_count: userData.following_count || 0
-             });
+            setProfileUser({
+              user_id: userData.user_id,
+              username: userData.username,
+              email: userData.email,
+              avatar_url: userData.avatar_url,
+              bio: userData.bio || 'Henüz bir biyografi eklenmemiş.',
+              followers_count: userData.followers_count || 0,
+              following_count: userData.following_count || 0,
+              is_following: userData.is_following || false // API'den gelen takip durumu
+            });
+            // Takip durumunu güncelle (sadece başkasının profili ise)
+            if (!isOwnProfileView) {
+              setIsFollowing(userData.is_following || false);
+            }
           } else {
-             console.error("API yanıtında kullanıcı verisi bulunamadı.");
-             setProfileUser(null);
+            console.error("API yanıtında kullanıcı verisi bulunamadı.");
+            setProfileUser(null);
           }
         } else {
           console.error("Kullanıcı profili alınamadı:", response.status);
@@ -168,40 +177,40 @@ function Profile() {
   useEffect(() => {
     const fetchUserLists = async () => {
       setLoadingLists(true);
-      
+
       let targetUsername = userId;
       if (!targetUsername) {
-          targetUsername = localStorage.getItem("profileusername");
+        targetUsername = localStorage.getItem("profileusername");
       }
-      
+
       if (!targetUsername) {
-          setLoadingLists(false);
-          return;
+        setLoadingLists(false);
+        return;
       }
 
       try {
         const response = await fetch(`http://localhost:8000/list/get_lists?username=${encodeURIComponent(targetUsername)}`);
-        
+
         if (response.ok) {
           const data = await response.json();
           const apiLists = data.lists || [];
-          
+
           // --- DÜZELTME BURADA: STANDART LİSTELERİ FİLTRELE ---
           // Bu listeler zaten LibraryTabs içinde gösteriliyor, 
           // CustomLists içinde tekrar göstermemek için filtreliyoruz.
           const standardListNames = ["İzledim", "İzlenecek", "Okudum", "Okunacak"];
-          
-          const customListsOnly = apiLists.filter(list => 
-              !standardListNames.includes(list.name)
+
+          const customListsOnly = apiLists.filter(list =>
+            !standardListNames.includes(list.name)
           );
           // ----------------------------------------------------
 
           const formattedLists = customListsOnly.map(list => ({
-              id: list.list_id,
-              name: list.name,
-              description: list.description,
-              items: [], // İçerik detayları için ayrı istek gerekebilir
-              itemCount: list.item_count
+            id: list.list_id,
+            name: list.name,
+            description: list.description,
+            items: [], // İçerik detayları için ayrı istek gerekebilir
+            itemCount: list.item_count
           }));
 
           setCustomLists(formattedLists);
@@ -223,13 +232,13 @@ function Profile() {
   // Library tabs
   const [activeLibraryTab, setActiveLibraryTab] = useState('watched');
   const [isTabTransitioning, setIsTabTransitioning] = useState(false);
-  
+
   // Create list modal
   const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false);
   const [isCreateListModalClosing, setIsCreateListModalClosing] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListDescription, setNewListDescription] = useState('');
-  
+
   // Edit profile modal
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isEditProfileModalClosing, setIsEditProfileModalClosing] = useState(false);
@@ -242,7 +251,7 @@ function Profile() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchResultsClosing, setIsSearchResultsClosing] = useState(false);
-  
+
   const handleTabChange = (newTab) => {
     if (newTab !== activeLibraryTab) {
       setIsTabTransitioning(true);
@@ -254,7 +263,7 @@ function Profile() {
       }, 200);
     }
   };
-  
+
 
   // Add content modal state
   const [isAddContentModalOpen, setIsAddContentModalOpen] = useState(false);
@@ -293,7 +302,7 @@ function Profile() {
     setLibraryData(prev => {
       const newData = { ...prev };
       const targetArray = newData[addContentType];
-      
+
       // Check if content already exists
       const exists = targetArray.some(item => item.id === content.id);
       if (!exists) {
@@ -303,22 +312,26 @@ function Profile() {
           poster_url: content.poster_url
         }];
       }
-      
+
       return newData;
     });
   };
-  
+
   // Mock custom lists - now using state
   const [customLists, setCustomLists] = useState([
-    { id: 1, name: 'En İyi Bilimkurgu Filmlerim', description: 'Favori bilimkurgu filmlerim', items: [
-      { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
-      { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' }
-    ]},
-    { id: 2, name: 'Okunacak Klasikler', description: 'Mutlaka okumam gereken klasik eserler', items: [
-      { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' }
-    ]}
+    {
+      id: 1, name: 'En İyi Bilimkurgu Filmlerim', description: 'Favori bilimkurgu filmlerim', items: [
+        { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
+        { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' }
+      ]
+    },
+    {
+      id: 2, name: 'Okunacak Klasikler', description: 'Mutlaka okumam gereken klasik eserler', items: [
+        { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' }
+      ]
+    }
   ]);
-  
+
   // Mock recent activities
   const recentActivities = [
     { type: 'rating', content_title: 'Inception', rating_score: 9.5, created_at: new Date(Date.now() - 2 * 3600 * 1000) },
@@ -328,7 +341,7 @@ function Profile() {
   ];
 
   const handleLogout = () => setLogoutModalOpen(true);
-  
+
   const handleConfirmLogout = () => {
     setLogoutLoading(true);
     setTimeout(() => {
@@ -344,21 +357,57 @@ function Profile() {
   };
 
   const handleFollow = async () => {
-    // TODO: Implement follow/unfollow API call
-    setIsFollowing(!isFollowing);
+    const currentUserId = localStorage.getItem('user_id');
+    const targetUserId = profileUser?.user_id;
+
+    if (!currentUserId || !targetUserId) {
+      console.error("Kullanıcı ID'leri eksik:", { currentUserId, targetUserId });
+      return;
+    }
+
+    const endpoint = isFollowing ? 'unfollow' : 'follow';
+    const method = isFollowing ? 'DELETE' : 'POST';
+
+    try {
+      const response = await fetch(`http://localhost:8000/user/${endpoint}`, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          follower_id: parseInt(currentUserId),
+          followed_id: targetUserId
+        })
+      });
+
+      if (response.ok) {
+        setIsFollowing(!isFollowing);
+        // Takipçi sayısını güncelle
+        setProfileUser(prev => ({
+          ...prev,
+          followers_count: isFollowing
+            ? Math.max(0, prev.followers_count - 1)
+            : prev.followers_count + 1
+        }));
+      } else {
+        console.error("Takip işlemi başarısız:", response.status);
+      }
+    } catch (error) {
+      console.error("Takip API hatası:", error);
+    }
   };
 
   const handleFollowersClick = async () => {
     if (!profileUser?.email) return;
-    
+
     setShowFollowersModal(true);
     setLoadingFollowers(true);
-    
+
     // Açılış animasyonu için kısa bir gecikme
     setTimeout(() => {
       setIsFollowersModalOpening(true);
     }, 10);
-    
+
     try {
       const response = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/followers`);
       if (response.ok) {
@@ -375,15 +424,15 @@ function Profile() {
 
   const handleFollowingClick = async () => {
     if (!profileUser?.email) return;
-    
+
     setShowFollowingModal(true);
     setLoadingFollowing(true);
-    
+
     // Açılış animasyonu için kısa bir gecikme
     setTimeout(() => {
       setIsFollowingModalOpening(true);
     }, 10);
-    
+
     try {
       const response = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/following`);
       if (response.ok) {
@@ -424,7 +473,7 @@ function Profile() {
 
   const handleUnfollow = async (e, userId) => {
     e.stopPropagation(); // Modal'ın kapanmasını engelle
-    
+
     const currentUserId = profileUser?.user_id;
     if (!currentUserId || !userId) return;
 
@@ -455,7 +504,7 @@ function Profile() {
 
   const handleRemoveFollower = async (e, followerId) => {
     e.stopPropagation(); // Modal'ın kapanmasını engelle
-    
+
     const currentUserId = profileUser?.user_id;
     if (!currentUserId || !followerId) return;
 
@@ -591,7 +640,7 @@ function Profile() {
               { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
               { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
               { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
-            ].filter(item => 
+            ].filter(item =>
               item.title.toLowerCase().includes(query.toLowerCase())
             );
             setSearchResults(mockResults);
@@ -608,7 +657,7 @@ function Profile() {
             { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
             { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
             { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
-          ].filter(item => 
+          ].filter(item =>
             item.title.toLowerCase().includes(query.toLowerCase())
           );
           setSearchResults(mockResults);
@@ -726,14 +775,14 @@ function Profile() {
   if (loadingProfile) {
     return (
       <div className="profile-container">
-        <Sidebar 
+        <Sidebar
           onLogout={handleLogout}
           isSearchMode={isSearchMode}
           onSearchModeChange={setIsSearchMode}
         />
         <div className="profile-loading">
           <div className="loading-spinner"></div> {/* CSS'inizde spinner varsa */}
-          <p style={{color: 'white', textAlign: 'center', marginTop: '20px'}}>Profil Yükleniyor...</p>
+          <p style={{ color: 'white', textAlign: 'center', marginTop: '20px' }}>Profil Yükleniyor...</p>
         </div>
         <BottomNav />
       </div>
@@ -742,12 +791,12 @@ function Profile() {
 
   // Eğer yükleme bitti ama kullanıcı bulunamadıysa (profileUser hala null ise)
   if (!profileUser) {
-     return (
+    return (
       <div className="profile-container">
         <Sidebar onLogout={handleLogout} />
-        <div className="profile-error" style={{color: 'white', textAlign: 'center', marginTop: '50px'}}>
-           <h2>Kullanıcı Bulunamadı</h2>
-           <button onClick={() => navigate('/home')} style={{marginTop: '10px', padding: '10px'}}>Ana Sayfaya Dön</button>
+        <div className="profile-error" style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}>
+          <h2>Kullanıcı Bulunamadı</h2>
+          <button onClick={() => navigate('/home')} style={{ marginTop: '10px', padding: '10px' }}>Ana Sayfaya Dön</button>
         </div>
         <BottomNav />
       </div>
@@ -758,7 +807,7 @@ function Profile() {
 
   return (
     <div className="profile-container">
-      <Sidebar 
+      <Sidebar
         onLogout={handleLogout}
         isSearchMode={isSearchMode}
         onSearchModeChange={setIsSearchMode}
@@ -803,7 +852,7 @@ function Profile() {
           recentActivities={recentActivities}
         />
       </div>
-      <BottomNav 
+      <BottomNav
         onSearchClick={() => setIsSearchMode(true)}
         isSearchMode={isSearchMode}
       />
@@ -878,18 +927,18 @@ function Profile() {
               ) : followersList.length > 0 ? (
                 <div className="follow-modal-list">
                   {followersList.map((user, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="follow-modal-user-item"
                       onClick={() => handleUserClick(user.username)}
                     >
-                      <img 
+                      <img
                         src={user.avatar_url || `https://i.pravatar.cc/150?img=${index + 1}`}
                         alt={user.username}
                         className="follow-modal-user-avatar"
                       />
                       <span className="follow-modal-username">{user.username}</span>
-                      <button 
+                      <button
                         className="follow-modal-remove-btn"
                         onClick={(e) => handleRemoveFollower(e, user.user_id)}
                       >
@@ -919,18 +968,18 @@ function Profile() {
               ) : followingList.length > 0 ? (
                 <div className="follow-modal-list">
                   {followingList.map((user, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="follow-modal-user-item"
                       onClick={() => handleUserClick(user.username)}
                     >
-                      <img 
+                      <img
                         src={user.avatar_url || `https://i.pravatar.cc/150?img=${index + 1}`}
                         alt={user.username}
                         className="follow-modal-user-avatar"
                       />
                       <span className="follow-modal-username">{user.username}</span>
-                      <button 
+                      <button
                         className="follow-modal-unfollow-btn"
                         onClick={(e) => handleUnfollow(e, user.user_id)}
                       >
