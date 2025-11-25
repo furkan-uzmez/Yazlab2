@@ -16,6 +16,7 @@ from backend.api.feed.get_user_feed_api import router as get_user_feed_router
 from backend.api.feed.like_review_api import router as like_review_router
 from backend.api.feed.add_rating_api import router as add_rating_router
 from backend.api.feed.add_review_api import router as add_review_router
+from backend.api.feed.get_user_activities_api import router as get_user_activities_router
 from backend.api.content.search_api import router as search_content_router
 from backend.api.content.get_details_api import router as get_details_router
 from backend.api.content.get_popular_content_api import router as get_popular_content_router
@@ -54,6 +55,7 @@ api.include_router(get_user_feed_router)
 api.include_router(like_review_router)
 api.include_router(add_rating_router)
 api.include_router(add_review_router)
+api.include_router(get_user_activities_router)
 api.include_router(search_content_router)
 api.include_router(get_details_router)
 api.include_router(get_popular_content_router)

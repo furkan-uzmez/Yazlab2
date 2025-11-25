@@ -333,13 +333,41 @@ function Profile() {
     }
   ]);
 
-  // Mock recent activities
-  const recentActivities = [
-    { type: 'rating', content_title: 'Inception', rating_score: 9.5, created_at: new Date(Date.now() - 2 * 3600 * 1000) },
-    { type: 'review', content_title: '1984', created_at: new Date(Date.now() - 5 * 3600 * 1000) },
-    { type: 'rating', content_title: 'The Matrix', rating_score: 8.5, created_at: new Date(Date.now() - 8 * 3600 * 1000) },
-    { type: 'review', content_title: 'Dune', created_at: new Date(Date.now() - 12 * 3600 * 1000) }
-  ];
+  // Recent activities state
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
+
+  useEffect(() => {
+    const fetchRecentActivities = async () => {
+      if (!profileUser?.user_id) return;
+
+      setLoadingActivities(true);
+      try {
+        const currentUserId = localStorage.getItem('user_id');
+        let url = `http://localhost:8000/feed/user_activities?user_id=${profileUser.user_id}`;
+
+        if (currentUserId) {
+          url += `&viewer_id=${currentUserId}`;
+        }
+
+        const response = await fetch(url);
+        if (response.ok) {
+          const data = await response.json();
+          setRecentActivities(data.activities || []);
+        } else {
+          console.error("Aktiviteler yüklenemedi:", response.status);
+        }
+      } catch (error) {
+        console.error("Aktivite API hatası:", error);
+      } finally {
+        setLoadingActivities(false);
+      }
+    };
+
+    if (profileUser?.user_id) {
+      fetchRecentActivities();
+    }
+  }, [profileUser?.user_id]);
 
   const handleLogout = () => setLogoutModalOpen(true);
 
