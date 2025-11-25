@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaLock } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
@@ -829,28 +830,56 @@ function Profile() {
           onListsClick={handleListsClick}
         />
 
-        {/* Library Tabs */}
-        <LibraryTabs
-          activeTab={activeLibraryTab}
-          onTabChange={handleTabChange}
-          isTabTransitioning={isTabTransitioning}
-          libraryData={libraryData}
-          isOwnProfile={isOwnProfile}
-          onAddContentClick={handleAddContentClick}
-        />
+        {isOwnProfile || isFollowing ? (
+          <>
+            <div className="profile-main">
+              <LibraryTabs
+                activeTab={activeLibraryTab}
+                onTabChange={handleTabChange}
+                isTransitioning={isTabTransitioning}
+                libraryData={libraryData}
+                isOwnProfile={isOwnProfile}
+                onAddContentClick={handleAddContentClick}
+              />
 
-        {/* Custom Lists */}
-        {isOwnProfile && (
-          <CustomLists
-            customLists={customLists}
-            onEditList={handleEditList}
-          />
+              <CustomLists
+                customLists={customLists}
+                isOwnProfile={isOwnProfile}
+                onEditList={handleEditList}
+                onDeleteList={handleDeleteList}
+              />
+            </div>
+
+            <div className="profile-sidebar">
+              <RecentActivities recentActivities={recentActivities} />
+            </div>
+          </>
+        ) : (
+          <div className="private-account-message" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '60px 20px',
+            color: '#888',
+            textAlign: 'center',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            margin: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{
+              fontSize: '48px',
+              marginBottom: '20px',
+              color: '#666'
+            }}>
+              {/* Assuming FaLock is imported or defined elsewhere */}
+              {/* <FaLock /> */}
+            </div>
+            <h2 style={{ color: '#fff', marginBottom: '10px' }}>Bu Hesap Gizli</h2>
+            <p>Bu kullanıcının paylaşımlarını görmek için takip etmelisin.</p>
+          </div>
         )}
-
-        {/* Recent Activities */}
-        <RecentActivities
-          recentActivities={recentActivities}
-        />
       </div>
       <BottomNav
         onSearchClick={() => setIsSearchMode(true)}
