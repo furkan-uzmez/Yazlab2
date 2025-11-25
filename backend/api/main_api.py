@@ -9,6 +9,8 @@ from backend.api.auth.forget_password_api import router as forget_password_route
 from backend.api.user.get_followers_api import router as get_followers_router
 from backend.api.user.get_following_api import router as get_following_router
 from backend.api.user.get_user_api import router as get_user_router
+from backend.api.list.get_user_library_api import router as get_user_library_router
+from backend.api.list.get_user_list_api import router as get_user_list_router
 from backend.api.feed.get_user_feed_api import router as get_user_feed_router
 from backend.api.feed.like_review_api import router as like_review_router
 from backend.api.feed.add_rating_api import router as add_rating_router
@@ -44,6 +46,8 @@ api.include_router(forget_password_router)
 api.include_router(get_followers_router)
 api.include_router(get_following_router)
 api.include_router(get_user_router)
+api.include_router(get_user_library_router)
+api.include_router(get_user_list_router)
 api.include_router(get_user_feed_router)
 api.include_router(like_review_router)
 api.include_router(add_rating_router)
