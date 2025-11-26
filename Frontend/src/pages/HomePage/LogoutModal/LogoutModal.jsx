@@ -4,12 +4,11 @@ function LogoutModal({ isOpen, isLoading, onConfirm, onCancel }) {
   if (!isOpen) return null;
 
   return (
-    <>
-      <div 
-        className="logout-modal-overlay"
-        onClick={!isLoading ? onCancel : undefined}
-      ></div>
-      <div className="logout-modal">
+    <div 
+      className="logout-modal-overlay"
+      onClick={!isLoading ? onCancel : undefined}
+    >
+      <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
         {!isLoading ? (
           <>
             <h3 className="logout-modal-title">Çıkış Yapmak İstiyor Musunuz?</h3>
@@ -38,7 +37,7 @@ function LogoutModal({ isOpen, isLoading, onConfirm, onCancel }) {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
