@@ -301,22 +301,113 @@ function Profile() {
   const handleAddContent = (content) => {
     if (!addContentType) return;
 
+    // Önce frontend state'ini güncelle (anında yansısın)
     setLibraryData(prev => {
       const newData = { ...prev };
       const targetArray = newData[addContentType];
 
-      // Check if content already exists
+      // Aynı içerik zaten varsa yeniden ekleme
       const exists = targetArray.some(item => item.id === content.id);
       if (!exists) {
-        newData[addContentType] = [...targetArray, {
-          id: content.id,
-          title: content.title,
-          poster_url: content.poster_url
-        }];
+        newData[addContentType] = [
+          ...targetArray,
+          {
+            id: content.id,
+            title: content.title,
+            poster_url: content.poster_url
+          }
+        ];
       }
 
       return newData;
     });
+
+    // Ardından veritabanına da kaydet
+    const username = profileUser?.username || localStorage.getItem('profileusername');
+    if (!username) {
+      console.error('Kütüphane kaydı için kullanıcı adı bulunamadı');
+      return;
+    }
+
+    // Liste tipine göre içerik türünü belirle
+    const contentType =
+      addContentType === 'watched' || addContentType === 'toWatch'
+        ? 'movie'
+        : 'book';
+
+    fetch('http://localhost:8000/list/add_item', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        list_key: addContentType,
+        external_id: content.id,
+        title: content.title,
+        poster_url: content.poster_url,
+        content_type: contentType,
+        api_source: 'user_add'
+      })
+    }).catch((error) => {
+      console.error('Kütüphane kaydı API hatası:', error);
+    });
+  };
+
+  const handleRemoveContent = async (content, listKey) => {
+    // Onay iste
+    const confirmed = window.confirm(`${content.title} adlı içeriği listeden kaldırmak istediğine emin misin?`);
+    if (!confirmed) {
+      return;
+    }
+
+    // Önce frontend state'ini güncelle (anında yansısın)
+    setLibraryData(prev => {
+      const newData = { ...prev };
+      newData[listKey] = newData[listKey].filter(item => item.id !== content.id);
+      return newData;
+    });
+
+    // Ardından veritabanından da kaldır
+    const username = profileUser?.username || localStorage.getItem('profileusername');
+    if (!username) {
+      console.error('Kütüphane kaldırma için kullanıcı adı bulunamadı');
+      return;
+    }
+
+    // get_user_library'den dönen verilerde id zaten content_id olarak geliyor
+    // Bu yüzden content.id'yi direkt kullanabiliriz
+    try {
+      const response = await fetch('http://localhost:8000/list/remove_item', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          list_key: listKey,
+          content_id: content.id
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Kütüphane kaldırma API hatası:', response.status);
+        // Hata durumunda state'i geri al (optimistic update'i geri al)
+        setLibraryData(prev => {
+          const newData = { ...prev };
+          newData[listKey] = [...newData[listKey], content];
+          return newData;
+        });
+      }
+    } catch (error) {
+      console.error('Kütüphane kaldırma hatası:', error);
+      // Hata durumunda state'i geri al
+      setLibraryData(prev => {
+        const newData = { ...prev };
+        newData[listKey] = [...newData[listKey], content];
+        return newData;
+      });
+    }
   };
 
   // Mock custom lists - now using state
@@ -887,6 +978,7 @@ function Profile() {
                 libraryData={libraryData}
                 isOwnProfile={isOwnProfile}
                 onAddContentClick={handleAddContentClick}
+                onRemoveContent={handleRemoveContent}
               />
 
               <CustomLists

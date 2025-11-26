@@ -12,6 +12,8 @@ from backend.api.user.follow_api import router as follow_router
 from backend.api.user.get_user_api import router as get_user_router
 from backend.api.list.get_user_library_api import router as get_user_library_router
 from backend.api.list.get_user_list_api import router as get_user_list_router
+from backend.api.list.add_library_item_api import router as add_library_item_router
+from backend.api.list.remove_library_item_api import router as remove_library_item_router
 from backend.api.feed.get_user_feed_api import router as get_user_feed_router
 from backend.api.feed.like_review_api import router as like_review_router
 from backend.api.feed.add_rating_api import router as add_rating_router
@@ -51,6 +53,8 @@ api.include_router(follow_router)
 api.include_router(get_user_router)
 api.include_router(get_user_library_router)
 api.include_router(get_user_list_router)
+api.include_router(add_library_item_router)
+api.include_router(remove_library_item_router)
 api.include_router(get_user_feed_router)
 api.include_router(like_review_router)
 api.include_router(add_rating_router)

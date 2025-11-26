@@ -159,6 +159,7 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  position: relative;
 }
 
 .library-item:nth-child(1) { animation-delay: 0.1s; }
@@ -206,6 +207,61 @@
 
 .library-item:hover span {
   color: #ffffff;
+}
+
+.library-item-remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.75);
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  padding: 0;
+  margin: 0;
+}
+
+.library-item-remove-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  color: inherit;
+}
+
+.library-item:hover .library-item-remove-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.library-item-remove-btn:hover {
+  background: rgba(220, 38, 38, 0.95);
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 
+    0 4px 16px rgba(220, 38, 38, 0.6),
+    0 0 0 2px rgba(220, 38, 38, 0.3);
+}
+
+.library-item-remove-btn:hover svg {
+  color: #ffffff;
+}
+
+.library-item-remove-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.5);
 }
 
 .library-item-add {

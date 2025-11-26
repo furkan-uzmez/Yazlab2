@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaFilm, FaBook, FaClock, FaPlus, FaChevronRight } from 'react-icons/fa';
+import { FaFilm, FaBook, FaClock, FaPlus, FaChevronRight, FaTrash } from 'react-icons/fa';
 import './LibraryTabs.css';
 
 function LibraryTabs({ 
@@ -9,7 +9,8 @@ function LibraryTabs({
   isTabTransitioning,
   libraryData,
   isOwnProfile,
-  onAddContentClick
+  onAddContentClick,
+  onRemoveContent
 }) {
   const navigate = useNavigate();
   const [showMore, setShowMore] = useState({
@@ -25,6 +26,13 @@ function LibraryTabs({
     // Tab'a göre type belirle
     const contentType = (activeTab === 'watched' || activeTab === 'toWatch') ? 'movie' : 'book';
     navigate(`/content/${contentType}/${item.id}`);
+  };
+
+  const handleRemoveClick = (e, item, listKey) => {
+    e.stopPropagation(); // Kartın tıklanmasını engelle
+    if (onRemoveContent) {
+      onRemoveContent(item, listKey);
+    }
   };
 
   const getItemsToShow = (items, tabKey) => {
@@ -94,6 +102,16 @@ function LibraryTabs({
                   onClick={() => handleItemClick(item)}
                   style={{ cursor: item.id ? 'pointer' : 'default' }}
                 >
+                  {isOwnProfile && (
+                    <button
+                      className="library-item-remove-btn"
+                      onClick={(e) => handleRemoveClick(e, item, 'watched')}
+                      aria-label="Kaldır"
+                      title="Listeden kaldır"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>
@@ -128,6 +146,16 @@ function LibraryTabs({
                   onClick={() => handleItemClick(item)}
                   style={{ cursor: item.id ? 'pointer' : 'default' }}
                 >
+                  {isOwnProfile && (
+                    <button
+                      className="library-item-remove-btn"
+                      onClick={(e) => handleRemoveClick(e, item, 'toWatch')}
+                      aria-label="Kaldır"
+                      title="Listeden kaldır"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>
@@ -162,6 +190,16 @@ function LibraryTabs({
                   onClick={() => handleItemClick(item)}
                   style={{ cursor: item.id ? 'pointer' : 'default' }}
                 >
+                  {isOwnProfile && (
+                    <button
+                      className="library-item-remove-btn"
+                      onClick={(e) => handleRemoveClick(e, item, 'read')}
+                      aria-label="Kaldır"
+                      title="Listeden kaldır"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>
@@ -196,6 +234,16 @@ function LibraryTabs({
                   onClick={() => handleItemClick(item)}
                   style={{ cursor: item.id ? 'pointer' : 'default' }}
                 >
+                  {isOwnProfile && (
+                    <button
+                      className="library-item-remove-btn"
+                      onClick={(e) => handleRemoveClick(e, item, 'toRead')}
+                      aria-label="Kaldır"
+                      title="Listeden kaldır"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
                   <img src={item.poster_url || '/placeholder.jpg'} alt={item.title} />
                   <span>{item.title}</span>
                 </div>
