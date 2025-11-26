@@ -24,6 +24,7 @@ function Profile() {
   // Mock data - Frontend only
   const isOwnProfile = !userId; // If no userId, it's own profile
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
   // ... (diğer state'ler) ...
 
@@ -386,6 +387,17 @@ function Profile() {
   };
 
   const handleFollow = async () => {
+    // Aynı anda birden fazla istek atılmasını engelle
+    if (isFollowLoading) return;
+
+    // Takipten çıkarken kullanıcıdan onay iste
+    if (isFollowing) {
+      const confirmed = window.confirm("Bu kullanıcıyı takipten çıkarmak istediğine emin misin?");
+      if (!confirmed) {
+        return;
+      }
+    }
+
     const currentUserId = localStorage.getItem('user_id');
     const targetUserId = profileUser?.user_id;
 
@@ -396,6 +408,8 @@ function Profile() {
 
     const endpoint = isFollowing ? 'unfollow' : 'follow';
     const method = isFollowing ? 'DELETE' : 'POST';
+
+    setIsFollowLoading(true);
 
     try {
       const response = await fetch(`http://localhost:8000/user/${endpoint}`, {
@@ -423,6 +437,8 @@ function Profile() {
       }
     } catch (error) {
       console.error("Takip API hatası:", error);
+    } finally {
+      setIsFollowLoading(false);
     }
   };
 
@@ -849,6 +865,7 @@ function Profile() {
           profileUser={profileUser}
           isOwnProfile={isOwnProfile}
           isFollowing={isFollowing}
+          isFollowLoading={isFollowLoading}
           customLists={customLists}
           libraryData={libraryData}
           recentActivities={recentActivities}

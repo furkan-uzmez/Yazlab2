@@ -6,6 +6,7 @@ function ProfileHeader({
   profileUser,
   isOwnProfile,
   isFollowing,
+  isFollowLoading,
   customLists,
   libraryData,
   recentActivities,
@@ -129,10 +130,15 @@ function ProfileHeader({
           </>
         ) : (
           <button
-            className={`profile-action-btn ${isFollowing ? 'unfollow' : 'follow'}`}
+            className={`profile-action-btn ${isFollowing ? 'unfollow' : 'follow'} ${isFollowLoading ? 'loading' : ''}`}
             onClick={onFollow}
+            disabled={isFollowLoading}
           >
-            {isFollowing ? (
+            {isFollowLoading ? (
+              <span className="follow-btn-skeleton">
+                <span className="skeleton-bar" />
+              </span>
+            ) : isFollowing ? (
               <>
                 <FaUserCheck />
                 <span>Takipten Çık</span>
@@ -151,3 +157,5 @@ function ProfileHeader({
 }
 
 export default ProfileHeader;
+
+

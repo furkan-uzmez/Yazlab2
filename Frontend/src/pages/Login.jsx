@@ -65,10 +65,16 @@ function Login() {
         }
 
         if (userData) {
-             localStorage.setItem("profileusername", userData.username);
-             localStorage.setItem("profilebio", userData.bio);
-             localStorage.setItem("profileimage_url", userData.avatar_url);
+          // Profil bilgilerini kaydet
+          localStorage.setItem("profileusername", userData.username);
+          localStorage.setItem("profilebio", userData.bio || "");
+          localStorage.setItem("profileimage_url", userData.avatar_url || "");
+
+          // Takip, aktiviteler vb. için user_id'yi de kaydet
+          if (userData.user_id !== undefined && userData.user_id !== null) {
+            localStorage.setItem("user_id", String(userData.user_id));
           }
+        }
       }
       
       // --- 3. ADIM: SPLASH EKRANINI GÖSTER ---
