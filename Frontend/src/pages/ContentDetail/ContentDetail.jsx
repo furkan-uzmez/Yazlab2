@@ -29,7 +29,7 @@ function ContentDetail() {
   const [isLoadingLists, setIsLoadingLists] = useState(false);
   const [addingToListId, setAddingToListId] = useState(null);
   const dropdownRef = useRef(null);
-  
+
   // Comments state
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -44,7 +44,7 @@ function ContentDetail() {
   useEffect(() => {
     const email = localStorage.getItem('email');
     setCurrentUserEmail(email);
-    
+
     // Fetch current user's user_id
     if (email) {
       const fetchCurrentUser = async () => {
@@ -70,7 +70,7 @@ function ContentDetail() {
   // Fetch comments for this content
   useEffect(() => {
     if (!id || !currentUserEmail) return;
-    
+
     const fetchComments = async () => {
       setIsLoadingComments(true);
       try {
@@ -78,11 +78,11 @@ function ContentDetail() {
         const response = await fetch(
           `http://localhost:8000/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
         );
-        
+
         if (response.ok) {
           const data = await response.json();
           const commentsData = data.comments || [];
-          
+
           // Format comments
           const formattedComments = commentsData.map(c => ({
             id: c.comment_id,
@@ -94,7 +94,7 @@ function ContentDetail() {
             likes: c.like_count || 0,
             isLiked: c.is_liked_by_me > 0
           }));
-          
+
           setComments(formattedComments);
         } else {
           console.error("Yorumlar yüklenemedi:", response.status);
@@ -105,7 +105,7 @@ function ContentDetail() {
         setIsLoadingComments(false);
       }
     };
-    
+
     fetchComments();
   }, [id, currentUserEmail]);
 
@@ -113,27 +113,27 @@ function ContentDetail() {
   useEffect(() => {
     const fetchContentDetails = async () => {
       if (!id || !type) return;
-      
+
       setLoading(true);
       try {
         const response = await fetch(
           `http://localhost:8000/content/details?content_id=${encodeURIComponent(id)}&content_type=${type}`
         );
-        
+
         if (response.ok) {
           const data = await response.json();
           const contentData = data.content;
-          
+
           if (type === 'movie') {
             // Format movie data
             const formattedContent = {
               id: contentData.id,
               title: contentData.title,
-              poster_path: contentData.poster_path 
-                ? `https://image.tmdb.org/t/p/w500${contentData.poster_path}` 
+              poster_path: contentData.poster_path
+                ? `https://image.tmdb.org/t/p/w500${contentData.poster_path}`
                 : null,
-              backdrop_path: contentData.backdrop_path 
-                ? `https://image.tmdb.org/t/p/w1280${contentData.backdrop_path}` 
+              backdrop_path: contentData.backdrop_path
+                ? `https://image.tmdb.org/t/p/w1280${contentData.backdrop_path}`
                 : null,
               release_date: contentData.release_date,
               vote_average: contentData.vote_average,
@@ -150,7 +150,7 @@ function ContentDetail() {
               revenue: contentData.revenue,
               status: contentData.status
             };
-            
+
             setContent(formattedContent);
             setPlatformRating(contentData.vote_average || 0);
             setTotalRatings(0); // TMDB'den rating sayısı gelmiyorsa 0
@@ -158,7 +158,7 @@ function ContentDetail() {
             // Format book data
             const imageLinks = contentData.imageLinks || {};
             const thumbnail = imageLinks.thumbnail || imageLinks.smallThumbnail || imageLinks.medium || null;
-            
+
             const formattedContent = {
               id: contentData.id,
               title: contentData.title,
@@ -175,7 +175,7 @@ function ContentDetail() {
               previewLink: contentData.previewLink || '',
               infoLink: contentData.infoLink || ''
             };
-            
+
             setContent(formattedContent);
             setPlatformRating(contentData.averageRating || 0);
             setTotalRatings(contentData.ratingsCount || 0);
@@ -189,7 +189,7 @@ function ContentDetail() {
         setLoading(false);
       }
     };
-    
+
     fetchContentDetails();
   }, [type, id]);
 
@@ -200,26 +200,26 @@ function ContentDetail() {
     // Simulate API call
     setTimeout(() => {
       const mockLists = [
-        { 
-          list_id: 1, 
-          list_name: 'En İyi Bilimkurgu Filmlerim', 
+        {
+          list_id: 1,
+          list_name: 'En İyi Bilimkurgu Filmlerim',
           name: 'En İyi Bilimkurgu Filmlerim',
           items: [
             { id: 1, title: 'Inception', type: 'Film' },
             { id: 2, title: 'The Matrix', type: 'Film' }
           ]
         },
-        { 
-          list_id: 2, 
-          list_name: 'Okunacak Klasikler', 
+        {
+          list_id: 2,
+          list_name: 'Okunacak Klasikler',
           name: 'Okunacak Klasikler',
           items: [
             { id: 3, title: '1984', type: 'Kitap' }
           ]
         },
-        { 
-          list_id: 3, 
-          list_name: 'Favori Aksiyon Filmleri', 
+        {
+          list_id: 3,
+          list_name: 'Favori Aksiyon Filmleri',
           name: 'Favori Aksiyon Filmleri',
           items: []
         }
@@ -250,13 +250,13 @@ function ContentDetail() {
     if (!content) return;
 
     setAddingToListId(listId);
-    
+
     // Simulate API call
     setTimeout(() => {
       const contentId = content.id || parseInt(id);
       const contentTitle = content.title;
       const contentType = type === 'movie' ? 'Film' : 'Kitap';
-      
+
       // Check if content already exists in the list
       const list = customLists.find(l => l.list_id === listId);
       if (list && list.items) {
@@ -267,7 +267,7 @@ function ContentDetail() {
           return;
         }
       }
-      
+
       // Add content to the list
       const updatedLists = customLists.map(list => {
         if (list.list_id === listId) {
@@ -282,7 +282,7 @@ function ContentDetail() {
         }
         return list;
       });
-      
+
       setCustomLists(updatedLists);
       alert('İçerik listeye eklendi!');
       setIsListDropdownOpen(false);
@@ -291,7 +291,7 @@ function ContentDetail() {
   };
 
   const handleLogout = () => setLogoutModalOpen(true);
-  
+
   const handleConfirmLogout = () => {
     setLogoutLoading(true);
     setTimeout(() => {
@@ -310,32 +310,119 @@ function ContentDetail() {
     // In real app, save to API
   };
 
-  const handleWatchedToggle = () => {
+  const handleWatchedToggle = async () => {
+    const listKey = type === 'movie' ? 'watched' : 'read';
+    const isCurrentlyInList = type === 'movie' ? isInWatched : isInRead;
+
+    // Optimistic update
     if (type === 'movie') {
       setIsInWatched(!isInWatched);
-      if (isInToWatch) setIsInToWatch(false);
+      if (!isCurrentlyInList && isInToWatch) setIsInToWatch(false);
     } else {
       setIsInRead(!isInRead);
-      if (isInToRead) setIsInToRead(false);
+      if (!isCurrentlyInList && isInToRead) setIsInToRead(false);
     }
-    // In real app, update API
+
+    const username = localStorage.getItem("profileusername");
+    if (!username) return;
+
+    try {
+      if (isCurrentlyInList) {
+        // Remove from list
+        // Note: We need content_id for removal, which we might not have if it's not in DB yet.
+        // But if it's in the list, it MUST be in DB.
+        // However, for safety, we should probably fetch the content_id first or handle this better.
+        // For now, let's assume content.id is the DB id if it's numeric, or we need to rely on backend handling.
+        // Actually, the backend remove expects 'content_id' (int). 
+        // If we only have TMDB ID, we can't remove easily without searching first.
+        // Let's skip removal implementation for now or try to send what we have.
+        // Wait, if we just added it, we might not know the content_id.
+        // Let's focus on ADDING first as per user request.
+        console.warn("Removal not fully implemented yet");
+      } else {
+        // Add to list
+        const response = await fetch("http://localhost:8000/list/add_item", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            list_key: listKey,
+            external_id: String(id), // TMDB/Google ID
+            title: content.title,
+            poster_url: content.poster_path,
+            content_type: type
+          })
+        });
+
+        if (!response.ok) {
+          // Revert optimistic update on error
+          if (type === 'movie') setIsInWatched(isCurrentlyInList);
+          else setIsInRead(isCurrentlyInList);
+          console.error("Failed to add to list");
+        }
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      // Revert
+      if (type === 'movie') setIsInWatched(isCurrentlyInList);
+      else setIsInRead(isCurrentlyInList);
+    }
   };
 
-  const handleToWatchToggle = () => {
+  const handleToWatchToggle = async () => {
+    const listKey = type === 'movie' ? 'toWatch' : 'toRead';
+    const isCurrentlyInList = type === 'movie' ? isInToWatch : isInToRead;
+
+    // Optimistic update
     if (type === 'movie') {
       setIsInToWatch(!isInToWatch);
-      if (isInWatched) setIsInWatched(false);
+      if (!isCurrentlyInList && isInWatched) setIsInWatched(false);
     } else {
       setIsInToRead(!isInToRead);
-      if (isInRead) setIsInRead(false);
+      if (!isCurrentlyInList && isInRead) setIsInRead(false);
     }
-    // In real app, update API
+
+    const username = localStorage.getItem("profileusername");
+    if (!username) return;
+
+    try {
+      if (isCurrentlyInList) {
+        // Remove logic (skipped for now as per above)
+        console.warn("Removal not fully implemented yet");
+      } else {
+        // Add to list
+        const response = await fetch("http://localhost:8000/list/add_item", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            list_key: listKey,
+            external_id: String(id),
+            title: content.title,
+            poster_url: content.poster_path,
+            content_type: type
+          })
+        });
+
+        if (!response.ok) {
+          // Revert
+          if (type === 'movie') setIsInToWatch(isCurrentlyInList);
+          else setIsInToRead(isCurrentlyInList);
+          console.error("Failed to add to list");
+        }
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      // Revert
+      if (type === 'movie') setIsInToWatch(isCurrentlyInList);
+      else setIsInToRead(isCurrentlyInList);
+    }
   };
 
   // Comments handlers
   const handleAddComment = async () => {
     if (!commentText.trim() || !currentUserEmail || !id) return;
-    
+
     try {
       const contentId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
       const response = await fetch('http://localhost:8000/interactions/add_comment_by_content', {
@@ -349,7 +436,7 @@ function ContentDetail() {
           comment_text: commentText.trim()
         })
       });
-      
+
       if (response.ok) {
         setCommentText('');
         setShowAllComments(false); // Reset to show first 5 comments
@@ -394,13 +481,13 @@ function ContentDetail() {
 
   const handleSaveEdit = async (commentId) => {
     if (!editingText.trim()) return;
-    
+
     const username = localStorage.getItem("profileusername");
     if (!username) {
       alert("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
       return;
     }
-    
+
     try {
       const response = await fetch('http://localhost:8000/interactions/update_comment', {
         method: 'PUT',
@@ -413,7 +500,7 @@ function ContentDetail() {
           new_text: editingText.trim()
         })
       });
-      
+
       if (response.ok) {
         setEditingCommentId(null);
         setEditingText('');
@@ -450,12 +537,12 @@ function ContentDetail() {
 
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
-    
+
     if (!currentUserEmail) {
       alert("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
       return;
     }
-    
+
     try {
       const response = await fetch('http://localhost:8000/interactions/delete_comment', {
         method: 'DELETE',
@@ -467,7 +554,7 @@ function ContentDetail() {
           user_email: currentUserEmail
         })
       });
-      
+
       if (response.ok) {
         // Refresh comments
         const contentId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
@@ -506,7 +593,7 @@ function ContentDetail() {
   if (loading) {
     return (
       <div className="content-detail-container">
-        <Sidebar 
+        <Sidebar
           onLogout={handleLogout}
           isSearchMode={isSearchMode}
           onSearchModeChange={setIsSearchMode}
@@ -514,7 +601,7 @@ function ContentDetail() {
         <div className="content-detail-content">
           <ContentDetailSkeleton />
         </div>
-        <BottomNav 
+        <BottomNav
           onSearchClick={() => setIsSearchMode(true)}
           isSearchMode={isSearchMode}
         />
@@ -525,7 +612,7 @@ function ContentDetail() {
   if (!content) {
     return (
       <div className="content-detail-container">
-        <Sidebar 
+        <Sidebar
           onLogout={handleLogout}
           isSearchMode={isSearchMode}
           onSearchModeChange={setIsSearchMode}
@@ -533,7 +620,7 @@ function ContentDetail() {
         <div className="content-detail-empty">
           <p>İçerik bulunamadı</p>
         </div>
-        <BottomNav 
+        <BottomNav
           onSearchClick={() => setIsSearchMode(true)}
           isSearchMode={isSearchMode}
         />
@@ -543,7 +630,7 @@ function ContentDetail() {
 
   return (
     <div className="content-detail-container">
-      <Sidebar 
+      <Sidebar
         onLogout={handleLogout}
         isSearchMode={isSearchMode}
         onSearchModeChange={setIsSearchMode}
@@ -667,26 +754,26 @@ function ContentDetail() {
                       <span>{isInToWatch ? 'İzlenecek' : 'İzlenecek'}</span>
                     </button>
                   </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        className={`library-btn ${isInRead ? 'active' : ''}`}
-                        onClick={handleWatchedToggle}
-                      >
-                        {isInRead ? <FaCheck /> : <FaPlus />}
-                        <span>{isInRead ? 'Okudum' : 'Okudum'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`library-btn ${isInToRead ? 'active' : ''}`}
-                        onClick={handleToWatchToggle}
-                      >
-                        {isInToRead ? <FaCheck /> : <FaPlus />}
-                        <span>{isInToRead ? 'Okunacak' : 'Okunacak'}</span>
-                      </button>
-                    </>
-                  )}
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className={`library-btn ${isInRead ? 'active' : ''}`}
+                      onClick={handleWatchedToggle}
+                    >
+                      {isInRead ? <FaCheck /> : <FaPlus />}
+                      <span>{isInRead ? 'Okudum' : 'Okudum'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`library-btn ${isInToRead ? 'active' : ''}`}
+                      onClick={handleToWatchToggle}
+                    >
+                      {isInToRead ? <FaCheck /> : <FaPlus />}
+                      <span>{isInToRead ? 'Okunacak' : 'Okunacak'}</span>
+                    </button>
+                  </>
+                )}
 
                 {/* Add to Custom List */}
                 <div className="custom-list-dropdown-wrapper" ref={dropdownRef}>
@@ -698,7 +785,7 @@ function ContentDetail() {
                     <FaPlus />
                     <span>Özel Listeye Ekle</span>
                   </button>
-                  
+
                   {isListDropdownOpen && (
                     <div className="custom-list-dropdown">
                       {isLoadingLists ? (
@@ -778,7 +865,7 @@ function ContentDetail() {
               <span className="comments-count">({comments.length})</span>
             )}
           </div>
-          
+
           {/* Add Comment Form */}
           {currentUserEmail && (
             <div className="add-comment-form">
@@ -818,11 +905,11 @@ function ContentDetail() {
                 {(showAllComments ? comments : comments.slice(0, 5)).map((comment) => {
                   const isOwnComment = currentUserId && comment.userId === currentUserId;
                   const isEditing = editingCommentId === comment.id;
-                  
+
                   return (
                     <div key={comment.id} className="comment-item">
-                      <img 
-                        src={comment.userAvatar || '/api/placeholder/40/40'} 
+                      <img
+                        src={comment.userAvatar || '/api/placeholder/40/40'}
                         alt={comment.userName}
                         className="comment-avatar"
                       />
@@ -832,14 +919,14 @@ function ContentDetail() {
                           <span className="comment-date">{formatTimeAgo(comment.date)}</span>
                           {isOwnComment && !isEditing && (
                             <div className="comment-actions">
-                              <button 
+                              <button
                                 className="comment-edit-btn"
                                 onClick={() => handleStartEdit(comment)}
                                 title="Düzenle"
                               >
                                 <FaEdit />
                               </button>
-                              <button 
+                              <button
                                 className="comment-delete-btn"
                                 onClick={() => handleDeleteComment(comment.id)}
                                 title="Sil"
@@ -860,14 +947,14 @@ function ContentDetail() {
                                 autoFocus
                               />
                               <div className="comment-edit-actions">
-                                <button 
+                                <button
                                   className="comment-save-btn"
                                   onClick={() => handleSaveEdit(comment.id)}
                                   disabled={!editingText.trim()}
                                 >
                                   <FaCheck />
                                 </button>
-                                <button 
+                                <button
                                   className="comment-cancel-btn"
                                   onClick={handleCancelEdit}
                                 >
@@ -906,7 +993,7 @@ function ContentDetail() {
 
       </div>
 
-      <BottomNav 
+      <BottomNav
         onSearchClick={() => setIsSearchMode(true)}
         isSearchMode={isSearchMode}
       />

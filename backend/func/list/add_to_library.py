@@ -62,7 +62,9 @@ def get_or_create_list(cursor, user_id: int, list_name: str):
     )
     return cursor.lastrowid
 
-def add_item_to_library(connection, username: str, list_key: str, external_id: str, title: str, poster_url: str, content_type: str, api_source: str = 'user_add'):
+from typing import Optional
+
+def add_item_to_library(connection, username: str, list_key: str, external_id: str, title: str, poster_url: Optional[str], content_type: str, api_source: str = 'user_add'):
     """
     Kullanıcının kütüphanesine içerik ekler.
     """

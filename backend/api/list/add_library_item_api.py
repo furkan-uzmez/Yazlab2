@@ -5,14 +5,15 @@ from backend.func.list.add_to_library import add_item_to_library
 
 router = APIRouter(prefix="/list", tags=["list"])
 
+from typing import Optional, Union
+
 class AddLibraryItemRequest(BaseModel):
     username: str
     list_key: str
-    external_id: str
+    external_id: Union[str, int]
     title: str
-    poster_url: str
+    poster_url: Optional[str] = None
     content_type: str
-    api_source: str = 'user_add'
 
 @router.post("/add_item")
 async def add_library_item(request: AddLibraryItemRequest):
@@ -25,8 +26,7 @@ async def add_library_item(request: AddLibraryItemRequest):
         "external_id": "123",
         "title": "Film Adı",
         "poster_url": "https://...",
-        "content_type": "movie",
-        "api_source": "user_add"
+        "content_type": "movie"
     }
     """
     connection = open_db_connection()
@@ -46,7 +46,7 @@ async def add_library_item(request: AddLibraryItemRequest):
             title=request.title,
             poster_url=request.poster_url,
             content_type=request.content_type,
-            api_source=request.api_source
+            api_source='user_add'
         )
         
         if not success:
