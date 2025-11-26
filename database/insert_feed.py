@@ -40,17 +40,19 @@ def get_or_create_content(cursor, title: str, content_type: str) -> int:
         if not content['api_id']:
             print(f"    -> Mevcut kayıt güncelleniyor (API ID eklendi): {metadata['title']}")
             cursor.execute(
-                "UPDATE contents SET api_id = %s, cover_url = %s, api_source = 'api_search' WHERE content_id = %s",
-                (metadata['id'], metadata['poster_url'], content['content_id'])
+                """UPDATE contents 
+                   SET api_id = %s, cover_url = %s, api_source = 'api_search', description = %s, release_year = %s, duration_or_pages = %s
+                   WHERE content_id = %s""",
+                (metadata['id'], metadata['poster_url'], metadata['description'], metadata['release_year'], metadata['duration_or_pages'], content['content_id'])
             )
         return content['content_id']
 
     # 3. Hiçbiri yoksa yeni oluştur
     print(f"    + Yeni içerik ekleniyor: {metadata['title']} ({metadata['type']})")
     cursor.execute(
-        """INSERT INTO contents (title, type, cover_url, api_id, api_source) 
-           VALUES (%s, %s, %s, %s, %s)""",
-        (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], 'api_search')
+        """INSERT INTO contents (title, type, cover_url, api_id, api_source, description, release_year, duration_or_pages) 
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+        (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], 'api_search', metadata['description'], metadata['release_year'], metadata['duration_or_pages'])
     )
     return cursor.lastrowid
 
