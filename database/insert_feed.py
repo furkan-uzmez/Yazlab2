@@ -2,43 +2,57 @@ import mysql.connector
 import json
 from pathlib import Path
 from backend.func.db.connection.open_db_connection import open_db_connection
+from backend.func.content.fetch_metadata import fetch_metadata
+import time
 
 # Dosyaların bulunduğu klasörü bul
 SCRIPT_DIR = Path(__file__).resolve().parent
 ACTIVITIES_JSON_PATH = SCRIPT_DIR / "activities.json"
 # Not: commentsMap.json, mevcut şemayla uyumlu olmadığı için işlenmemiştir.
 
-def get_or_create_content(cursor, title: str, content_type: str, poster_url: str) -> int:
+def get_or_create_content(cursor, title: str, content_type: str) -> int:
     """
-    İçeriği başlığına göre arar. Bulamazsa oluşturur.
-    Her durumda content_id'yi döndürür.
+    İçeriği API'den arar ve oluşturur.
+    Eğer API'de bulunamazsa None döner.
     """
-    # Önce içeriğin var olup olmadığını kontrol et
-    cursor.execute("SELECT content_id FROM contents WHERE title = %s", (title,))
-    content = cursor.fetchone()
     
-    if content:
-        return content['content_id']
-    else:
-        # --- HATA DÜZELTMESİ BURADA ---
-        
-        # 1. 'Film' -> 'movie', 'Kitap' -> 'book' eşleşmesini yap
-        if content_type.lower() == 'film':
-            db_type = 'movie'
-        elif content_type.lower() == 'kitap':
-            db_type = 'book'
+    # API'den veri çek
+    # JSON'da 'film' veya 'kitap' olarak gelebilir, fetch_metadata bunu handle ediyor
+    metadata = fetch_metadata(title, content_type)
+    
+    if not metadata:
+        print(f"    ! Metadata bulunamadı, atlanıyor: {title}")
+        return None
 
-        print(f"  -> İçerik bulunamadı, '{title}' ({db_type}) oluşturuluyor...")
-        
-        # 2. 'poster_url' yerine 'cover_url' sütununu kullan
-        cursor.execute(
-            """INSERT INTO contents (title, type, cover_url) 
-               VALUES (%s, %s, %s)""",
-            (title, db_type, poster_url) # poster_url değişkeni JSON'dan geliyor
-        )
-        # --- DÜZELTME SONU ---
-        
-        return cursor.lastrowid
+    # 1. Önce API ID'sine göre kontrol et
+    cursor.execute("SELECT content_id FROM contents WHERE api_id = %s", (metadata['id'],))
+    content = cursor.fetchone()
+    if content: return content['content_id']
+    
+    # 2. Yoksa Başlık VE TİP'e göre kontrol et
+    cursor.execute(
+        "SELECT content_id, api_id FROM contents WHERE title = %s AND type = %s", 
+        (metadata['title'], metadata['type'])
+    )
+    content = cursor.fetchone()
+    if content:
+        # Eğer varsa ama API ID yoksa güncelle
+        if not content['api_id']:
+            print(f"    -> Mevcut kayıt güncelleniyor (API ID eklendi): {metadata['title']}")
+            cursor.execute(
+                "UPDATE contents SET api_id = %s, cover_url = %s, api_source = 'api_search' WHERE content_id = %s",
+                (metadata['id'], metadata['poster_url'], content['content_id'])
+            )
+        return content['content_id']
+
+    # 3. Hiçbiri yoksa yeni oluştur
+    print(f"    + Yeni içerik ekleniyor: {metadata['title']} ({metadata['type']})")
+    cursor.execute(
+        """INSERT INTO contents (title, type, cover_url, api_id, api_source) 
+           VALUES (%s, %s, %s, %s, %s)""",
+        (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], 'api_search')
+    )
+    return cursor.lastrowid
 
 def insert_mock_activities():
     """
@@ -70,14 +84,17 @@ def insert_mock_activities():
         for activity in activities_data:
             print(f"\nİşleniyor: {activity['userName']} -> {activity['contentTitle']}")
             try:
-                # 1. İçerik ID'sini al (veya oluştur)
+                # 1. İçerik ID'sini al (veya oluştur) - ARTIK API KULLANIYOR
                 content_id = get_or_create_content(
                     cursor, 
                     activity['contentTitle'], 
-                    activity['contentType'], 
-                    activity['contentPoster']
+                    activity['contentType']
                 )
                 
+                if not content_id:
+                    print(f"  ! İçerik API'de bulunamadığı için aktivite EKLENMEDİ.")
+                    continue
+
                 user_id = activity['userId']
                 activity_type = activity['type']
                 reference_id = None # Bu, rating_id veya review_id olacak
@@ -109,6 +126,9 @@ def insert_mock_activities():
                         (user_id, activity_type, reference_id)
                     )
                     print(f"  -> 'activities' eklendi.")
+                
+                # API limitlerine takılmamak için kısa bekleme
+                time.sleep(0.2)
 
             except mysql.connector.Error as e:
                 # Hata (örn: 'UNIQUE' kısıtlaması - bu aktivite zaten eklenmiş)
@@ -130,3 +150,6 @@ def insert_mock_activities():
         if connection and connection.is_connected():
             connection.close()
             print("Veritabanı bağlantısı kapatıldı.")
+
+if __name__ == "__main__":
+    insert_mock_activities()

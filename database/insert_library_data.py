@@ -1,26 +1,28 @@
 import mysql.connector
 from backend.func.db.connection.open_db_connection import open_db_connection
+from backend.func.content.fetch_metadata import fetch_metadata
+import time
 
-# React tarafındaki mock veri
+# React tarafındaki mock veri (Sadece başlıklar ve tipler yeterli olacak)
 library_data = {
     "watched": [
-        { "id": 27205, "title": "Inception", "poster_url": "https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg", "type": "movie" },
-        { "id": 603, "title": "The Matrix", "poster_url": "https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", "type": "movie" },
-        { "id": 157336, "title": "Interstellar", "poster_url": "https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", "type": "movie" },
-        { "id": 155, "title": "The Dark Knight", "poster_url": "https://image.tmdb.org/t/p/w200/qJ2tW6WMUDux911r6m7haRef0WH.jpg", "type": "movie" }
+        { "title": "Inception", "type": "movie" },
+        { "title": "The Matrix", "type": "movie" },
+        { "title": "Interstellar", "type": "movie" },
+        { "title": "The Dark Knight", "type": "movie" }
     ],
     "toWatch": [
-        { "id": 438631, "title": "Dune", "poster_url": "https://image.tmdb.org/t/p/w200/d5NXSklXo0qyIhbkgX2r5Y5D3vT.jpg", "type": "movie" },
-        { "id": 335984, "title": "Blade Runner 2049", "poster_url": "https://image.tmdb.org/t/p/w200/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg", "type": "movie" }
+        { "title": "Dune", "type": "movie" },
+        { "title": "Blade Runner 2049", "type": "movie" }
     ],
     "read": [
-        { "id": "OL82565W", "title": "1984", "poster_url": "https://covers.openlibrary.org/b/id/7222246-M.jpg", "type": "book" },
-        { "id": "OL82566W", "title": "Dune", "poster_url": "https://covers.openlibrary.org/b/id/8739161-M.jpg", "type": "book" },
-        { "id": "OL82567W", "title": "The Lord of the Rings", "poster_url": "https://covers.openlibrary.org/b/id/6979861-M.jpg", "type": "book" }
+        { "title": "1984", "type": "book" },
+        { "title": "Dune", "type": "book" },
+        { "title": "The Lord of the Rings", "type": "book" }
     ],
     "toRead": [
-        { "id": "OL82568W", "title": "Foundation", "poster_url": "https://covers.openlibrary.org/b/id/8739162-M.jpg", "type": "book" },
-        { "id": "OL82569W", "title": "Brave New World", "poster_url": "https://covers.openlibrary.org/b/id/7222247-M.jpg", "type": "book" }
+        { "title": "Foundation", "type": "book" },
+        { "title": "Brave New World", "type": "book" }
     ]
 }
 
@@ -35,26 +37,40 @@ LIST_NAMES = {
 def get_or_create_content(cursor, item):
     """İçeriği bulur veya oluşturur, content_id döndürür."""
     
+    # API'den veri çek
+    metadata = fetch_metadata(item['title'], item['type'])
+    
+    if not metadata:
+        print(f"    ! Metadata bulunamadı, veritabanına EKLENMİYOR: {item['title']}")
+        return None
+
     # 1. Önce API ID'sine göre kontrol et (En güvenlisi)
-    cursor.execute("SELECT content_id FROM contents WHERE api_id = %s", (str(item['id']),))
+    cursor.execute("SELECT content_id FROM contents WHERE api_id = %s", (metadata['id'],))
     content = cursor.fetchone()
     if content: return content['content_id']
     
-    # 2. Yoksa Başlık VE TİP'e göre kontrol et (DÜZELTME BURADA)
-    # Sadece başlık yeterli değil (Dune hem kitap hem film olabilir)
+    # 2. Yoksa Başlık VE TİP'e göre kontrol et
+    # Eğer başlık eşleşiyorsa ama API ID yoksa, bu kaydı GÜNCELLEMELİYİZ ki API verisiyle eşleşsin.
     cursor.execute(
-        "SELECT content_id FROM contents WHERE title = %s AND type = %s", 
-        (item['title'], item['type'])
+        "SELECT content_id, api_id FROM contents WHERE title = %s AND type = %s", 
+        (metadata['title'], metadata['type'])
     )
     content = cursor.fetchone()
-    if content: return content['content_id']
+    if content:
+        if not content['api_id']:
+            print(f"    -> Mevcut kayıt güncelleniyor (API ID eklendi): {metadata['title']}")
+            cursor.execute(
+                "UPDATE contents SET api_id = %s, cover_url = %s, api_source = 'api_search' WHERE content_id = %s",
+                (metadata['id'], metadata['poster_url'], content['content_id'])
+            )
+        return content['content_id']
 
     # 3. Hiçbiri yoksa yeni oluştur
-    print(f"  -> İçerik oluşturuluyor: {item['title']} ({item['type']})")
+    print(f"    + Yeni içerik ekleniyor: {metadata['title']} ({metadata['type']})")
     cursor.execute(
         """INSERT INTO contents (title, type, cover_url, api_id, api_source) 
            VALUES (%s, %s, %s, %s, %s)""",
-        (item['title'], item['type'], item['poster_url'], str(item['id']), 'seed_data')
+        (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], 'api_search')
     )
     return cursor.lastrowid
 
@@ -107,16 +123,20 @@ def insert_library_for_user(email):
                 # İçeriği bul veya oluştur
                 content_id = get_or_create_content(cursor, item)
                 
-                # Listeye ekle (Varsa hata vermemesi için IGNORE)
-                try:
-                    cursor.execute(
-                        "INSERT IGNORE INTO list_items (list_id, content_id) VALUES (%s, %s)",
-                        (list_id, content_id)
-                    )
-                    if cursor.rowcount > 0:
-                        print(f"    + Eklendi: {item['title']}")
-                except Exception as e:
-                    print(f"    ! Hata ({item['title']}): {e}")
+                if content_id:
+                    # Listeye ekle (Varsa hata vermemesi için IGNORE)
+                    try:
+                        cursor.execute(
+                            "INSERT IGNORE INTO list_items (list_id, content_id) VALUES (%s, %s)",
+                            (list_id, content_id)
+                        )
+                        if cursor.rowcount > 0:
+                            print(f"    -> Listeye eklendi: {item['title']}")
+                    except Exception as e:
+                        print(f"    ! Liste hatası ({item['title']}): {e}")
+                
+                # API limitlerine takılmamak için kısa bekleme
+                time.sleep(0.2)
 
         connection.commit()
         print("\n--- İşlem Başarıyla Tamamlandı ---")
@@ -128,3 +148,7 @@ def insert_library_for_user(email):
     finally:
         if connection:
             connection.close()
+
+if __name__ == "__main__":
+    # Test için doğrudan çalıştırıldığında
+    insert_library_for_user("mehmet.demir@example.com")
