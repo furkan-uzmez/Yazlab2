@@ -209,13 +209,12 @@
 }
 
 .library-item-add {
-  border: 2px dashed rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.03);
+  /* Poster kartı gibi görünsün, kesik (dashed) çerçeve olmasın */
+  border: none;
+  background: transparent;
 }
 
 .library-item-add:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.06);
   transform: translateY(-4px);
 }
 
@@ -224,10 +223,13 @@
   aspect-ratio: 2/3;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
+  justify-content: center; /* + ikonu her zaman tam ortada */
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+  position: relative; /* İç metni alt tarafta konumlandırmak için */
 }
 
 .add-icon {
@@ -238,6 +240,9 @@
 
 .library-item-add:hover .add-poster {
   background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15),
+              0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .library-item-add:hover .add-icon {
@@ -245,13 +250,28 @@
   transform: rotate(90deg);
 }
 
-.library-item-add span {
-  color: rgba(255, 255, 255, 0.6);
-  transition: color 0.3s ease;
+.library-item-add .add-poster span {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, 4px);
+  width: 100%;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  padding: 0 0.75rem;
+  line-height: 1.3;
+  word-break: break-word;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: color 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
 }
 
-.library-item-add:hover span {
-  color: rgba(255, 255, 255, 0.9);
+.library-item-add:hover .add-poster span {
+  color: rgba(255, 255, 255, 0.95);
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .show-more-btn {

@@ -102,8 +102,8 @@ function LibraryTabs({
                 <div className="library-item library-item-add" onClick={() => onAddContentClick('watched')}>
                   <div className="add-poster">
                     <FaPlus className="add-icon" />
+                    <span>İzlediğin filmleri ekle</span>
                   </div>
-                  <span>Ekle</span>
                 </div>
               )}
             </div>
@@ -136,8 +136,8 @@ function LibraryTabs({
                 <div className="library-item library-item-add" onClick={() => onAddContentClick('toWatch')}>
                   <div className="add-poster">
                     <FaPlus className="add-icon" />
+                    <span>İzlemek istediğin filmleri ekle</span>
                   </div>
-                  <span>Ekle</span>
                 </div>
               )}
             </div>
@@ -170,8 +170,8 @@ function LibraryTabs({
                 <div className="library-item library-item-add" onClick={() => onAddContentClick('read')}>
                   <div className="add-poster">
                     <FaPlus className="add-icon" />
+                    <span>Okuduğun kitapları ekle</span>
                   </div>
-                  <span>Ekle</span>
                 </div>
               )}
             </div>
@@ -204,8 +204,8 @@ function LibraryTabs({
                 <div className="library-item library-item-add" onClick={() => onAddContentClick('toRead')}>
                   <div className="add-poster">
                     <FaPlus className="add-icon" />
+                    <span>Okumak istediğin kitapları ekle</span>
                   </div>
-                  <span>Ekle</span>
                 </div>
               )}
             </div>
