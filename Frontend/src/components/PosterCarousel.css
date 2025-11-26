@@ -63,12 +63,14 @@
 
 /* İlk akış - sağa doğru */
 .track-1 .poster-track {
-  animation: scroll-right 60s linear infinite;
+  /* Daha hızlı akış için süre kısaltıldı (60s -> 30s) */
+  animation: scroll-right 30s linear infinite;
 }
 
 /* İkinci akış - sola doğru */
 .track-2 .poster-track {
-  animation: scroll-left 50s linear infinite;
+  /* Daha hızlı akış için süre kısaltıldı (50s -> 25s) */
+  animation: scroll-left 25s linear infinite;
 }
 
 @keyframes scroll-right {
@@ -296,12 +298,13 @@
     width: 80px;
   }
 
+  /* Tablet için hız artırıldı (45s/40s -> 25s/22s) */
   .track-1 .poster-track {
-    animation-duration: 45s;
+    animation-duration: 25s;
   }
 
   .track-2 .poster-track {
-    animation-duration: 40s;
+    animation-duration: 22s;
   }
 }
 
@@ -331,12 +334,13 @@
     width: 60px;
   }
 
+  /* Mobil için hız artırıldı (35s/30s -> 20s/18s) */
   .track-1 .poster-track {
-    animation-duration: 35s;
+    animation-duration: 20s;
   }
 
   .track-2 .poster-track {
-    animation-duration: 30s;
+    animation-duration: 18s;
   }
 }
 

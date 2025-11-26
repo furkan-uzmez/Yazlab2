@@ -129,31 +129,31 @@ function RecentActivities({ recentActivities = [], libraryData = {}, profileUser
         </div>
       ) : (
         // Son Aktiviteler tab'ında liste formatı
-        <div className="activities-list">
+      <div className="activities-list">
           {currentActivities.length > 0 ? (
             currentActivities.map((activity, index) => (
               <div key={activity.activity_id || index} className="activity-item">
-                <div className={`activity-icon ${activity.type === 'rating' ? 'rating-icon' : activity.type === 'review' ? 'review-icon' : 'comment-icon'}`}>
-                  {activity.type === 'rating' ? <FaStar /> : activity.type === 'review' ? <FaEdit /> : <FaComment />}
-                </div>
-                <div className="activity-content">
-                  <p className="activity-text">
-                    {activity.type === 'rating'
-                      ? `${activity.content_title} için ${activity.rating_score} puan verdi`
-                      : activity.type === 'review'
-                        ? `${activity.content_title} hakkında yorum yaptı`
-                        : `${activity.original_post_owner_username}'in ${activity.content_title} gönderisine yorum yaptı: "${activity.comment_text}"`}
-                  </p>
-                  <span className="activity-date">
-                    {formatTimeAgo(activity.created_at)}
-                  </span>
-                </div>
+              <div className={`activity-icon ${activity.type === 'rating' ? 'rating-icon' : activity.type === 'review' ? 'review-icon' : 'comment-icon'}`}>
+                {activity.type === 'rating' ? <FaStar /> : activity.type === 'review' ? <FaEdit /> : <FaComment />}
               </div>
-            ))
-          ) : (
+              <div className="activity-content">
+                <p className="activity-text">
+                  {activity.type === 'rating'
+                    ? `${activity.content_title} için ${activity.rating_score} puan verdi`
+                    : activity.type === 'review'
+                      ? `${activity.content_title} hakkında yorum yaptı`
+                      : `${activity.original_post_owner_username}'in ${activity.content_title} gönderisine yorum yaptı: "${activity.comment_text}"`}
+                </p>
+                <span className="activity-date">
+                    {formatTimeAgo(activity.created_at)}
+                </span>
+              </div>
+            </div>
+          ))
+        ) : (
             <p className="empty-state">Bu kategoride henüz aktivite yok</p>
-          )}
-        </div>
+        )}
+      </div>
       )}
     </div>
   );
