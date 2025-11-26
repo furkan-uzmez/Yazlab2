@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaTimes, FaSearch, FaPlus, FaFilm, FaBook } from 'react-icons/fa';
+import { FaTimes, FaSearch, FaPlus, FaFilm, FaBook, FaCheck } from 'react-icons/fa';
 import './AddContentModal.css';
 
 function AddContentModal({
@@ -13,6 +13,7 @@ function AddContentModal({
   const [searchType, setSearchType] = useState(contentType === 'watched' || contentType === 'toWatch' ? 'movie' : 'book');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const searchInputRef = useRef(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ function AddContentModal({
       setSearchQuery('');
       setSearchResults([]);
       setIsSearching(false);
+      setSelectedItems(new Set());
     }
   }, [isOpen]);
 
@@ -77,6 +79,7 @@ function AddContentModal({
         }
 
         setSearchResults(formattedResults);
+        setSelectedItems(new Set()); // Yeni arama yapıldığında seçimleri sıfırla
       } else {
         setSearchResults([]);
       }
@@ -93,10 +96,37 @@ function AddContentModal({
     executeSearch();
   };
 
+  const handleToggleSelect = (contentId) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(contentId)) {
+        newSet.delete(contentId);
+      } else {
+        newSet.add(contentId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleAddSelected = () => {
+    if (selectedItems.size === 0) return;
+    
+    const itemsToAdd = searchResults.filter(result => selectedItems.has(result.id));
+    itemsToAdd.forEach(item => {
+      onAddContent(item);
+    });
+    
+    setSelectedItems(new Set());
+    setSearchQuery('');
+    setSearchResults([]);
+    onClose();
+  };
+
   const handleAdd = (content) => {
     onAddContent(content);
     setSearchQuery('');
     setSearchResults([]);
+    setSelectedItems(new Set());
     onClose();
   };
 
@@ -151,27 +181,55 @@ function AddContentModal({
           )}
 
           {!isSearching && searchResults.length > 0 && (
-            <div className="add-content-results">
-              {searchResults.map((result) => (
-                <div key={result.id} className="add-content-result-item">
-                  <img src={result.poster_url || '/placeholder.jpg'} alt={result.title} />
-                  <div className="add-content-result-info">
-                    <span className="add-content-result-title">{result.title}</span>
-                    <span className="add-content-result-type">
-                      {result.type === 'Film' ? <FaFilm /> : <FaBook />}
-                      {result.type}
-                    </span>
-                  </div>
+            <>
+              {selectedItems.size > 0 && (
+                <div className="add-content-bulk-actions">
+                  <span className="selected-count">{selectedItems.size} içerik seçildi</span>
                   <button
                     type="button"
-                    className="add-content-btn"
-                    onClick={() => handleAdd(result)}
+                    className="add-content-bulk-btn"
+                    onClick={handleAddSelected}
                   >
                     <FaPlus />
+                    <span>Seçilenleri Ekle</span>
                   </button>
                 </div>
-              ))}
-            </div>
+              )}
+              <div className="add-content-results">
+                {searchResults.map((result) => {
+                  const isSelected = selectedItems.has(result.id);
+                  return (
+                    <div 
+                      key={result.id} 
+                      className={`add-content-result-item ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleToggleSelect(result.id)}
+                    >
+                      <div className="add-content-checkbox">
+                        {isSelected && <FaCheck />}
+                      </div>
+                      <img src={result.poster_url || '/placeholder.jpg'} alt={result.title} />
+                      <div className="add-content-result-info">
+                        <span className="add-content-result-title">{result.title}</span>
+                        <span className="add-content-result-type">
+                          {result.type === 'Film' ? <FaFilm /> : <FaBook />}
+                          {result.type}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="add-content-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAdd(result);
+                        }}
+                      >
+                        <FaPlus />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           {searchQuery && !isSearching && searchResults.length === 0 && (
