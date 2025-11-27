@@ -116,36 +116,41 @@ function ContentDetail() {
 
       setLoading(true);
       try {
-        const response = await fetch(
-          `http://localhost:8000/content/details?content_id=${encodeURIComponent(id)}&content_type=${type}`
-        );
+        const username = localStorage.getItem("profileusername");
+        let url = `http://localhost:8000/content/details?content_id=${encodeURIComponent(id)}&content_type=${type}`;
+        if (username) {
+          url += `&username=${encodeURIComponent(username)}`;
+        }
+
+        const response = await fetch(url);
 
         if (response.ok) {
           const data = await response.json();
           const contentData = data.content;
+          const userStatus = data.user_status;
+
+          if (userStatus) {
+            if (type === 'movie') {
+              setIsInWatched(userStatus.is_watched);
+              setIsInToWatch(userStatus.is_to_watch);
+            } else {
+              setIsInRead(userStatus.is_watched); // Reusing is_watched for read
+              setIsInToRead(userStatus.is_to_watch); // Reusing is_to_watch for to_read
+            }
+          }
 
           if (type === 'movie') {
             // Format movie data
             const formattedContent = {
               id: contentData.id,
               title: contentData.title,
-              poster_path: contentData.poster_path
-                ? `https://image.tmdb.org/t/p/w500${contentData.poster_path}`
-                : null,
-              backdrop_path: contentData.backdrop_path
-                ? `https://image.tmdb.org/t/p/w1280${contentData.backdrop_path}`
-                : null,
+              poster_path: contentData.poster_path ? `https://image.tmdb.org/t/p/w500${contentData.poster_path}` : null,
               release_date: contentData.release_date,
               vote_average: contentData.vote_average,
               overview: contentData.overview,
               runtime: contentData.runtime,
               genres: contentData.genres || [],
-              directors: contentData.directors || [],
-              cast: contentData.cast || [],
               tagline: contentData.tagline,
-              production_companies: contentData.production_companies || [],
-              production_countries: contentData.production_countries || [],
-              spoken_languages: contentData.spoken_languages || [],
               budget: contentData.budget,
               revenue: contentData.revenue,
               status: contentData.status
@@ -751,7 +756,7 @@ function ContentDetail() {
                       onClick={handleWatchedToggle}
                     >
                       {isInWatched ? <FaCheck /> : <FaPlus />}
-                      <span>{isInWatched ? 'İzledim' : 'İzledim'}</span>
+                      <span>{isInWatched ? 'İzledin' : 'İzledim'}</span>
                     </button>
                     <button
                       type="button"
@@ -759,7 +764,7 @@ function ContentDetail() {
                       onClick={handleToWatchToggle}
                     >
                       {isInToWatch ? <FaCheck /> : <FaPlus />}
-                      <span>{isInToWatch ? 'İzlenecek' : 'İzlenecek'}</span>
+                      <span>{isInToWatch ? 'Listemde' : 'İzlenecek'}</span>
                     </button>
                   </>
                 ) : (
@@ -770,7 +775,7 @@ function ContentDetail() {
                       onClick={handleWatchedToggle}
                     >
                       {isInRead ? <FaCheck /> : <FaPlus />}
-                      <span>{isInRead ? 'Okudum' : 'Okudum'}</span>
+                      <span>{isInRead ? 'Okudun' : 'Okudum'}</span>
                     </button>
                     <button
                       type="button"
@@ -778,7 +783,7 @@ function ContentDetail() {
                       onClick={handleToWatchToggle}
                     >
                       {isInToRead ? <FaCheck /> : <FaPlus />}
-                      <span>{isInToRead ? 'Okunacak' : 'Okunacak'}</span>
+                      <span>{isInToRead ? 'Listemde' : 'Okunacak'}</span>
                     </button>
                   </>
                 )}

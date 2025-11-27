@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException, status, Query
+from typing import Optional
 
 from backend.func.content.get_movie_details import get_movie_details as get_movie_details_func
 from backend.func.content.get_book_details import get_book_details as get_book_details_func
 from backend.func.content.get_content_from_db import get_content_from_db
+from backend.func.content.check_user_content_status import check_user_content_status
 from backend.func.db.connection.open_db_connection import open_db_connection
 
 router = APIRouter(prefix="/content", tags=["content"])
@@ -10,7 +12,8 @@ router = APIRouter(prefix="/content", tags=["content"])
 @router.get("/details")
 async def get_content_details(
     content_id: str = Query(...),
-    content_type: str = Query(...)
+    content_type: str = Query(...),
+    username: Optional[str] = Query(None)
 ):
     """
     İçerik detaylarını getirir.
@@ -30,23 +33,36 @@ async def get_content_details(
         )
     
     try:
-        # Önce content_id'nin integer olup olmadığını kontrol et
-        # Eğer integer ise, veritabanından api_id'yi bul
+        # İçeriği bulmaya çalış
+        # Önce api_id olarak kontrol et (TMDB ID veya Google Books ID)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM contents WHERE api_id = %s AND type = %s",
+            (content_id, content_type)
+        )
+        db_content = cursor.fetchone()
+        
+        # Eğer bulunamazsa ve content_id integer ise, veritabanı ID'si olarak kontrol et
+        if not db_content:
+            try:
+                db_id = int(content_id)
+                cursor.execute(
+                    "SELECT * FROM contents WHERE content_id = %s AND type = %s",
+                    (db_id, content_type)
+                )
+                db_content = cursor.fetchone()
+            except ValueError:
+                pass
+        
+        cursor.close()
+
         api_id = None
-        try:
-            db_content_id = int(content_id)
-            # Veritabanından içerik bilgilerini al
-            db_content = get_content_from_db(connection, db_content_id)
-            if db_content and db_content.get('api_id'):
-                api_id = db_content['api_id']
-                # content_type'ı da veritabanından al (daha güvenilir)
-                if db_content.get('type'):
-                    content_type = db_content['type']
-            else:
-                # Veritabanında bulunamadı, direkt content_id'yi api_id olarak kullan
-                api_id = content_id
-        except ValueError:
-            # content_id string ise, direkt api_id olarak kullan
+        if db_content:
+            # Veritabanında bulundu
+            api_id = db_content['api_id']
+            # User status kontrolü için DB ID'sini kullanabiliriz ama api_id daha genel
+        else:
+            # Veritabanında yok, direkt API'den çekilecek
             api_id = content_id
         
         # API'den detayları çek
@@ -75,7 +91,25 @@ async def get_content_details(
                 detail="Content not found"
             )
         
-        return {"content": result}
+        # Kullanıcı durumu kontrolü
+        user_status = None
+        if username:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT user_id FROM users WHERE username = %s", (username,))
+            user = cursor.fetchone()
+            if user:
+                user_status = check_user_content_status(
+                    connection, 
+                    user['user_id'], 
+                    str(api_id), 
+                    content_type
+                )
+            cursor.close()
+        
+        return {
+            "content": result,
+            "user_status": user_status
+        }
     except HTTPException:
         raise
     except Exception as e:
