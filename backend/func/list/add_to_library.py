@@ -1,6 +1,6 @@
 import mysql.connector
 
-def get_or_create_content(cursor, external_id: str, title: str, poster_url: str, content_type: str, api_source: str = 'user_add'):
+def get_or_create_content(cursor, external_id: str, title: str, poster_url: str, content_type: str, description: str = None, release_year: int = None, duration_or_pages: int = None, api_source: str = None):
     """
     İçeriği bulur veya oluşturur. content_id döndürür.
     """
@@ -12,7 +12,18 @@ def get_or_create_content(cursor, external_id: str, title: str, poster_url: str,
     existing = cursor.fetchone()
     
     if existing:
-        return existing['content_id']
+        content_id = existing['content_id']
+        if description or release_year or duration_or_pages or api_source != 'user_add':
+            cursor.execute(
+                """UPDATE contents 
+                   SET description = COALESCE(%s, description),
+                       release_year = COALESCE(%s, release_year),
+                       duration_or_pages = COALESCE(%s, duration_or_pages),
+                       api_source = CASE WHEN api_source = 'user_add' THEN %s ELSE api_source END
+                   WHERE content_id = %s""",
+                (description, release_year, duration_or_pages, api_source, content_id)
+            )
+        return content_id
     
     # Yoksa başlık ve tip ile kontrol et
     cursor.execute(
@@ -22,13 +33,24 @@ def get_or_create_content(cursor, external_id: str, title: str, poster_url: str,
     existing = cursor.fetchone()
     
     if existing:
-        return existing['content_id']
+        content_id = existing['content_id']
+        if description or release_year or duration_or_pages or api_source != 'user_add':
+            cursor.execute(
+                """UPDATE contents 
+                   SET description = COALESCE(%s, description),
+                       release_year = COALESCE(%s, release_year),
+                       duration_or_pages = COALESCE(%s, duration_or_pages),
+                       api_source = CASE WHEN api_source = 'user_add' THEN %s ELSE api_source END
+                   WHERE content_id = %s""",
+                (description, release_year, duration_or_pages, api_source, content_id)
+            )
+        return content_id
     
     # Yoksa yeni oluştur
     cursor.execute(
-        """INSERT INTO contents (api_id, title, cover_url, type, api_source)
-           VALUES (%s, %s, %s, %s, %s)""",
-        (str(external_id), title, poster_url, content_type, api_source)
+        """INSERT INTO contents (api_id, title, cover_url, type, description, release_year, duration_or_pages, api_source)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+        (str(external_id), title, poster_url, content_type, description, release_year, duration_or_pages, api_source)
     )
     return cursor.lastrowid
 
@@ -64,7 +86,7 @@ def get_or_create_list(cursor, user_id: int, list_name: str):
 
 from typing import Optional
 
-def add_item_to_library(connection, username: str, list_key: str, external_id: str, title: str, poster_url: Optional[str], content_type: str, api_source: str = 'user_add'):
+def add_item_to_library(connection, username: str, list_key: str, external_id: str, title: str, poster_url: Optional[str], content_type: str, description: Optional[str] = None, release_year: Optional[int] = None, duration_or_pages: Optional[int] = None, api_source: str = None):
     """
     Kullanıcının kütüphanesine içerik ekler.
     """
@@ -84,7 +106,7 @@ def add_item_to_library(connection, username: str, list_key: str, external_id: s
         user_id = user['user_id']
         
         # İçeriği bul veya oluştur
-        content_id = get_or_create_content(cursor, external_id, title, poster_url, content_type, api_source)
+        content_id = get_or_create_content(cursor, external_id, title, poster_url, content_type, description, release_year, duration_or_pages, api_source)
         
         # Listeyi bul veya oluştur
         list_id = get_or_create_list(cursor, user_id, list_key)

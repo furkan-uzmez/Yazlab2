@@ -350,7 +350,11 @@ function ContentDetail() {
             external_id: String(id), // TMDB/Google ID
             title: content.title,
             poster_url: content.poster_path,
-            content_type: type
+            content_type: type,
+            description: type === 'movie' ? content.overview : content.overview,
+            release_year: type === 'movie' ? (content.release_date ? new Date(content.release_date).getFullYear() : null) : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
+            duration_or_pages: type === 'movie' ? content.runtime : content.pageCount,
+            api_source: type === 'movie' ? 'tmdb' : 'google_books'
           })
         });
 
@@ -400,7 +404,11 @@ function ContentDetail() {
             external_id: String(id),
             title: content.title,
             poster_url: content.poster_path,
-            content_type: type
+            content_type: type,
+            description: type === 'movie' ? content.overview : content.overview,
+            release_year: type === 'movie' ? (content.release_date ? new Date(content.release_date).getFullYear() : null) : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
+            duration_or_pages: type === 'movie' ? content.runtime : content.pageCount,
+            api_source: type === 'movie' ? 'tmdb' : 'google_books'
           })
         });
 

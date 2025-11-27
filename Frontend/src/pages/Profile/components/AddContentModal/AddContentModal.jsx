@@ -62,7 +62,11 @@ function AddContentModal({
             title: movie.title,
             poster_url: movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : '/placeholder.jpg',
             type: 'Film',
-            release_date: movie.release_date
+            release_date: movie.release_date,
+            description: movie.overview,
+            release_year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+            // Runtime usually not in search results
+            duration_or_pages: null
           }));
         } else if (searchType === 'book') {
           const items = data.results?.items || [];
@@ -73,7 +77,10 @@ function AddContentModal({
               title: info.title,
               poster_url: info.imageLinks?.smallThumbnail?.replace('http:', 'https:') || '/placeholder.jpg',
               type: 'Kitap',
-              authors: info.authors
+              authors: info.authors,
+              description: info.description,
+              release_year: info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : null,
+              duration_or_pages: info.pageCount
             };
           });
         }
@@ -110,12 +117,12 @@ function AddContentModal({
 
   const handleAddSelected = () => {
     if (selectedItems.size === 0) return;
-    
+
     const itemsToAdd = searchResults.filter(result => selectedItems.has(result.id));
     itemsToAdd.forEach(item => {
       onAddContent(item);
     });
-    
+
     setSelectedItems(new Set());
     setSearchQuery('');
     setSearchResults([]);
@@ -142,7 +149,7 @@ function AddContentModal({
             {contentType === 'read' && 'Okuduklarıma Ekle'}
             {contentType === 'toRead' && 'Okunacaklara Ekle'}
           </h2>
-          <button 
+          <button
             className="add-content-modal-close"
             onClick={onClose}
             aria-label="Kapat"
@@ -199,8 +206,8 @@ function AddContentModal({
                 {searchResults.map((result) => {
                   const isSelected = selectedItems.has(result.id);
                   return (
-                    <div 
-                      key={result.id} 
+                    <div
+                      key={result.id}
                       className={`add-content-result-item ${isSelected ? 'selected' : ''}`}
                       onClick={() => handleToggleSelect(result.id)}
                     >

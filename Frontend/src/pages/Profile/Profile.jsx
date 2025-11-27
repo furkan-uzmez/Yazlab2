@@ -335,6 +335,8 @@ function Profile() {
         ? 'movie'
         : 'book';
 
+    const apiSource = contentType === 'movie' ? 'tmdb' : 'google_books';
+
     fetch('http://localhost:8000/list/add_item', {
       method: 'POST',
       headers: {
@@ -347,7 +349,10 @@ function Profile() {
         title: content.title,
         poster_url: content.poster_url,
         content_type: contentType,
-        api_source: 'user_add'
+        description: content.description,
+        release_year: content.release_year,
+        duration_or_pages: content.duration_or_pages,
+        api_source: apiSource
       })
     }).catch((error) => {
       console.error('Kütüphane kaydı API hatası:', error);

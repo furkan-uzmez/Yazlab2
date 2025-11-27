@@ -44,6 +44,9 @@ def get_or_create_content(cursor, item):
         print(f"    ! Metadata bulunamadı, veritabanına EKLENMİYOR: {item['title']}")
         return None
 
+    # Determine API source
+    api_source = 'tmdb' if metadata['type'] == 'movie' else 'google_books'
+
     # 1. Önce API ID'sine göre kontrol et (En güvenlisi)
     cursor.execute("SELECT content_id FROM contents WHERE api_id = %s", (metadata['id'],))
     content = cursor.fetchone()
@@ -61,9 +64,9 @@ def get_or_create_content(cursor, item):
             print(f"    -> Mevcut kayıt güncelleniyor (API ID eklendi): {metadata['title']}")
             cursor.execute(
                 """UPDATE contents 
-                   SET api_id = %s, cover_url = %s, api_source = 'api_search', description = %s, release_year = %s, duration_or_pages = %s
+                   SET api_id = %s, cover_url = %s, api_source = %s, description = %s, release_year = %s, duration_or_pages = %s
                    WHERE content_id = %s""",
-                (metadata['id'], metadata['poster_url'], metadata['description'], metadata['release_year'], metadata['duration_or_pages'], content['content_id'])
+                (metadata['id'], metadata['poster_url'], api_source, metadata['description'], metadata['release_year'], metadata['duration_or_pages'], content['content_id'])
             )
         return content['content_id']
 
@@ -72,7 +75,7 @@ def get_or_create_content(cursor, item):
     cursor.execute(
         """INSERT INTO contents (title, type, cover_url, api_id, api_source, description, release_year, duration_or_pages) 
            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-        (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], 'api_search', metadata['description'], metadata['release_year'], metadata['duration_or_pages'])
+        (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], api_source, metadata['description'], metadata['release_year'], metadata['duration_or_pages'])
     )
     return cursor.lastrowid
 

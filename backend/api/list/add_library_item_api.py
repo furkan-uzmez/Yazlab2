@@ -14,6 +14,10 @@ class AddLibraryItemRequest(BaseModel):
     title: str
     poster_url: Optional[str] = None
     content_type: str
+    description: Optional[str] = None
+    release_year: Optional[int] = None
+    duration_or_pages: Optional[int] = None
+    api_source: str
 
 @router.post("/add_item")
 async def add_library_item(request: AddLibraryItemRequest):
@@ -26,7 +30,11 @@ async def add_library_item(request: AddLibraryItemRequest):
         "external_id": "123",
         "title": "Film Adı",
         "poster_url": "https://...",
-        "content_type": "movie"
+        "content_type": "movie",
+        "description": "Film açıklaması...",
+        "release_year": 2023,
+        "duration_or_pages": 120,
+        "api_source": "tmdb"
     }
     """
     connection = open_db_connection()
@@ -46,7 +54,10 @@ async def add_library_item(request: AddLibraryItemRequest):
             title=request.title,
             poster_url=request.poster_url,
             content_type=request.content_type,
-            api_source='user_add'
+            description=request.description,
+            release_year=request.release_year,
+            duration_or_pages=request.duration_or_pages,
+            api_source=request.api_source
         )
         
         if not success:
