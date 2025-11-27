@@ -1,4 +1,4 @@
-def update_user_profile(connection, new_username: str = None, new_bio: str = None, avatar_url: str = None):
+def update_user_profile(connection, user_id: int, new_username: str = None, new_bio: str = None, avatar_url: str = None):
     cursor = connection.cursor()
     
     fields = []
@@ -19,8 +19,8 @@ def update_user_profile(connection, new_username: str = None, new_bio: str = Non
     if not fields:
         return False  # No fields to update
     
-    values.append(1)  # Assuming we're updating user with id=1 for simplicity
-    sql = f"UPDATE users SET {', '.join(fields)} WHERE id = %s"
+    values.append(user_id)
+    sql = f"UPDATE users SET {', '.join(fields)} WHERE user_id = %s"
     
     try:
         cursor.execute(sql, tuple(values))

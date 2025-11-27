@@ -10,6 +10,7 @@ from backend.api.user.get_followers_api import router as get_followers_router
 from backend.api.user.get_following_api import router as get_following_router
 from backend.api.user.follow_api import router as follow_router
 from backend.api.user.get_user_api import router as get_user_router
+from backend.api.user.update_user_profile_api import router as update_user_profile_router
 from backend.api.list.get_user_library_api import router as get_user_library_router
 from backend.api.list.get_user_list_api import router as get_user_list_router
 from backend.api.list.add_library_item_api import router as add_library_item_router
@@ -28,11 +29,13 @@ from backend.api.interactions.like_comment_api import router as like_comment_rou
 from backend.api.interactions.update_comments_api import router as update_comment_router
 from backend.api.interactions.get_comments_by_content_api import router as get_comments_by_content_router
 from backend.api.interactions.add_comment_by_content_api import router as add_comment_by_content_router
+from backend.api.list.create_list_api import router as create_list_router
+from backend.api.list.delete_list_api import router as delete_list_router
 from database.create_tables import create_tables
 from database.insert_users_data import insert_initial_data
 from database.insert_feed import insert_mock_activities
 from database.insert_comments import insert_mock_comments
-from database.insert_library_data import insert_library_for_user 
+from database.insert_library_data import insert_library_for_user
 
 api = FastAPI()
 
@@ -51,10 +54,13 @@ api.include_router(get_followers_router)
 api.include_router(get_following_router)
 api.include_router(follow_router)
 api.include_router(get_user_router)
+api.include_router(update_user_profile_router)
 api.include_router(get_user_library_router)
 api.include_router(get_user_list_router)
 api.include_router(add_library_item_router)
 api.include_router(remove_library_item_router)
+api.include_router(create_list_router)
+api.include_router(delete_list_router)
 api.include_router(get_user_feed_router)
 api.include_router(like_review_router)
 api.include_router(add_rating_router)

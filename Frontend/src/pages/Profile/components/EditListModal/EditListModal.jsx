@@ -26,7 +26,7 @@ function EditListModal({
       <div className={`create-list-modal edit-list-modal ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
         <div className="create-list-modal-header">
           <h2>Listeyi Düzenle</h2>
-          <button 
+          <button
             className="create-list-modal-close"
             onClick={onClose}
             aria-label="Kapat"
@@ -34,7 +34,7 @@ function EditListModal({
             <FaTimes />
           </button>
         </div>
-        
+
         <div className="edit-list-modal-content">
           {/* Left Side - Content Management */}
           <div className="edit-list-left-panel">
@@ -117,7 +117,7 @@ function EditListModal({
                   id="edit-list-name"
                   type="text"
                   value={selectedList.name}
-                  onChange={(e) => setSelectedList({...selectedList, name: e.target.value})}
+                  onChange={(e) => setSelectedList({ ...selectedList, name: e.target.value })}
                   required
                 />
               </div>
@@ -126,7 +126,7 @@ function EditListModal({
                 <textarea
                   id="edit-list-description"
                   value={selectedList.description || ''}
-                  onChange={(e) => setSelectedList({...selectedList, description: e.target.value})}
+                  onChange={(e) => setSelectedList({ ...selectedList, description: e.target.value })}
                   rows="4"
                 />
               </div>
@@ -135,24 +135,24 @@ function EditListModal({
         </div>
 
         <div className="create-list-modal-actions">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="create-list-modal-delete"
-            onClick={onDeleteList}
+            onClick={() => onDeleteList()}
           >
             <FaTrash />
             <span>Listeyi Sil</span>
           </button>
           <div className="action-buttons-group">
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="create-list-modal-cancel"
               onClick={onClose}
             >
               İptal
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="create-list-modal-submit"
               onClick={onUpdateList}
             >

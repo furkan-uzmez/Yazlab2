@@ -695,22 +695,53 @@ function Profile() {
     }, 300);
   };
 
-  const handleSubmitEditProfile = (formData) => {
-    // Update profile user state
-    setProfileUser(prev => ({
-      ...prev,
-      username: formData.username,
-      email: formData.email,
-      bio: formData.bio,
-      avatar_url: formData.avatar_url || prev.avatar_url
-    }));
-    // In real app, this would be an API call
-    // Close with animation
-    setIsEditProfileModalClosing(true);
-    setTimeout(() => {
-      setIsEditProfileModalOpen(false);
-      setIsEditProfileModalClosing(false);
-    }, 300);
+  const handleSubmitEditProfile = async (formData) => {
+    const currentUsername = profileUser?.username || localStorage.getItem('profileusername');
+    if (!currentUsername) return;
+
+    try {
+      const response = await fetch('http://localhost:8000/user/update_profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          current_username: currentUsername,
+          new_username: formData.username,
+          new_bio: formData.bio,
+          avatar_url: formData.avatar_url
+        })
+      });
+
+      if (response.ok) {
+        // Update profile user state
+        setProfileUser(prev => ({
+          ...prev,
+          username: formData.username,
+          email: formData.email,
+          bio: formData.bio,
+          avatar_url: formData.avatar_url || prev.avatar_url
+        }));
+
+        // Update local storage if username changed
+        if (formData.username && formData.username !== currentUsername) {
+          localStorage.setItem('profileusername', formData.username);
+        }
+
+        // Close with animation
+        setIsEditProfileModalClosing(true);
+        setTimeout(() => {
+          setIsEditProfileModalOpen(false);
+          setIsEditProfileModalClosing(false);
+        }, 300);
+      } else {
+        const errorData = await response.json();
+        alert(`Profil güncellenemedi: ${errorData.detail || 'Bilinmeyen hata'}`);
+      }
+    } catch (error) {
+      console.error('Profil güncelleme hatası:', error);
+      alert('Profil güncellenirken bir hata oluştu.');
+    }
   };
 
   const handleCreateList = () => {
@@ -727,25 +758,103 @@ function Profile() {
     }, 300);
   };
 
-  const handleSubmitNewList = (e) => {
+  const handleSubmitNewList = async (e) => {
     e.preventDefault();
-    if (newListName.trim()) {
-      const newList = {
-        id: Date.now(),
-        name: newListName,
-        description: newListDescription,
-        items: []
-      };
-      // Add to custom lists (in real app, this would be an API call)
-      setCustomLists([...customLists, newList]);
-      // Close with animation
-      setIsCreateListModalClosing(true);
-      setTimeout(() => {
-        setIsCreateListModalOpen(false);
-        setIsCreateListModalClosing(false);
-        setNewListName('');
-        setNewListDescription('');
-      }, 300);
+    if (!newListName.trim()) return;
+
+    const username = profileUser?.username || localStorage.getItem('profileusername');
+    if (!username) {
+      console.error('Liste oluşturma için kullanıcı adı bulunamadı');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/list/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          name: newListName,
+          description: newListDescription
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Add to custom lists state
+        const newList = {
+          id: data.list_id,
+          name: data.name,
+          description: data.description,
+          items: [],
+          itemCount: 0
+        };
+
+        setCustomLists([...customLists, newList]);
+
+        // Close with animation
+        setIsCreateListModalClosing(true);
+        setTimeout(() => {
+          setIsCreateListModalOpen(false);
+          setIsCreateListModalClosing(false);
+          setNewListName('');
+          setNewListDescription('');
+        }, 300);
+      } else {
+        const errorData = await response.json();
+        alert(`Liste oluşturulamadı: ${errorData.detail || 'Bilinmeyen hata'}`);
+      }
+    } catch (error) {
+      console.error('Liste oluşturma hatası:', error);
+      alert('Liste oluşturulurken bir hata oluştu.');
+    }
+  };
+
+  const handleDeleteList = async (listId) => {
+    // If listId is provided (direct delete), use it. Otherwise use selectedList (modal delete)
+    const targetList = listId ? customLists.find(l => l.id === listId) : selectedList;
+    if (!targetList) return;
+
+    const confirmed = window.confirm(`${targetList.name} adlı listeyi silmek istediğine emin misin?`);
+    if (!confirmed) return;
+
+    const username = profileUser?.username || localStorage.getItem('profileusername');
+    if (!username) return;
+
+    try {
+      const response = await fetch('http://localhost:8000/list/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          list_id: targetList.id
+        })
+      });
+
+      if (response.ok) {
+        // Remove from state
+        setCustomLists(customLists.filter(list => list.id !== targetList.id));
+
+        // Close modal if open
+        if (isEditListModalOpen) {
+          setIsEditListModalClosing(true);
+          setTimeout(() => {
+            setIsEditListModalOpen(false);
+            setIsEditListModalClosing(false);
+            setSelectedList(null);
+          }, 300);
+        }
+      } else {
+        alert('Liste silinemedi');
+      }
+    } catch (error) {
+      console.error('Liste silme hatası:', error);
+      alert('Liste silinirken bir hata oluştu');
     }
   };
 
@@ -897,22 +1006,7 @@ function Profile() {
     }
   };
 
-  const handleDeleteList = () => {
-    if (selectedList) {
-      const updatedLists = customLists.filter(list => list.id !== selectedList.id);
-      setCustomLists(updatedLists);
-      // Close with animation
-      setIsEditListModalClosing(true);
-      setTimeout(() => {
-        setIsEditListModalOpen(false);
-        setIsEditListModalClosing(false);
-        setSelectedList(null);
-        setSearchQuery('');
-        setSearchResults([]);
-        setIsSearchResultsClosing(false);
-      }, 300);
-    }
-  };
+
 
   // --- DÜZELTME BURADA: Yükleniyor Kontrolü Ekleyin ---
   if (loadingProfile) {
