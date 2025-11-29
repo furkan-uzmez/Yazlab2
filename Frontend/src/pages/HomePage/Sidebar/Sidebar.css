@@ -18,6 +18,7 @@
 /* Expand sidebar when in search mode */
 .sidebar.search-mode {
   width: 340px;
+  overflow: hidden;
 }
 
 .sidebar-brand {
@@ -530,6 +531,7 @@ button.nav-item:focus {
   animation: searchPanelEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   opacity: 0;
   transform: translateX(20px) scale(0.95);
+  overflow: hidden;
 }
 
 @keyframes searchPanelEnter {
@@ -639,8 +641,10 @@ button.nav-item:focus {
   display: flex;
   flex-direction: column;
   padding: 0 1.5rem;
-  overflow-y: auto;
+  overflow: hidden;
   animation: contentFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+  min-height: 0;
+  max-height: 100%;
 }
 
 @keyframes contentFadeIn {
@@ -988,15 +992,20 @@ button.nav-item:focus {
 
 .search-results {
   flex: 1;
-  overflow-y: auto;
-  min-height: 600px !important;
+  overflow: hidden;
+  min-height: 0;
+  max-height: none;
   animation: fadeIn 0.4s ease 0.2s both;
+  display: flex;
+  flex-direction: column;
 }
 
 .search-results-content {
   display: flex;
   flex-direction: column;
-  height: 600px !important;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1;
 }
 
 .search-results-header {
@@ -1021,6 +1030,10 @@ button.nav-item:focus {
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.5rem 0;
+  max-height: 560px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 560px;
 }
 
 .search-result-item {
@@ -1257,23 +1270,19 @@ button.nav-item:focus {
 }
 
 /* Scrollbar Styling for Search Panel */
-.search-panel-content::-webkit-scrollbar,
 .search-results::-webkit-scrollbar {
   width: 6px;
 }
 
-.search-panel-content::-webkit-scrollbar-track,
 .search-results::-webkit-scrollbar-track {
   background: #0a0a0a;
 }
 
-.search-panel-content::-webkit-scrollbar-thumb,
 .search-results::-webkit-scrollbar-thumb {
   background: #2a2a2a;
   border-radius: 3px;
 }
 
-.search-panel-content::-webkit-scrollbar-thumb:hover,
 .search-results::-webkit-scrollbar-thumb:hover {
   background: #3a3a3a;
 }
@@ -1336,8 +1345,7 @@ button.nav-item:focus {
   .sidebar.search-mode .search-panel-content {
     padding: 0 1.5rem 1.5rem;
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
   }
