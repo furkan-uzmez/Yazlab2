@@ -41,7 +41,6 @@ function EditListModal({
             {/* Add Content Section */}
             <div className="edit-list-add-content">
               <div className="form-group">
-                <label htmlFor="search-content">İçerik Ekle</label>
                 <div className="search-content-wrapper">
                   <FaSearch className="search-content-icon" />
                   <input
