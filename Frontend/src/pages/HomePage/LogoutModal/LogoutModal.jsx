@@ -32,8 +32,12 @@ function LogoutModal({ isOpen, isLoading, onConfirm, onCancel }) {
           </div>
         ) : (
           <div className="logout-loading">
-            <div className="logout-spinner"></div>
-            <p className="logout-loading-text">Çıkış yapılıyor...</p>
+            <div className="logout-loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <p className="logout-loading-text">Çıkış yapılıyor</p>
           </div>
         )}
       </div>
