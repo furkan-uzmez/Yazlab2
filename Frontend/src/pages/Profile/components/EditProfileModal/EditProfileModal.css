@@ -3,6 +3,44 @@
 /* Edit Profile Modal */
 .edit-profile-modal {
   max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.edit-profile-modal .create-list-modal-form {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.edit-profile-modal .create-list-modal-form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.edit-profile-modal .create-list-modal-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.edit-profile-modal .create-list-modal-form::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.edit-profile-modal .create-list-modal-form::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.edit-profile-modal .create-list-modal-actions {
+  flex-shrink: 0;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Avatar Section */

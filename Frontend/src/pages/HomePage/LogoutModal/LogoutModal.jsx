@@ -10,7 +10,7 @@ function LogoutModal({ isOpen, isLoading, onConfirm, onCancel }) {
     >
       <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
         {!isLoading ? (
-          <>
+          <div className="logout-modal-content">
             <h3 className="logout-modal-title">Çıkış Yapmak İstiyor Musunuz?</h3>
             <p className="logout-modal-message">
               Çıkış yaptığınızda oturumunuz sonlandırılacak ve ana giriş sayfasına yönlendirileceksiniz.
@@ -29,7 +29,7 @@ function LogoutModal({ isOpen, isLoading, onConfirm, onCancel }) {
                 Çıkış Yap
               </button>
             </div>
-          </>
+          </div>
         ) : (
           <div className="logout-loading">
             <div className="logout-spinner"></div>
