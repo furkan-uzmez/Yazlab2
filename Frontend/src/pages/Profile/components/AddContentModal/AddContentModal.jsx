@@ -55,35 +55,19 @@ function AddContentModal({
         const data = await response.json();
         let formattedResults = [];
 
-        if (searchType === 'movie') {
-          const items = data.results?.results || [];
-          formattedResults = items.map(movie => ({
-            id: movie.id,
-            title: movie.title,
-            poster_url: movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : '/placeholder.jpg',
-            type: 'Film',
-            release_date: movie.release_date,
-            description: movie.overview,
-            release_year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
-            // Runtime usually not in search results
-            duration_or_pages: null
-          }));
-        } else if (searchType === 'book') {
-          const items = data.results?.items || [];
-          formattedResults = items.map(book => {
-            const info = book.volumeInfo;
-            return {
-              id: book.id,
-              title: info.title,
-              poster_url: info.imageLinks?.smallThumbnail?.replace('http:', 'https:') || '/placeholder.jpg',
-              type: 'Kitap',
-              authors: info.authors,
-              description: info.description,
-              release_year: info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : null,
-              duration_or_pages: info.pageCount
-            };
-          });
-        }
+        // API artık normalize edilmiş veri döndürüyor
+        const items = data.results || [];
+
+        formattedResults = items.map(item => ({
+          id: item.id,
+          title: item.title,
+          poster_url: item.poster_url || '/placeholder.jpg',
+          type: item.type,
+          description: item.description,
+          release_year: item.release_year,
+          duration_or_pages: item.duration_or_pages,
+          authors: item.authors
+        }));
 
         setSearchResults(formattedResults);
         setSelectedItems(new Set()); // Yeni arama yapıldığında seçimleri sıfırla
