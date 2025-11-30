@@ -58,17 +58,14 @@ def get_user_feed(connection, email: str, page: int = 1) -> list:
                 JOIN users curr_u ON f.follower_id = curr_u.user_id
                 WHERE curr_u.email = %s
             )
-            OR a.user_id = (
-                -- Kendi aktiviteleri de dahil
-                SELECT user_id FROM users WHERE email = %s
-            )
+
             
             ORDER BY a.created_at DESC
             LIMIT %s OFFSET %s;
         """
         
-        # Parametre sırasına dikkat: current_user_id, email, email (kendi aktiviteleri için), limit, offset
-        cursor.execute(query, (current_user_id, email, email, ITEMS_PER_PAGE, offset))
+        # Parametre sırasına dikkat: current_user_id, email, limit, offset
+        cursor.execute(query, (current_user_id, email, ITEMS_PER_PAGE, offset))
         feed_items = cursor.fetchall()
         cursor.close()
         
