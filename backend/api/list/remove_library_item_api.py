@@ -5,10 +5,13 @@ from backend.func.list.remove_from_library import remove_item_from_library
 
 router = APIRouter(prefix="/list", tags=["list"])
 
+from typing import Optional
+
 class RemoveLibraryItemRequest(BaseModel):
     username: str
     list_key: str
     content_id: int
+    list_id: Optional[int] = None
 
 @router.delete("/remove_item")
 async def remove_library_item(request: RemoveLibraryItemRequest):
@@ -18,7 +21,8 @@ async def remove_library_item(request: RemoveLibraryItemRequest):
     Body: {
         "username": "mehmetdemir1",
         "list_key": "watched",
-        "content_id": 123
+        "content_id": 123,
+        "list_id": 123 # Opsiyonel
     }
     """
     connection = open_db_connection()
@@ -34,7 +38,8 @@ async def remove_library_item(request: RemoveLibraryItemRequest):
             connection=connection,
             username=request.username,
             list_key=request.list_key,
-            content_id=request.content_id
+            content_id=request.content_id,
+            list_id=request.list_id
         )
         
         if not success:

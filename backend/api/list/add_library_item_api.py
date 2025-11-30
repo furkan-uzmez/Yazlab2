@@ -18,6 +18,7 @@ class AddLibraryItemRequest(BaseModel):
     release_year: Optional[int] = None
     duration_or_pages: Optional[int] = None
     api_source: str
+    list_id: Optional[int] = None
 
 @router.post("/add_item")
 async def add_library_item(request: AddLibraryItemRequest):
@@ -27,6 +28,7 @@ async def add_library_item(request: AddLibraryItemRequest):
     Body: {
         "username": "mehmetdemir1",
         "list_key": "watched",
+        "list_id": 123,  # Opsiyonel, özel listeler için
         "external_id": "123",
         "title": "Film Adı",
         "poster_url": "https://...",
@@ -57,7 +59,8 @@ async def add_library_item(request: AddLibraryItemRequest):
             description=request.description,
             release_year=request.release_year,
             duration_or_pages=request.duration_or_pages,
-            api_source=request.api_source
+            api_source=request.api_source,
+            list_id=request.list_id
         )
         
         if not success:

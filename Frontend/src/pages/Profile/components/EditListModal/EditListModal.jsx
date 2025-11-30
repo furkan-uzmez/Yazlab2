@@ -1,4 +1,5 @@
-import { FaTimes, FaSearch, FaPlus, FaTrash } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaTimes, FaSearch, FaPlus, FaTrash, FaFilm, FaBook } from 'react-icons/fa';
 import './EditListModal.css';
 
 function EditListModal({
@@ -19,6 +20,14 @@ function EditListModal({
   onUpdateList,
   onDeleteList
 }) {
+  const [searchType, setSearchType] = useState('movie');
+
+  const handleSearchTypeChange = (type) => {
+    setSearchType(type);
+    if (searchQuery) {
+      onSearchContent(searchQuery, type);
+    }
+  };
   if (!isOpen || !selectedList) return null;
 
   return (
@@ -40,6 +49,22 @@ function EditListModal({
           <div className="edit-list-left-panel">
             {/* Add Content Section */}
             <div className="edit-list-add-content">
+              {/* Search Type Selector */}
+              <div className="search-type-selector">
+                <button
+                  className={`search-type-btn ${searchType === 'movie' ? 'active' : ''}`}
+                  onClick={() => handleSearchTypeChange('movie')}
+                >
+                  <FaFilm /> Film
+                </button>
+                <button
+                  className={`search-type-btn ${searchType === 'book' ? 'active' : ''}`}
+                  onClick={() => handleSearchTypeChange('book')}
+                >
+                  <FaBook /> Kitap
+                </button>
+              </div>
+
               <div className="form-group">
                 <div className="search-content-wrapper">
                   <FaSearch className="search-content-icon" />
@@ -47,8 +72,8 @@ function EditListModal({
                     id="search-content"
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => onSearchContent(e.target.value)}
-                    placeholder="Film veya kitap ara..."
+                    onChange={(e) => onSearchContent(e.target.value, searchType)}
+                    placeholder={searchType === 'movie' ? "Film ara..." : "Kitap ara..."}
                   />
                   {isSearching && <div className="search-spinner"></div>}
                 </div>

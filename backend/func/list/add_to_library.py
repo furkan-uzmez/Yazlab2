@@ -86,7 +86,7 @@ def get_or_create_list(cursor, user_id: int, list_name: str):
 
 from typing import Optional
 
-def add_item_to_library(connection, username: str, list_key: str, external_id: str, title: str, poster_url: Optional[str], content_type: str, description: Optional[str] = None, release_year: Optional[int] = None, duration_or_pages: Optional[int] = None, api_source: str = None):
+def add_item_to_library(connection, username: str, list_key: str, external_id: str, title: str, poster_url: Optional[str], content_type: str, description: Optional[str] = None, release_year: Optional[int] = None, duration_or_pages: Optional[int] = None, api_source: str = None, list_id: int = None):
     """
     Kullanıcının kütüphanesine içerik ekler.
     """
@@ -109,12 +109,17 @@ def add_item_to_library(connection, username: str, list_key: str, external_id: s
         content_id = get_or_create_content(cursor, external_id, title, poster_url, content_type, description, release_year, duration_or_pages, api_source)
         
         # Listeyi bul veya oluştur
-        list_id = get_or_create_list(cursor, user_id, list_key)
+        if list_id:
+            # Eğer list_id verildiyse direkt onu kullan
+            target_list_id = list_id
+        else:
+            # Verilmediyse isme göre bul/oluştur (eski yöntem)
+            target_list_id = get_or_create_list(cursor, user_id, list_key)
         
         # Listeye ekle (varsa hata vermemesi için IGNORE)
         cursor.execute(
             "INSERT IGNORE INTO list_items (list_id, content_id) VALUES (%s, %s)",
-            (list_id, content_id)
+            (target_list_id, content_id)
         )
         
         connection.commit()

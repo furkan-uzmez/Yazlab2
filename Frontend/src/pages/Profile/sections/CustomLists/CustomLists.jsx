@@ -11,8 +11,8 @@ function CustomLists({ customLists, onEditList }) {
       <div className="custom-lists">
         {customLists.length > 0 ? (
           customLists.map((list) => (
-            <div 
-              key={list.id} 
+            <div
+              key={list.id}
               className="custom-list-card"
               onClick={() => onEditList(list)}
             >
@@ -21,7 +21,7 @@ function CustomLists({ customLists, onEditList }) {
               </div>
               <p>{list.description || 'Açıklama yok'}</p>
               <div className="custom-list-card-footer">
-                <span className="list-count">{list.items?.length || 0} içerik</span>
+                <span className="list-count">{list.itemCount || 0} içerik</span>
               </div>
             </div>
           ))

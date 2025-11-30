@@ -858,9 +858,23 @@ function Profile() {
     }
   };
 
-  const handleEditList = (list) => {
+  const handleEditList = async (list) => {
     setSelectedList(list);
     setIsEditListModalOpen(true);
+
+    // Fetch list items from API
+    try {
+      const response = await fetch(`http://localhost:8000/list/items/${list.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedList(prev => ({
+          ...prev,
+          items: data.items || []
+        }));
+      }
+    } catch (error) {
+      console.error("Liste içerikleri yüklenemedi:", error);
+    }
   };
 
   const handleCloseEditListModal = () => {
@@ -875,7 +889,7 @@ function Profile() {
     }, 300);
   };
 
-  const handleSearchContent = (query) => {
+  const handleSearchContent = (query, type = 'movie') => {
     setSearchQuery(query);
     if (query.trim().length > 0) {
       // If there are existing results, close them first
@@ -884,37 +898,11 @@ function Profile() {
         setTimeout(() => {
           setIsSearchResultsClosing(false);
           setIsSearching(true);
-          // Mock search results - in real app, this would be an API call
-          setTimeout(() => {
-            const mockResults = [
-              { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
-              { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
-              { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
-              { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
-              { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
-            ].filter(item =>
-              item.title.toLowerCase().includes(query.toLowerCase())
-            );
-            setSearchResults(mockResults);
-            setIsSearching(false);
-          }, 300);
+          fetchSearchResults(query, type);
         }, 300);
       } else {
         setIsSearching(true);
-        // Mock search results - in real app, this would be an API call
-        setTimeout(() => {
-          const mockResults = [
-            { id: 1, title: 'Inception', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg' },
-            { id: 2, title: 'The Matrix', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg' },
-            { id: 3, title: '1984', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/7222246-M.jpg' },
-            { id: 4, title: 'Dune', type: 'Kitap', poster_url: 'https://covers.openlibrary.org/b/id/8739161-M.jpg' },
-            { id: 5, title: 'Interstellar', type: 'Film', poster_url: 'https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' }
-          ].filter(item =>
-            item.title.toLowerCase().includes(query.toLowerCase())
-          );
-          setSearchResults(mockResults);
-          setIsSearching(false);
-        }, 300);
+        fetchSearchResults(query, type);
       }
     } else {
       // Close with animation
@@ -932,77 +920,169 @@ function Profile() {
     }
   };
 
-  const handleAddToList = (content) => {
-    if (selectedList) {
-      const updatedLists = customLists.map(list => {
-        if (list.id === selectedList.id) {
-          // Check if content already exists
-          const exists = list.items.some(item => item.id === content.id);
-          if (!exists) {
-            return {
-              ...list,
-              items: [...list.items, content]
-            };
-          }
-        }
-        return list;
-      });
-      setCustomLists(updatedLists);
-      setSelectedList(updatedLists.find(l => l.id === selectedList.id));
-      setSearchQuery('');
-      // Close with animation
-      if (searchResults.length > 0) {
-        setIsSearchResultsClosing(true);
-        setTimeout(() => {
-          setSearchResults([]);
-          setIsSearchResultsClosing(false);
-        }, 300);
+  const fetchSearchResults = async (query, type) => {
+    try {
+      const response = await fetch(`http://localhost:8000/content/search?query=${encodeURIComponent(query)}&api_type=${type}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data.results || []);
       } else {
         setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleAddToList = async (content) => {
+    if (selectedList) {
+      const username = profileUser?.username || localStorage.getItem('profileusername');
+      if (!username) return;
+
+      try {
+        const response = await fetch('http://localhost:8000/list/add_item', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: username,
+            list_key: selectedList.name, // Not used when list_id is present
+            list_id: selectedList.id,
+            external_id: content.id,
+            title: content.title,
+            poster_url: content.poster_url,
+            content_type: content.type === 'Film' ? 'movie' : 'book',
+            api_source: content.type === 'Film' ? 'tmdb' : 'google_books'
+          })
+        });
+
+        if (response.ok) {
+          // Update local state
+          const updatedLists = customLists.map(list => {
+            if (list.id === selectedList.id) {
+              const exists = list.items.some(item => item.id === content.id);
+              if (!exists) {
+                return {
+                  ...list,
+                  items: [...list.items, content],
+                  itemCount: (list.itemCount || 0) + 1
+                };
+              }
+            }
+            return list;
+          });
+          setCustomLists(updatedLists);
+          setSelectedList(prev => ({
+            ...prev,
+            items: [...(prev.items || []), content]
+          }));
+
+          setSearchQuery('');
+          if (searchResults.length > 0) {
+            setIsSearchResultsClosing(true);
+            setTimeout(() => {
+              setSearchResults([]);
+              setIsSearchResultsClosing(false);
+            }, 300);
+          } else {
+            setSearchResults([]);
+          }
+        } else {
+          alert("İçerik eklenemedi");
+        }
+      } catch (error) {
+        console.error("Ekleme hatası:", error);
       }
     }
   };
 
-  const handleRemoveFromList = (contentId) => {
+  const handleRemoveFromList = async (contentId) => {
     if (selectedList) {
-      const updatedLists = customLists.map(list => {
-        if (list.id === selectedList.id) {
-          return {
-            ...list,
-            items: list.items.filter(item => item.id !== contentId)
-          };
+      const username = profileUser?.username || localStorage.getItem('profileusername');
+      if (!username) return;
+
+      try {
+        const response = await fetch('http://localhost:8000/list/remove_item', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: username,
+            list_key: selectedList.name,
+            list_id: selectedList.id,
+            content_id: contentId
+          })
+        });
+
+        if (response.ok) {
+          const updatedLists = customLists.map(list => {
+            if (list.id === selectedList.id) {
+              return {
+                ...list,
+                items: list.items.filter(item => item.id !== contentId),
+                itemCount: Math.max(0, (list.itemCount || 0) - 1)
+              };
+            }
+            return list;
+          });
+          setCustomLists(updatedLists);
+          setSelectedList(prev => ({
+            ...prev,
+            items: prev.items.filter(item => item.id !== contentId)
+          }));
+        } else {
+          alert("İçerik kaldırılamadı");
         }
-        return list;
-      });
-      setCustomLists(updatedLists);
-      setSelectedList(updatedLists.find(l => l.id === selectedList.id));
+      } catch (error) {
+        console.error("Kaldırma hatası:", error);
+      }
     }
   };
 
-  const handleUpdateList = (e) => {
+  const handleUpdateList = async (e) => {
     e.preventDefault();
     if (selectedList) {
-      const updatedLists = customLists.map(list => {
-        if (list.id === selectedList.id) {
-          return {
-            ...list,
+      try {
+        const response = await fetch('http://localhost:8000/list/update', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            list_id: selectedList.id,
             name: selectedList.name,
             description: selectedList.description
-          };
+          })
+        });
+
+        if (response.ok) {
+          const updatedLists = customLists.map(list => {
+            if (list.id === selectedList.id) {
+              return {
+                ...list,
+                name: selectedList.name,
+                description: selectedList.description
+              };
+            }
+            return list;
+          });
+          setCustomLists(updatedLists);
+
+          // Close with animation
+          setIsEditListModalClosing(true);
+          setTimeout(() => {
+            setIsEditListModalOpen(false);
+            setIsEditListModalClosing(false);
+            setSelectedList(null);
+            setSearchQuery('');
+            setSearchResults([]);
+            setIsSearchResultsClosing(false);
+          }, 300);
+        } else {
+          alert("Liste güncellenemedi");
         }
-        return list;
-      });
-      setCustomLists(updatedLists);
-      // Close with animation
-      setIsEditListModalClosing(true);
-      setTimeout(() => {
-        setIsEditListModalOpen(false);
-        setIsEditListModalClosing(false);
-        setSelectedList(null);
-        setSearchQuery('');
-        setSearchResults([]);
-        setIsSearchResultsClosing(false);
-      }, 300);
+      } catch (error) {
+        console.error("Güncelleme hatası:", error);
+      }
     }
   };
 

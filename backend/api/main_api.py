@@ -31,6 +31,8 @@ from backend.api.interactions.get_comments_by_content_api import router as get_c
 from backend.api.interactions.add_comment_by_content_api import router as add_comment_by_content_router
 from backend.api.list.create_list_api import router as create_list_router
 from backend.api.list.delete_list_api import router as delete_list_router
+from backend.api.list.get_list_items_api import router as get_list_items_router
+from backend.api.list.update_list_api import router as update_list_router
 from database.create_tables import create_tables
 from database.insert_users_data import insert_initial_data
 from database.insert_feed import insert_mock_activities
@@ -61,6 +63,8 @@ api.include_router(add_library_item_router)
 api.include_router(remove_library_item_router)
 api.include_router(create_list_router)
 api.include_router(delete_list_router)
+api.include_router(get_list_items_router)
+api.include_router(update_list_router)
 api.include_router(get_user_feed_router)
 api.include_router(like_review_router)
 api.include_router(add_rating_router)
