@@ -52,34 +52,21 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
       if (response.ok) {
         const data = await response.json();
         console.log("API Ham Veri:", data);
-        
-        let formattedResults = [];
-        
-        if (contentType === 'movie') {
-          // TMDB API'si {"results": [...]} formatında döndürüyor
-          const items = data.results?.results || data.results || [];
-          formattedResults = items.map(movie => ({
-            content_id: movie.id,
-            title: movie.title,
-            poster_url: movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : '/api/placeholder/60/90',
-            cover_url: movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : '/api/placeholder/60/90',
-            release_year: movie.release_date ? movie.release_date.split('-')[0] : null
-          }));
-        } else if (contentType === 'book') {
-          // Google Books API'si {"items": [...]} formatında döndürüyor
-          const items = data.results?.items || data.items || [];
-          formattedResults = items.map(book => {
-            const info = book.volumeInfo;
-            return {
-              content_id: book.id,
-              title: info.title,
-              poster_url: info.imageLinks?.smallThumbnail?.replace('http:', 'https:') || '/api/placeholder/60/90',
-              cover_url: info.imageLinks?.smallThumbnail?.replace('http:', 'https:') || '/api/placeholder/60/90',
-              release_year: info.publishedDate ? info.publishedDate.split('-')[0] : null
-            };
-          });
-        }
-        
+
+        // Backend zaten film/kitap sonuçlarını normalize ediyor:
+        // { query: "...", results: [{ id, title, poster_url, release_year, ...}] }
+        const items = data.results || [];
+
+        const formattedResults = items.map((item) => ({
+          content_id: item.id,
+          title: item.title,
+          // Önce backend'den gelen poster_url'i kullan,
+          // yoksa mevcut tek placeholder görseline düş.
+          poster_url: item.poster_url || '/readditlogo.png',
+          cover_url: item.poster_url || '/readditlogo.png',
+          release_year: item.release_year || null,
+        }));
+
         console.log("Formatlanmış Sonuçlar:", formattedResults);
         setSearchResults(formattedResults);
       } else {
