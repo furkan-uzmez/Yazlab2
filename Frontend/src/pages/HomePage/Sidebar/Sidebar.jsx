@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation , useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaSun, FaMoon, FaCog, FaInfoCircle, FaQuestionCircle, FaArrowRight } from 'react-icons/fa';
 import ShinyText from '../../../components/ShinyText';
 import './Sidebar.css';
@@ -11,10 +11,10 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
 
   const [internalSearchMode, setInternalSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // DİKKAT: Varsayılanı 'movie' yapalım ki test ederken sonuç görebilesiniz
-  const [searchType, setSearchType] = useState('movie'); 
-  
+  const [searchType, setSearchType] = useState('movie');
+
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isCompactTabs, setIsCompactTabs] = useState(false);
@@ -72,15 +72,15 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
   }, [isSearchMode]);
 
   // --- ASIL ARAMA FONKSİYONU (GÜNCELLENDİ) ---
-const executeSearch = async () => {
+  const executeSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
-    setSearchResults([]); 
+    setSearchResults([]);
 
     try {
       let url = '';
-      
+
       if (searchType === 'movie' || searchType === 'book') {
         url = `http://localhost:8000/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${searchType}`;
       } else if (searchType === 'user') {
@@ -88,37 +88,40 @@ const executeSearch = async () => {
       }
 
       const response = await fetch(url);
-      
+
       if (response.ok) {
         const data = await response.json();
-        console.log("API Ham Veri:", data); 
+        console.log("API Ham Veri:", data);
 
         let formattedResults = [];
 
         if (searchType === 'movie') {
-          const items = data.results?.results || data.results || [];
+          // Backend normalized results returns a list directly in data.results
+          const items = data.results || [];
           formattedResults = items.map(movie => ({
             id: movie.id,
-            title: movie.title, 
-            image: movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : '/api/placeholder/50/75',
-            subtitle: movie.release_date ? movie.release_date.split('-')[0] : 'Tarih Yok', 
+            title: movie.title,
+            // Backend sends full URL in poster_url
+            image: movie.poster_url || '/api/placeholder/50/75',
+            subtitle: movie.release_year || 'Tarih Yok',
             type: 'movie'
           }));
 
         } else if (searchType === 'book') {
-          const items = data.results?.items || data.items || [];
+          // Backend normalized results returns a list directly in data.results
+          const items = data.results || [];
           formattedResults = items.map(book => {
-            const info = book.volumeInfo;
             return {
               id: book.id,
-              title: info.title, 
-              image: info.imageLinks?.smallThumbnail?.replace('http:', 'https:') || '/api/placeholder/50/75',
-              subtitle: info.authors ? info.authors.join(', ') : 'Yazar Yok', 
+              title: book.title,
+              // Backend sends full URL in poster_url
+              image: book.poster_url?.replace('http:', 'https:') || '/api/placeholder/50/75',
+              subtitle: book.authors ? book.authors.join(', ') : 'Yazar Yok',
               type: 'book'
             };
           });
 
-        } else if (searchType === 'user') { 
+        } else if (searchType === 'user') {
           // Veri yapısı kontrolü
           let items = [];
           if (Array.isArray(data.results)) {
@@ -126,15 +129,15 @@ const executeSearch = async () => {
           } else if (data.results && typeof data.results === 'object') {
             items = [data.results]; // Tek objeyi diziye çevir
           } else if (data.user) {
-             items = [data.user]; // Tek objeyi diziye çevir
+            items = [data.user]; // Tek objeyi diziye çevir
           }
-          
+
           formattedResults = items.map(user => ({
-            id: user.user_id || user.username || Math.random(), 
-            title: user.username, 
-            image: user.avatar_url || 'https://i.pravatar.cc/150?img=default', 
-            subtitle: user.bio 
-              ? (user.bio.length > 30 ? user.bio.substring(0, 30) + '...' : user.bio) 
+            id: user.user_id || user.username || Math.random(),
+            title: user.username,
+            image: user.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            subtitle: user.bio
+              ? (user.bio.length > 30 ? user.bio.substring(0, 30) + '...' : user.bio)
               : 'Kullanıcı',
             type: 'user'
           }));
@@ -191,8 +194,8 @@ const executeSearch = async () => {
           totalWidth += tabClone.offsetWidth;
           document.body.removeChild(tabClone);
         });
-        totalWidth += 0.25 * 2 * 16; 
-        setIsCompactTabs(totalWidth > containerWidth - 10); 
+        totalWidth += 0.25 * 2 * 16;
+        setIsCompactTabs(totalWidth > containerWidth - 10);
       };
       const timeoutId = setTimeout(checkTabsFit, 100);
       window.addEventListener('resize', checkTabsFit);
@@ -221,14 +224,14 @@ const executeSearch = async () => {
       setTimeout(() => {
         setIsMoreMenuOpen(false);
         setIsMoreMenuClosing(false);
-      }, 300); 
+      }, 300);
     } else {
       setIsMoreMenuOpen(true);
       setIsMoreMenuClosing(false);
     }
   };
 
-const handleResultClick = (item) => {
+  const handleResultClick = (item) => {
     if (searchType === 'user') {
       // Kullanıcı araması ise profile git (title=username)
       navigate(`/profile/${item.title}`);
@@ -239,10 +242,10 @@ const handleResultClick = (item) => {
       // Kitap ise detay sayfasına git
       navigate(`/content/book/${item.id}`);
     }
-    
+
     // Mobildeysek menüyü kapatmak isteyebilirsiniz:
     if (window.innerWidth <= 768 && onSearchModeChange) {
-        onSearchModeChange(false);
+      onSearchModeChange(false);
     }
   };
 
@@ -337,7 +340,7 @@ const handleResultClick = (item) => {
                           {isDarkMode ? <FaSun className="more-menu-icon" /> : <FaMoon className="more-menu-icon" />}
                           <span>Görünümü Değiştir</span>
                         </button>
-                         <button type="button" className="more-menu-item" onClick={handleSettings}>
+                        <button type="button" className="more-menu-item" onClick={handleSettings}>
                           <FaCog className="more-menu-icon" />
                           <span>Ayarlar</span>
                         </button>
@@ -372,9 +375,9 @@ const handleResultClick = (item) => {
             <div className="search-panel-content">
               {/* --- FORM YAPISI: Enter tuşu için en garantili yöntem --- */}
               <form className="search-input-wrapper" onSubmit={handleSearchSubmit}>
-                <FaSearch 
-                  className="search-input-icon" 
-                  onClick={executeSearch} 
+                <FaSearch
+                  className="search-input-icon"
+                  onClick={executeSearch}
                   style={{ cursor: 'pointer' }}
                 />
                 <input
@@ -384,7 +387,7 @@ const handleResultClick = (item) => {
                   placeholder="Film, kitap veya kullanıcı ara..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  // onKeyDown artık gerekmez, form onSubmit halleder
+                // onKeyDown artık gerekmez, form onSubmit halleder
                 />
               </form>
 
@@ -434,35 +437,35 @@ const handleResultClick = (item) => {
                       </p>
                     </div>
 
-                   {/* --- SONUÇ LİSTESİ --- */}
+                    {/* --- SONUÇ LİSTESİ --- */}
                     <div className="search-results-list">
-                        {searchResults.map((item, index) => (
-                          <button 
-                            key={item.id || index} 
-                            className="search-result-item"
-                            onClick={() => handleResultClick(item)}
-                          >
-                            <img 
-                              src={item.image} 
-                              alt={item.title} 
-                              className="search-result-img" 
-                              onError={(e) => { e.target.src = '/api/placeholder/50/75'; }} 
-                            />
-                            <div className="search-result-info">
-                              <h4 className="search-result-title">{item.title}</h4>
-                              <p className="search-result-subtitle">{item.subtitle}</p>
-                            </div>
-                          </button>
-                        ))}
+                      {searchResults.map((item, index) => (
+                        <button
+                          key={item.id || index}
+                          className="search-result-item"
+                          onClick={() => handleResultClick(item)}
+                        >
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="search-result-img"
+                            onError={(e) => { e.target.src = '/api/placeholder/50/75'; }}
+                          />
+                          <div className="search-result-info">
+                            <h4 className="search-result-title">{item.title}</h4>
+                            <p className="search-result-subtitle">{item.subtitle}</p>
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 ) : searchQuery && !isSearching && searchResults.length === 0 ? (
-                    <div className="search-results-placeholder">
-                       <div className="search-empty-state">
-                          <FaSearch className="search-empty-icon" />
-                          <p className="search-empty-text">Sonuç bulunamadı</p>
-                       </div>
+                  <div className="search-results-placeholder">
+                    <div className="search-empty-state">
+                      <FaSearch className="search-empty-icon" />
+                      <p className="search-empty-text">Sonuç bulunamadı</p>
                     </div>
+                  </div>
                 ) : (
                   <div className="search-results-placeholder">
                     <div className="search-empty-state">
