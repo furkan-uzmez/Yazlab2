@@ -8,8 +8,11 @@ router = APIRouter(prefix="/interactions", tags=["interactions"])
 
 class CommentByContentRequest(BaseModel):
     user_email: str
-    content_id: int
+    content_id: str  # Changed to str to support external IDs
     comment_text: str
+    title: str = None
+    poster_url: str = None
+    content_type: str = None
 
 
 @router.post("/add_comment_by_content")
@@ -31,7 +34,10 @@ async def add_comment_by_content_endpoint(request: CommentByContentRequest):
             connection,
             request.user_email,
             request.content_id,
-            request.comment_text
+            request.comment_text,
+            request.title,
+            request.poster_url,
+            request.content_type
         )
         if added is False:
             raise HTTPException(

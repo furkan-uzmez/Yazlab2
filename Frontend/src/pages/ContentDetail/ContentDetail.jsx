@@ -445,8 +445,11 @@ function ContentDetail() {
         },
         body: JSON.stringify({
           user_email: currentUserEmail,
-          content_id: contentId,
-          comment_text: commentText.trim()
+          content_id: String(contentId), // Ensure string for backend
+          comment_text: commentText.trim(),
+          title: content.title,
+          poster_url: content.poster_path,
+          content_type: type === 'movie' ? 'movie' : 'book'
         })
       });
 

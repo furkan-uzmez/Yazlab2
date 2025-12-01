@@ -1,6 +1,6 @@
 import mysql.connector
 
-def get_comments_by_content(connection, content_id: int, email: str = None):
+def get_comments_by_content(connection, content_id: str, email: str = None):
     """
     Belirli bir içerik (content_id) için tüm yorumları getirir.
     Yorumlar, o içeriğe ait tüm aktiviteler (ratings/reviews) üzerindeki yorumları içerir.
@@ -10,6 +10,23 @@ def get_comments_by_content(connection, content_id: int, email: str = None):
 
     try:
         cursor = connection.cursor(dictionary=True)
+
+        # 0. content_id'yi çözümle (api_id -> internal_id)
+        # Önce bu ID'ye sahip bir api_id var mı bak
+        cursor.execute("SELECT content_id FROM contents WHERE api_id = %s", (str(content_id),))
+        content_row = cursor.fetchone()
+        
+        target_content_id = None
+        if content_row:
+            target_content_id = content_row['content_id']
+        else:
+            # Yoksa, direkt internal ID olarak dene (eğer int ise)
+            try:
+                target_content_id = int(content_id)
+            except ValueError:
+                # Hem api_id değil hem int değil -> geçersiz
+                print(f"Hata: Geçersiz content_id: {content_id}")
+                return []
 
         # 1. Mevcut kullanıcının ID'sini bul (Eğer email verildiyse)
         current_user_id = None
@@ -47,7 +64,7 @@ def get_comments_by_content(connection, content_id: int, email: str = None):
             ORDER BY ac.created_at DESC
         """
         
-        cursor.execute(query, (current_user_id, content_id))
+        cursor.execute(query, (current_user_id, target_content_id))
         comments_data = cursor.fetchall()
         cursor.close()
 

@@ -29,6 +29,7 @@ from backend.api.interactions.like_comment_api import router as like_comment_rou
 from backend.api.interactions.update_comments_api import router as update_comment_router
 from backend.api.interactions.get_comments_by_content_api import router as get_comments_by_content_router
 from backend.api.interactions.add_comment_by_content_api import router as add_comment_by_content_router
+from backend.api.interactions.delete_comment_api import router as delete_comment_router
 from backend.api.list.create_list_api import router as create_list_router
 from backend.api.list.delete_list_api import router as delete_list_router
 from backend.api.list.get_list_items_api import router as get_list_items_router
@@ -79,6 +80,7 @@ api.include_router(like_comment_router)
 api.include_router(get_comments_by_content_router)
 api.include_router(add_comment_by_content_router)
 api.include_router(update_comment_router)
+api.include_router(delete_comment_router)
 
 if __name__ == "__main__":
     create_tables()

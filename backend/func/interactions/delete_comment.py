@@ -19,6 +19,7 @@ def delete_comment(connection, comment_id: int, user_email: str) -> bool:
             return False
         
         user_id = user['user_id']
+        print(f"DEBUG: Delete request for comment_id: {comment_id} by user: {user_email} (id: {user_id})")
 
         # 2. ADIM: Yorumun sahibi kontrolü
         check_query = """
@@ -32,6 +33,8 @@ def delete_comment(connection, comment_id: int, user_email: str) -> bool:
             print(f"HATA: {comment_id} nolu yorum bulunamadı.")
             cursor.close()
             return False
+        
+        print(f"DEBUG: Comment found. Owner ID: {comment['user_id']}")
 
         if comment['user_id'] != user_id:
             print(f"HATA: Bu yorumu sadece sahibi silebilir.")

@@ -6,7 +6,7 @@ from backend.func.interactions.get_comments_by_content import get_comments_by_co
 router = APIRouter(prefix="/interactions", tags=["interactions"])
 
 @router.get("/get_comments_by_content")
-async def get_comments_by_content_endpoint(content_id: int, email: str = None):
+async def get_comments_by_content_endpoint(content_id: str, email: str = None):
     """
     Belirli bir içerik için tüm yorumları getirir.
     Kullanım: GET /interactions/get_comments_by_content?content_id=1&email=user@example.com
