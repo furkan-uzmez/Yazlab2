@@ -108,15 +108,17 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
           }));
 
         } else if (searchType === 'book') {
+          console.log("Book Search Data:", data);
           // Backend normalized results returns a list directly in data.results
-          const items = data.results || [];
+          const items = Array.isArray(data.results) ? data.results : [];
+
           formattedResults = items.map(book => {
             return {
               id: book.id,
               title: book.title,
               // Backend sends full URL in poster_url
               image: book.poster_url?.replace('http:', 'https:') || '/api/placeholder/50/75',
-              subtitle: book.authors ? book.authors.join(', ') : 'Yazar Yok',
+              subtitle: (book.authors && book.authors.length > 0) ? book.authors.join(', ') : 'Yazar Yok',
               type: 'book'
             };
           });
