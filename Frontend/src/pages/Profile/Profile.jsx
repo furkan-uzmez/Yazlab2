@@ -4,6 +4,7 @@ import { FaLock } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
+import CommentPanel from '../HomePage/CommentPanel/CommentPanel';
 import CreateListModal from './components/CreateListModal/CreateListModal';
 import EditListModal from './components/EditListModal/EditListModal';
 import EditProfileModal from './components/EditProfileModal/EditProfileModal';
@@ -434,6 +435,15 @@ function Profile() {
   const [recentActivities, setRecentActivities] = useState([]);
   const [loadingActivities, setLoadingActivities] = useState(false);
 
+  // Yorum paneli state'leri (Home.jsx ile aynı mantık)
+  const [commentPanelOpen, setCommentPanelOpen] = useState(false);
+  const [commentPanelClosing, setCommentPanelClosing] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [panelComments, setPanelComments] = useState([]);
+  const [commentText, setCommentText] = useState('');
+  const [likedComments, setLikedComments] = useState(new Set());
+  const [currentUserId, setCurrentUserId] = useState(null);
+
   useEffect(() => {
     const fetchRecentActivities = async () => {
       if (!profileUser?.user_id) return;
@@ -480,6 +490,261 @@ function Profile() {
 
   const handleCancelLogout = () => {
     setLogoutModalOpen(false);
+  };
+
+  // --- Profil sayfası: Gönderilerim için yorum panelini aç ---
+  const handleCommentClick = async (activity) => {
+    setSelectedActivity(activity);
+    setCommentPanelOpen(true);
+    setPanelComments([]);
+
+    try {
+      const userEmail = localStorage.getItem('email');
+      if (!userEmail) {
+        console.error('Kullanıcı girişi yapılmamış.');
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:8000/interactions/get_all_comments?email=${userEmail}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const allComments = data.comments || [];
+        const fetchedCurrentUserId = data.current_user_id || null;
+        setCurrentUserId(fetchedCurrentUserId);
+
+        // Sadece seçilen aktiviteye ait yorumları filtrele
+        const relatedComments = allComments.filter(
+          (comment) => String(comment.activity_id) === String(activity.id)
+        );
+
+        // Yorumları CommentPanel için uygun formata dönüştür
+        const formattedComments = relatedComments.map((c) => ({
+          id: c.comment_id,
+          userId: c.user_id,
+          userName: c.username,
+          userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+          text: c.text,
+          date: c.created_at,
+          likes: c.like_count,
+          isLiked: c.is_liked_by_me > 0
+        }));
+
+        setPanelComments(formattedComments);
+
+        const newLikedSet = new Set();
+        formattedComments.forEach((c) => {
+          if (c.isLiked) {
+            newLikedSet.add(c.id);
+          }
+        });
+        setLikedComments(newLikedSet);
+      } else {
+        console.error('Yorumlar yüklenemedi:', response.status);
+      }
+    } catch (error) {
+      console.error('Yorum API hatası:', error);
+    }
+  };
+
+  const handleCloseCommentPanel = () => {
+    setCommentPanelClosing(true);
+    setTimeout(() => {
+      setCommentPanelOpen(false);
+      setCommentPanelClosing(false);
+      setSelectedActivity(null);
+      setPanelComments([]);
+      setCommentText('');
+    }, 400);
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!commentText.trim() || !selectedActivity) return;
+
+    try {
+      const userEmail = localStorage.getItem('email');
+      if (!userEmail) {
+        console.error('Kullanıcı girişi yapılmamış.');
+        return;
+      }
+
+      const response = await fetch('http://localhost:8000/interactions/add_comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user_email: userEmail,
+          activity_id: selectedActivity.id,
+          comment_text: commentText
+        })
+      });
+
+      if (response.ok) {
+        // Input alanını temizle
+        setCommentText('');
+
+        // Yorumları veritabanından yeniden yükle (güncel veriler için)
+        const refreshResponse = await fetch(
+          `http://localhost:8000/interactions/get_all_comments?email=${userEmail}`
+        );
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          const allComments = refreshData.comments || [];
+
+          const relatedComments = allComments.filter(
+            (comment) => String(comment.activity_id) === String(selectedActivity.id)
+          );
+
+          const formattedComments = relatedComments.map((c) => ({
+            id: c.comment_id,
+            userId: c.user_id,
+            userName: c.username,
+            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            text: c.text,
+            date: c.created_at,
+            likes: c.like_count,
+            isLiked: c.is_liked_by_me > 0
+          }));
+
+          setPanelComments(formattedComments);
+
+          const newLikedSet = new Set();
+          formattedComments.forEach((c) => {
+            if (c.isLiked) {
+              newLikedSet.add(c.id);
+            }
+          });
+          setLikedComments(newLikedSet);
+        }
+
+        // Aktivitenin yorum sayısını artır (hem kart hem backend aktivite datası)
+        setSelectedActivity((prev) =>
+          prev
+            ? {
+                ...prev,
+                comments: (prev.comments || 0) + 1
+              }
+            : prev
+        );
+
+        setRecentActivities((prev) =>
+          prev.map((activity) =>
+            activity.activity_id === selectedActivity.id
+              ? { ...activity, comment_count: (activity.comment_count || 0) + 1 }
+              : activity
+          )
+        );
+      } else {
+        const errorData = await response.json();
+        console.error('Yorum eklenemedi:', errorData.detail);
+        alert('Yorum eklenirken bir hata oluştu.');
+      }
+    } catch (error) {
+      console.error('Yorum API hatası:', error);
+    }
+  };
+
+  const handleCommentLike = async (commentId) => {
+    try {
+      const username = localStorage.getItem('profileusername');
+      if (!username) return;
+
+      const isCurrentlyLiked = likedComments.has(commentId);
+      const willLike = !isCurrentlyLiked;
+      const changeAmount = willLike ? 1 : -1;
+
+      // Optimistic UI
+      setLikedComments((prev) => {
+        const newSet = new Set(prev);
+        if (willLike) newSet.add(commentId);
+        else newSet.delete(commentId);
+        return newSet;
+      });
+
+      setPanelComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === commentId
+            ? {
+                ...comment,
+                likes: Math.max(0, (comment.likes || 0) + changeAmount)
+              }
+            : comment
+        )
+      );
+
+      const response = await fetch('http://localhost:8000/interactions/like_comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          comment_id: commentId,
+          username: username
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Beğeni API hatası, geri alınıyor...');
+
+        setLikedComments((prev) => {
+          const newSet = new Set(prev);
+          if (willLike) newSet.delete(commentId);
+          else newSet.add(commentId);
+          return newSet;
+        });
+
+        setPanelComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.id === commentId
+              ? {
+                  ...comment,
+                  likes: Math.max(0, (comment.likes || 0) - changeAmount)
+                }
+              : comment
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Yorum beğeni hatası:', error);
+    }
+  };
+
+  const handleCommentEdit = (commentId, newText) => {
+    setPanelComments((prevComments) =>
+      prevComments.map((comment) =>
+        comment.id === commentId
+          ? {
+              ...comment,
+              text: newText
+            }
+          : comment
+      )
+    );
+  };
+
+  const handleCommentDelete = (commentId) => {
+    setPanelComments((prevComments) =>
+      prevComments.filter((comment) => comment.id !== commentId)
+    );
+
+    if (selectedActivity) {
+      setSelectedActivity({
+        ...selectedActivity,
+        comments: Math.max(0, (selectedActivity.comments || 0) - 1)
+      });
+
+      setRecentActivities((prev) =>
+        prev.map((activity) =>
+          activity.activity_id === selectedActivity.id
+            ? { ...activity, comment_count: Math.max(0, (activity.comment_count || 0) - 1) }
+            : activity
+        )
+      );
+    }
   };
 
   const handleFollow = async () => {
@@ -1169,7 +1434,14 @@ function Profile() {
             </div>
 
             <div className="profile-sidebar">
-              <RecentActivities recentActivities={recentActivities} libraryData={libraryData} profileUser={profileUser} />
+              <RecentActivities
+                recentActivities={recentActivities}
+                libraryData={libraryData}
+                profileUser={profileUser}
+                onCommentClick={handleCommentClick}
+                commentPanelOpen={commentPanelOpen}
+                selectedActivity={selectedActivity}
+              />
             </div>
           </>
         ) : (
@@ -1284,8 +1556,18 @@ function Profile() {
 
       {/* Takip Edilenler Modal */}
       {showFollowingModal && (
-        <div className={`follow-modal-overlay ${isFollowingModalOpening && !isFollowingModalClosing ? 'active' : ''}`} onClick={handleCloseFollowingModal}>
-          <div className={`follow-modal ${isFollowingModalClosing ? 'closing' : isFollowingModalOpening ? 'opening' : ''}`} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`follow-modal-overlay ${
+            isFollowingModalOpening && !isFollowingModalClosing ? 'active' : ''
+          }`}
+          onClick={handleCloseFollowingModal}
+        >
+          <div
+            className={`follow-modal ${
+              isFollowingModalClosing ? 'closing' : isFollowingModalOpening ? 'opening' : ''
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="follow-modal-header">
               <h2>Takip Edilenler</h2>
             </div>
@@ -1322,6 +1604,23 @@ function Profile() {
           </div>
         </div>
       )}
+
+      {/* Yorum Paneli - Gönderilerim için */}
+      <CommentPanel
+        isOpen={commentPanelOpen}
+        isClosing={commentPanelClosing}
+        selectedActivity={selectedActivity}
+        comments={panelComments}
+        likedComments={likedComments}
+        commentText={commentText}
+        currentUserId={currentUserId}
+        onClose={handleCloseCommentPanel}
+        onCommentLike={handleCommentLike}
+        onCommentSubmit={handleCommentSubmit}
+        onCommentTextChange={setCommentText}
+        onCommentEdit={handleCommentEdit}
+        onCommentDelete={handleCommentDelete}
+      />
     </div>
   );
 }

@@ -4,7 +4,14 @@ import ActivityCard from '../../../HomePage/ActivityCard/ActivityCard';
 import { formatTimeAgo } from '../../../HomePage/utils/utils';
 import './RecentActivities.css';
 
-function RecentActivities({ recentActivities = [], libraryData = {}, profileUser = null }) {
+function RecentActivities({
+  recentActivities = [],
+  libraryData = {},
+  profileUser = null,
+  onCommentClick,
+  commentPanelOpen = false,
+  selectedActivity = null
+}) {
   const [activeTab, setActiveTab] = useState('activities');
 
   // Aktiviteleri kategorilere ayır
@@ -53,6 +60,7 @@ function RecentActivities({ recentActivities = [], libraryData = {}, profileUser
       id: activity.activity_id,
       type: activity.review_text && activity.rating_score ? 'rating_and_review' : activity.type,
       userName: activity.activity_user_username,
+      userId: activity.activity_user_username,
       userAvatar: activity.activity_user_avatar || `https://i.pravatar.cc/150?img=${activity.activity_id}`,
       actionText: actionText,
       date: activity.created_at,
@@ -116,9 +124,11 @@ function RecentActivities({ recentActivities = [], libraryData = {}, profileUser
                 <div key={activity.activity_id || index} className="activity-card-wrapper">
                   <ActivityCard 
                     activity={cardActivity}
-                    onCommentClick={() => {}}
+                    onCommentClick={onCommentClick}
                     onLike={() => {}}
-                    isCommentPanelOpen={false}
+                    isCommentPanelOpen={
+                      commentPanelOpen && selectedActivity?.id === cardActivity.id
+                    }
                   />
                 </div>
               );
