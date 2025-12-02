@@ -306,7 +306,22 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
           // ... (Menü Modu - Burası aynı kaldı) ...
           <>
             <div className="sidebar-brand">
-              <ShinyText text="READDIT" speed={3} className="brand-text" />
+              {location.pathname === '/home' ? (
+                <a 
+                  href="/home" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.reload();
+                  }}
+                  style={{ textDecoration: 'none', display: 'block', cursor: 'pointer' }}
+                >
+                  <ShinyText text="READDIT" speed={3} className="brand-text" />
+                </a>
+              ) : (
+                <Link to="/home" style={{ textDecoration: 'none', display: 'block' }}>
+                  <ShinyText text="READDIT" speed={3} className="brand-text" />
+                </Link>
+              )}
             </div>
             <div className="sidebar-content">
               <div className="sidebar-section">

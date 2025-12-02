@@ -9,7 +9,7 @@ from typing import Optional, Union
 
 class AddLibraryItemRequest(BaseModel):
     username: str
-    list_key: str
+    list_key: Optional[str] = None  # Özel listeler için opsiyonel
     external_id: Union[str, int]
     title: str
     poster_url: Optional[str] = None
@@ -48,6 +48,13 @@ async def add_library_item(request: AddLibraryItemRequest):
         )
 
     try:
+        # list_id veya list_key'den biri mutlaka olmalı
+        if not request.list_id and not request.list_key:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either list_id or list_key must be provided"
+            )
+        
         success = add_item_to_library(
             connection=connection,
             username=request.username,

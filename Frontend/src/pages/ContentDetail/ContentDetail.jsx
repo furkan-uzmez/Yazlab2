@@ -199,39 +199,55 @@ function ContentDetail() {
   }, [type, id]);
 
 
-  // Mock custom lists - In real app, fetch from API
+  // Fetch custom lists from API
   useEffect(() => {
-    setIsLoadingLists(true);
-    // Simulate API call
-    setTimeout(() => {
-      const mockLists = [
-        {
-          list_id: 1,
-          list_name: 'En İyi Bilimkurgu Filmlerim',
-          name: 'En İyi Bilimkurgu Filmlerim',
-          items: [
-            { id: 1, title: 'Inception', type: 'Film' },
-            { id: 2, title: 'The Matrix', type: 'Film' }
-          ]
-        },
-        {
-          list_id: 2,
-          list_name: 'Okunacak Klasikler',
-          name: 'Okunacak Klasikler',
-          items: [
-            { id: 3, title: '1984', type: 'Kitap' }
-          ]
-        },
-        {
-          list_id: 3,
-          list_name: 'Favori Aksiyon Filmleri',
-          name: 'Favori Aksiyon Filmleri',
-          items: []
+    const fetchCustomLists = async () => {
+      setIsLoadingLists(true);
+      
+      const username = localStorage.getItem("profileusername");
+      if (!username) {
+        setIsLoadingLists(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:8000/list/get_lists?username=${encodeURIComponent(username)}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const apiLists = data.lists || [];
+
+          // Standart listeleri filtrele (İzledim, İzlenecek, Okudum, Okunacak)
+          const standardListNames = ["İzledim", "İzlenecek", "Okudum", "Okunacak"];
+          const customListsOnly = apiLists.filter(list =>
+            !standardListNames.includes(list.name)
+          );
+
+          // Format lists for frontend
+          const formattedLists = customListsOnly.map(list => ({
+            list_id: list.list_id,
+            list_name: list.name,
+            name: list.name,
+            description: list.description,
+            item_count: list.item_count || 0
+          }));
+
+          setCustomLists(formattedLists);
+        } else {
+          console.error("Listeler yüklenemedi:", response.status);
+          setCustomLists([]);
         }
-      ];
-      setCustomLists(mockLists);
-      setIsLoadingLists(false);
-    }, 300);
+      } catch (error) {
+        console.error("Liste API hatası:", error);
+        setCustomLists([]);
+      } finally {
+        setIsLoadingLists(false);
+      }
+    };
+
+    fetchCustomLists();
   }, []);
 
   // Close dropdown when clicking outside
@@ -251,48 +267,79 @@ function ContentDetail() {
     };
   }, [isListDropdownOpen]);
 
-  const handleAddToList = (listId) => {
+  const handleAddToList = async (listId) => {
     if (!content) return;
+
+    const username = localStorage.getItem("profileusername");
+    if (!username) {
+      alert("Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
 
     setAddingToListId(listId);
 
-    // Simulate API call
-    setTimeout(() => {
-      const contentId = content.id || parseInt(id);
-      const contentTitle = content.title;
-      const contentType = type === 'movie' ? 'Film' : 'Kitap';
+    try {
+      const requestBody = {
+        username: username,
+        list_id: listId, // Özel liste için list_id kullanıyoruz
+        external_id: String(id),
+        title: content.title,
+        poster_url: content.poster_path || null,
+        content_type: type,
+        description: content.overview || null,
+        release_year: type === 'movie' 
+          ? (content.release_date ? new Date(content.release_date).getFullYear() : null) 
+          : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
+        duration_or_pages: type === 'movie' 
+          ? (content.runtime || null) 
+          : (content.pageCount || null),
+        api_source: type === 'movie' ? 'tmdb' : 'google_books'
+      };
 
-      // Check if content already exists in the list
-      const list = customLists.find(l => l.list_id === listId);
-      if (list && list.items) {
-        const exists = list.items.some(item => item.id === contentId);
-        if (exists) {
-          alert('Bu içerik zaten listede!');
-          setAddingToListId(null);
-          return;
-        }
-      }
-
-      // Add content to the list
-      const updatedLists = customLists.map(list => {
-        if (list.list_id === listId) {
-          return {
-            ...list,
-            items: [...(list.items || []), {
-              id: contentId,
-              title: contentTitle,
-              type: contentType
-            }]
-          };
-        }
-        return list;
+      const response = await fetch("http://localhost:8000/list/add_item", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
       });
 
-      setCustomLists(updatedLists);
-      alert('İçerik listeye eklendi!');
-      setIsListDropdownOpen(false);
+      if (response.ok) {
+        // Başarılı olduğunda listeyi güncelle (item_count artacak)
+        const updatedLists = customLists.map(list => {
+          if (list.list_id === listId) {
+            return {
+              ...list,
+              item_count: (list.item_count || 0) + 1
+            };
+          }
+          return list;
+        });
+        setCustomLists(updatedLists);
+        
+        alert('İçerik listeye eklendi!');
+        setIsListDropdownOpen(false);
+      } else {
+        const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
+        console.error("API Error Response:", errorData);
+        console.error("Request Body:", requestBody);
+        
+        // 422 validation hatası için daha detaylı mesaj
+        if (response.status === 422 && errorData.detail) {
+          const validationErrors = Array.isArray(errorData.detail) 
+            ? errorData.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join(', ')
+            : errorData.detail;
+          alert(`Doğrulama hatası: ${validationErrors}`);
+        } else if (errorData.detail && (errorData.detail.includes("already") || errorData.detail.includes("zaten"))) {
+          alert('Bu içerik zaten listede!');
+        } else {
+          alert(`İçerik eklenirken bir hata oluştu: ${errorData.detail || "Bilinmeyen hata"}`);
+        }
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      alert("İçerik eklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+    } finally {
       setAddingToListId(null);
-    }, 500);
+    }
   };
 
   const handleLogout = () => setLogoutModalOpen(true);
@@ -812,7 +859,7 @@ function ContentDetail() {
                       ) : customLists.length === 0 ? (
                         <div className="dropdown-empty">
                           <FaList />
-                          <span>Henüz özel listeniz yok</span>
+                          <span>Özel listeniz bulunmamaktadır</span>
                         </div>
                       ) : (
                         <div className="dropdown-list">
@@ -833,8 +880,8 @@ function ContentDetail() {
                                 <>
                                   <FaList />
                                   <span>{list.list_name || list.name}</span>
-                                  {list.items && (
-                                    <span className="item-count">({list.items.length})</span>
+                                  {(list.item_count !== undefined && list.item_count !== null) && (
+                                    <span className="item-count">({list.item_count})</span>
                                   )}
                                 </>
                               )}

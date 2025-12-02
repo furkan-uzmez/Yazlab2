@@ -86,7 +86,7 @@ def get_or_create_list(cursor, user_id: int, list_name: str):
 
 from typing import Optional
 
-def add_item_to_library(connection, username: str, list_key: str, external_id: str, title: str, poster_url: Optional[str], content_type: str, description: Optional[str] = None, release_year: Optional[int] = None, duration_or_pages: Optional[int] = None, api_source: str = None, list_id: int = None):
+def add_item_to_library(connection, username: str, list_key: Optional[str], external_id: str, title: str, poster_url: Optional[str], content_type: str, description: Optional[str] = None, release_year: Optional[int] = None, duration_or_pages: Optional[int] = None, api_source: str = None, list_id: int = None):
     """
     Kullanıcının kütüphanesine içerik ekler.
     """
@@ -112,9 +112,12 @@ def add_item_to_library(connection, username: str, list_key: str, external_id: s
         if list_id:
             # Eğer list_id verildiyse direkt onu kullan
             target_list_id = list_id
-        else:
+        elif list_key:
             # Verilmediyse isme göre bul/oluştur (eski yöntem)
             target_list_id = get_or_create_list(cursor, user_id, list_key)
+        else:
+            # Hem list_id hem list_key yoksa hata
+            return False
         
         # Listeye ekle (varsa hata vermemesi için IGNORE)
         cursor.execute(

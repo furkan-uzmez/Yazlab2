@@ -27,6 +27,8 @@
   position: relative;
   z-index: 2;
   animation: contentFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  width: 100%; /* Container genişliğini sabit tut */
+  box-sizing: border-box; /* Padding dahil genişlik hesaplaması */
 }
 
 .edit-list-left-panel {
@@ -71,7 +73,7 @@
   border-left: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   padding: 2rem;
-  height: fit-content;
+  max-height: calc(85vh - 8rem); /* Modal yüksekliğine göre ayarla */
   position: sticky;
   top: 1rem;
   animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
@@ -82,7 +84,31 @@
     0 8px 32px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  overflow-y: auto; /* Dikey scroll ekle */
+  overflow-x: hidden; /* Yatay scroll'u gizle */
+  min-width: 0; /* Flex container'ın wrap olması için */
+  max-width: 100%; /* Container dışına taşmasını önle */
+  scrollbar-width: thin; /* İnce scrollbar */
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent; /* Scrollbar rengi */
+}
+
+/* Webkit scrollbar stilleri */
+.edit-list-right-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.edit-list-right-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.edit-list-right-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.edit-list-right-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .edit-list-right-panel::before {
@@ -137,6 +163,14 @@
   animation: fadeInUp 0.5s ease-out 0.3s both;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal; /* Alt satıra geçmesine izin ver */
+  min-width: 0; /* Flex item'ın wrap olması için */
+  hyphens: auto; /* Uzun kelimeleri otomatik kır */
+  max-width: 100%; /* Container dışına taşmasını önle */
+  width: 100%; /* Container genişliğini kullan */
+  box-sizing: border-box; /* Padding dahil genişlik hesaplaması */
 }
 
 .edit-list-right-panel .form-group:first-child {
@@ -268,7 +302,7 @@
   padding: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 20px; /* Border radius artırıldı */
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.85rem;
   cursor: pointer;
@@ -281,9 +315,9 @@
 }
 
 .search-type-btn.active {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #fff;
+  background: #ffffff; /* Aktif buton beyaz */
+  border-color: #ffffff;
+  color: #000000; /* Beyaz arka plan için siyah metin */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -767,6 +801,10 @@
   .edit-list-right-panel {
     position: static;
     order: -1;
+  }
+
+  .list-title-header {
+    font-size: clamp(1.25rem, 5vw, 2rem); /* Mobilde daha küçük */
   }
 }
 

@@ -80,6 +80,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  min-width: 0; /* Flex container'ın ellipsis çalışması için */
 }
 
 .custom-list-card h3 {
@@ -89,6 +90,10 @@
   color: #ffffff;
   line-height: 1.4;
   flex: 1;
+  min-width: 0; /* Flex item'ın ellipsis çalışması için */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .custom-list-card p {
@@ -97,6 +102,12 @@
   margin: 0;
   line-height: 1.5;
   flex: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Maksimum 2 satır göster */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
 }
 
 .custom-list-card-footer {

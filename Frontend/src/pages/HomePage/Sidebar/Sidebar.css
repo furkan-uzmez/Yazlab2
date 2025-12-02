@@ -30,6 +30,15 @@
   border-bottom: 1px solid #101010;
 }
 
+.sidebar-brand a {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-brand a:hover {
+  opacity: 0.8;
+}
+
 .brand-text {
   font-family:   'Raleway', 'Inter', sans-serif;
   font-size: 1.75rem;
