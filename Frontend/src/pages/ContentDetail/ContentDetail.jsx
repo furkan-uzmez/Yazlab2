@@ -24,6 +24,8 @@ function ContentDetail() {
   const [isInToRead, setIsInToRead] = useState(false);
   const [platformRating, setPlatformRating] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
+  const [appAverageRating, setAppAverageRating] = useState(0);
+  const [appVoteCount, setAppVoteCount] = useState(0);
   const [customLists, setCustomLists] = useState([]);
   const [isListDropdownOpen, setIsListDropdownOpen] = useState(false);
   const [isLoadingLists, setIsLoadingLists] = useState(false);
@@ -140,6 +142,11 @@ function ContentDetail() {
             if (userStatus.score) {
               setUserRating(userStatus.score);
             }
+          }
+
+          if (data.rating_stats) {
+            setAppAverageRating(data.rating_stats.average_rating || 0);
+            setAppVoteCount(data.rating_stats.vote_count || 0);
           }
 
           if (type === 'movie') {
@@ -764,6 +771,7 @@ function ContentDetail() {
             {/* Platform Rating */}
             <div className="platform-rating-section">
               <div className="platform-rating">
+                <div className="rating-label">Platform Puanı</div>
                 <div className="platform-rating-value">
                   <FaStar className="star-icon" />
                   <span className="rating-number">{platformRating.toFixed(1)}</span>
@@ -771,6 +779,18 @@ function ContentDetail() {
                 </div>
                 <div className="platform-rating-count">
                   {totalRatings.toLocaleString()} oy
+                </div>
+              </div>
+
+              <div className="platform-rating app-rating">
+                <div className="rating-label">Uygulama Puanı</div>
+                <div className="platform-rating-value">
+                  <FaStar className="star-icon app-star" />
+                  <span className="rating-number">{appAverageRating.toFixed(1)}</span>
+                  <span className="rating-max">/5</span>
+                </div>
+                <div className="platform-rating-count">
+                  {appVoteCount.toLocaleString()} oy
                 </div>
               </div>
             </div>

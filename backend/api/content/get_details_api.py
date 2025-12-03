@@ -8,6 +8,7 @@ from backend.func.content.check_user_content_status import check_user_content_st
 from backend.func.db.connection.open_db_connection import open_db_connection
 
 from backend.func.list.add_to_library import get_or_create_content
+from backend.func.interactions.get_content_rating_stats import get_content_rating_stats
 
 router = APIRouter(prefix="/content", tags=["content"])
 
@@ -151,10 +152,14 @@ async def get_content_details(
                     content_type
                 )
             cursor.close()
+            
+        # Rating istatistiklerini al
+        rating_stats = get_content_rating_stats(connection, str(api_id), content_type)
         
         return {
             "content": result,
-            "user_status": user_status
+            "user_status": user_status,
+            "rating_stats": rating_stats
         }
     except HTTPException:
         raise

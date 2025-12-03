@@ -105,12 +105,18 @@
   padding: 1.5rem 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 3rem;
 }
 
 .platform-rating {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.app-rating .star-icon.app-star {
+  color: #ff4a4a; /* Different color for app rating */
 }
 
 .platform-rating-value {
