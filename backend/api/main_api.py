@@ -11,6 +11,7 @@ from backend.api.user.get_following_api import router as get_following_router
 from backend.api.user.follow_api import router as follow_router
 from backend.api.user.get_user_api import router as get_user_router
 from backend.api.user.update_user_profile_api import router as update_user_profile_router
+from backend.api.user.recommendations_api import router as recommendations_router
 from backend.api.list.get_user_library_api import router as get_user_library_router
 from backend.api.list.get_user_list_api import router as get_user_list_router
 from backend.api.list.add_library_item_api import router as add_library_item_router
@@ -81,6 +82,7 @@ api.include_router(get_comments_by_content_router)
 api.include_router(add_comment_by_content_router)
 api.include_router(update_comment_router)
 api.include_router(delete_comment_router)
+api.include_router(recommendations_router)
 
 if __name__ == "__main__":
     create_tables()

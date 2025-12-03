@@ -30,8 +30,8 @@ async def register_user(request: RegisterRequest):
         connection.close()
 
     if success:
-        follow_all_users(request.email) # test amaçlı daha sonra kaldırılacak
-        make_them_follow_me(request.email) # test amaçlı daha sonra kaldırılacak
+        #follow_all_users(request.email) # test amaçlı daha sonra kaldırılacak
+        #make_them_follow_me(request.email) # test amaçlı daha sonra kaldırılacak
         return {"message": "User registered successfully"}
     else:
         raise HTTPException(

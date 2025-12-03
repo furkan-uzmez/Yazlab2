@@ -6,38 +6,79 @@ import './RightPanel.css';
 function RightPanel({ followedUsers, onFollowUser }) {
   const navigate = useNavigate();
   const [following, setFollowing] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [limit, setLimit] = useState(5);
   const [showAll, setShowAll] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    const fetchFollowing = async () => {
+    const fetchData = async () => {
       try {
-        const email = localStorage.getItem("email"); // Giriş yapmış kullanıcının email'i
-        if (!email) {
-          console.error("Kullanıcı email'i bulunamadı.");
-          return;
+        const email = localStorage.getItem("email");
+        if (!email) return;
+
+        // 1. Get Current User ID
+        const userRes = await fetch(`http://localhost:8000/user/search_by_email?query=${email}`);
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          // The API returns { message: "...", results: { user_id: ..., ... } }
+          const userId = userData.results.user_id;
+          setCurrentUserId(userId);
+
+          // 2. Get Recommendations
+          if (userId) {
+            const recRes = await fetch(`http://localhost:8000/user/recommendations?user_id=${userId}`);
+            if (recRes.ok) {
+              const recData = await recRes.json();
+              setRecommendations(recData);
+            }
+          }
         }
 
+        // 3. Get Following (Existing logic)
         const url = `http://localhost:8000/user/${email}/followers`;
-
         const res = await fetch(url);
         if (res.ok) {
-            const data = await res.json();
-            
-            // --- 1. DÜZELTME: Verinin tamamını değil, 'followers' dizisini state'e ata
-            setFollowing(data.followers); 
-            
-        } else {
-            console.error("Takip edilenler alınamadı:", res.status);
+          const data = await res.json();
+          setFollowing(data.followers);
         }
       } catch (err) {
-        console.error("Takip API hatası:", err);
+        console.error("API hatası:", err);
       }
     };
 
-    fetchFollowing();
-  }, []); // Boş dizi [], bu effect'in sadece bileşen ilk yüklendiğinde çalışmasını sağlar
+    fetchData();
+  }, []);
+
+  const handleFollowClick = async (targetUserId, isCurrentlyFollowed) => {
+    if (!currentUserId) return;
+
+    try {
+      const endpoint = isCurrentlyFollowed ? "/user/unfollow" : "/user/follow";
+      const method = isCurrentlyFollowed ? "DELETE" : "POST";
+
+      const response = await fetch(`http://localhost:8000${endpoint}`, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          follower_id: currentUserId,
+          followed_id: targetUserId
+        }),
+      });
+
+      if (response.ok) {
+        // Update parent state (UI)
+        onFollowUser(targetUserId);
+      } else {
+        console.error("Takip işlemi başarısız");
+      }
+    } catch (error) {
+      console.error("Takip API hatası:", error);
+    }
+  };
 
   const handleShowMoreFollowing = () => {
     if (showAll) {
@@ -58,7 +99,7 @@ function RightPanel({ followedUsers, onFollowUser }) {
   return (
     <aside className="right-panel">
       <div className="right-panel-content">
-        
+
         <div className="right-panel-section">
           <h3 className="right-panel-title">
             <FaUserFriends className="right-panel-title-icon" />
@@ -66,22 +107,22 @@ function RightPanel({ followedUsers, onFollowUser }) {
             Takipçilerin
           </h3>
           <div className="right-panel-list">
-            
+
             {/* --- 2. DÜZELTME: Doğru veri anahtarlarını (keys) kullan --- */}
             {following.slice(0, limit).map((user, index) => {
               // Kapanış animasyonu için: 5'ten fazla olan öğeler kapanırken animasyonlu
               const shouldAnimateClose = isClosing && index >= 5;
               return (
-                <div 
-                  key={user.username} 
+                <div
+                  key={user.username}
                   className={`right-panel-item ${shouldAnimateClose ? 'closing' : ''}`}
-                  style={{ 
-                    animationDelay: shouldAnimateClose 
-                      ? `${(index - 5) * 0.03}s` 
-                      : `${index * 0.05}s` 
+                  style={{
+                    animationDelay: shouldAnimateClose
+                      ? `${(index - 5) * 0.03}s`
+                      : `${index * 0.05}s`
                   }}
                 > {/* key='id' -> 'username' */}
-                  <img 
+                  <img
                     src={user.avatar_url} // src='avatar' -> 'avatar_url'
                     alt={user.username}   // alt='name' -> 'username'
                     className="right-panel-avatar"
@@ -93,9 +134,9 @@ function RightPanel({ followedUsers, onFollowUser }) {
               );
             })}
             {/* --- DÜZELTME SONU --- */}
-            
+
             {following.length > 5 && (
-              <button 
+              <button
                 className="right-panel-show-more-btn"
                 onClick={handleShowMoreFollowing}
               >
@@ -107,37 +148,38 @@ function RightPanel({ followedUsers, onFollowUser }) {
         {/* --- DİNAMİK BÖLÜM SONU --- */}
 
 
-        {/* "Senin İçin Önerilenler" (Bu bölüm zaten props ile doğru çalışıyor) */}
+        {/* "Senin İçin Önerilenler" */}
         <div className="right-panel-section">
           <h3 className="right-panel-title">
             <FaStar className="right-panel-title-icon" />
             Senin İçin Önerilenler
           </h3>
           <div className="right-panel-list">
-            {[
-              { id: 101, name: 'Elif Şahin', avatar: 'https://i.pravatar.cc/150?img=35', followers: '1.2K takipçi', mutual: '3 ortak takipçi' },
-              { id: 102, name: 'Burak Arslan', avatar: 'https://i.pravatar.cc/150?img=40', followers: '856 takipçi', mutual: '5 ortak takipçi' },
-              { id: 103, name: 'Selin Aydın', avatar: 'https://i.pravatar.cc/150?img=45', followers: '2.1K takipçi', mutual: '2 ortak takipçi' },
-              { id: 104, name: 'Emre Doğan', avatar: 'https://i.pravatar.cc/150?img=50', followers: '3.5K takipçi', mutual: '7 ortak takipçi' }
-            ].map((user) => {
-              // 'followedUsers' prop'u "Önerilenler" listesini kontrol etmek için kullanılıyor
-              const isFollowed = followedUsers.has(user.id); 
+            {recommendations.map((user) => {
+              const isFollowed = followedUsers.has(user.id);
               return (
                 <div key={user.id} className="right-panel-item">
-                  <img 
-                    src={user.avatar} 
+                  <img
+                    src={user.avatar}
                     alt={user.name}
                     className="right-panel-avatar"
+                    onClick={() => navigate(`/profile/${user.name}`)}
+                    style={{ cursor: 'pointer' }}
                   />
                   <div className="right-panel-item-info">
-                    <span className="right-panel-item-name">{user.name}</span>
+                    <span
+                      className="right-panel-item-name"
+                      onClick={() => navigate(`/profile/${user.name}`)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {user.name}
+                    </span>
                     <span className="right-panel-item-details">{user.followers}</span>
                     <span className="right-panel-item-mutual">{user.mutual}</span>
                   </div>
-                  <button 
+                  <button
                     className={`right-panel-follow-text-btn ${isFollowed ? 'followed' : ''}`}
-                    // 'onFollowUser' prop'u "Önerilenler" listesindeki butonu kontrol ediyor
-                    onClick={() => onFollowUser(user.id)} 
+                    onClick={() => handleFollowClick(user.id, isFollowed)}
                   >
                     {isFollowed ? 'Takip Ediliyor' : 'Takip Et'}
                   </button>
