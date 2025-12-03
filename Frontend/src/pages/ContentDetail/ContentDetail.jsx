@@ -168,7 +168,7 @@ function ContentDetail() {
 
             setContent(formattedContent);
             setPlatformRating(contentData.vote_average || 0);
-            setTotalRatings(0); // TMDB'den rating sayısı gelmiyorsa 0
+            setTotalRatings(contentData.vote_count || 0);
           } else if (type === 'book') {
             // Format book data
             const imageLinks = contentData.imageLinks || {};
