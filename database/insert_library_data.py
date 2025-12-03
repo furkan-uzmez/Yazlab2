@@ -50,34 +50,45 @@ def get_or_create_content(cursor, item):
     # 1. Önce API ID'sine göre kontrol et (En güvenlisi)
     cursor.execute("SELECT content_id FROM contents WHERE api_id = %s", (metadata['id'],))
     content = cursor.fetchone()
-    if content: return content['content_id']
     
-    # 2. Yoksa Başlık VE TİP'e göre kontrol et
-    # Eğer başlık eşleşiyorsa ama API ID yoksa, bu kaydı GÜNCELLEMELİYİZ ki API verisiyle eşleşsin.
-    cursor.execute(
-        "SELECT content_id, api_id FROM contents WHERE title = %s AND type = %s", 
-        (metadata['title'], metadata['type'])
-    )
-    content = cursor.fetchone()
-    if content:
-        if not content['api_id']:
-            print(f"    -> Mevcut kayıt güncelleniyor (API ID eklendi): {metadata['title']}")
+    content_id = None
+    
+    if content: 
+        content_id = content['content_id']
+    else:
+        # 2. Yoksa Başlık VE TİP'e göre kontrol et
+        # Eğer başlık eşleşiyorsa ama API ID yoksa, bu kaydı GÜNCELLEMELİYİZ ki API verisiyle eşleşsin.
+        cursor.execute(
+            "SELECT content_id, api_id FROM contents WHERE title = %s AND type = %s", 
+            (metadata['title'], metadata['type'])
+        )
+        content = cursor.fetchone()
+        if content:
+            content_id = content['content_id']
+            if not content['api_id']:
+                print(f"    -> Mevcut kayıt güncelleniyor (API ID eklendi): {metadata['title']}")
+                cursor.execute(
+                    """UPDATE contents 
+                       SET api_id = %s, cover_url = %s, api_source = %s, description = %s, release_year = %s, duration_or_pages = %s
+                       WHERE content_id = %s""",
+                    (metadata['id'], metadata['poster_url'], api_source, metadata['description'], metadata['release_year'], metadata['duration_or_pages'], content['content_id'])
+                )
+        else:
+            # 3. Hiçbiri yoksa yeni oluştur
+            print(f"    + Yeni içerik ekleniyor: {metadata['title']} ({metadata['type']})")
             cursor.execute(
-                """UPDATE contents 
-                   SET api_id = %s, cover_url = %s, api_source = %s, description = %s, release_year = %s, duration_or_pages = %s
-                   WHERE content_id = %s""",
-                (metadata['id'], metadata['poster_url'], api_source, metadata['description'], metadata['release_year'], metadata['duration_or_pages'], content['content_id'])
+                """INSERT INTO contents (title, type, cover_url, api_id, api_source, description, release_year, duration_or_pages) 
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], api_source, metadata['description'], metadata['release_year'], metadata['duration_or_pages'])
             )
-        return content['content_id']
-
-    # 3. Hiçbiri yoksa yeni oluştur
-    print(f"    + Yeni içerik ekleniyor: {metadata['title']} ({metadata['type']})")
-    cursor.execute(
-        """INSERT INTO contents (title, type, cover_url, api_id, api_source, description, release_year, duration_or_pages) 
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-        (metadata['title'], metadata['type'], metadata['poster_url'], metadata['id'], api_source, metadata['description'], metadata['release_year'], metadata['duration_or_pages'])
-    )
-    return cursor.lastrowid
+            content_id = cursor.lastrowid
+    
+    # Türleri kaydet
+    from backend.func.list.add_to_library import save_genres
+    if metadata.get('genres'):
+        save_genres(cursor, content_id, metadata['genres'])
+        
+    return content_id
 
 def get_or_create_list(cursor, user_id, list_name):
     """Kullanıcı için listeyi bulur veya oluşturur."""

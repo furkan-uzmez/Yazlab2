@@ -19,6 +19,7 @@ class AddLibraryItemRequest(BaseModel):
     duration_or_pages: Optional[int] = None
     api_source: str
     list_id: Optional[int] = None
+    genres: Optional[list[str]] = None
 
 @router.post("/add_item")
 async def add_library_item(request: AddLibraryItemRequest):
@@ -36,7 +37,8 @@ async def add_library_item(request: AddLibraryItemRequest):
         "description": "Film açıklaması...",
         "release_year": 2023,
         "duration_or_pages": 120,
-        "api_source": "tmdb"
+        "api_source": "tmdb",
+        "genres": ["Action", "Sci-Fi"]
     }
     """
     connection = open_db_connection()
@@ -67,7 +69,8 @@ async def add_library_item(request: AddLibraryItemRequest):
             release_year=request.release_year,
             duration_or_pages=request.duration_or_pages,
             api_source=request.api_source,
-            list_id=request.list_id
+            list_id=request.list_id,
+            genres=request.genres
         )
         
         if not success:

@@ -1,9 +1,40 @@
 import mysql.connector
+from typing import List, Optional
 
-def get_or_create_content(cursor, external_id: str, title: str, poster_url: str, content_type: str, description: str = None, release_year: int = None, duration_or_pages: int = None, api_source: str = None):
+def save_genres(cursor, content_id: int, genres: List[str]):
+    """
+    Türleri veritabanına kaydeder ve içerikle ilişkilendirir.
+    """
+    if not genres:
+        return
+
+    for genre_name in genres:
+        # 1. Türü genres tablosuna ekle (Varsa geç)
+        cursor.execute(
+            "INSERT IGNORE INTO genres (name) VALUES (%s)",
+            (genre_name,)
+        )
+        
+        # 2. Türün ID'sini al
+        cursor.execute("SELECT genre_id FROM genres WHERE name = %s", (genre_name,))
+        genre_row = cursor.fetchone()
+        
+        if genre_row:
+            genre_id = genre_row['genre_id']
+            
+            # 3. İçerik ile türü ilişkilendir (Varsa geç)
+            cursor.execute(
+                "INSERT IGNORE INTO content_genres (content_id, genre_id) VALUES (%s, %s)",
+                (content_id, genre_id)
+            )
+
+def get_or_create_content(cursor, external_id: str, title: str, poster_url: str, content_type: str, description: str = None, release_year: int = None, duration_or_pages: int = None, api_source: str = None, genres: List[str] = None):
     """
     İçeriği bulur veya oluşturur. content_id döndürür.
+    Ayrıca türleri de kaydeder.
     """
+    content_id = None
+    
     # Önce api_id ile kontrol et (external_id olarak geliyor)
     cursor.execute(
         "SELECT content_id FROM contents WHERE api_id = %s",
@@ -23,36 +54,40 @@ def get_or_create_content(cursor, external_id: str, title: str, poster_url: str,
                    WHERE content_id = %s""",
                 (description, release_year, duration_or_pages, api_source, content_id)
             )
-        return content_id
-    
-    # Yoksa başlık ve tip ile kontrol et
-    cursor.execute(
-        "SELECT content_id FROM contents WHERE title = %s AND type = %s",
-        (title, content_type)
-    )
-    existing = cursor.fetchone()
-    
-    if existing:
-        content_id = existing['content_id']
-        if description or release_year or duration_or_pages or api_source != 'user_add':
+    else:
+        # Yoksa başlık ve tip ile kontrol et
+        cursor.execute(
+            "SELECT content_id FROM contents WHERE title = %s AND type = %s",
+            (title, content_type)
+        )
+        existing = cursor.fetchone()
+        
+        if existing:
+            content_id = existing['content_id']
+            if description or release_year or duration_or_pages or api_source != 'user_add':
+                cursor.execute(
+                    """UPDATE contents 
+                       SET description = COALESCE(%s, description),
+                           release_year = COALESCE(%s, release_year),
+                           duration_or_pages = COALESCE(%s, duration_or_pages),
+                           api_source = CASE WHEN api_source = 'user_add' THEN %s ELSE api_source END
+                       WHERE content_id = %s""",
+                    (description, release_year, duration_or_pages, api_source, content_id)
+                )
+        else:
+            # Yoksa yeni oluştur
             cursor.execute(
-                """UPDATE contents 
-                   SET description = COALESCE(%s, description),
-                       release_year = COALESCE(%s, release_year),
-                       duration_or_pages = COALESCE(%s, duration_or_pages),
-                       api_source = CASE WHEN api_source = 'user_add' THEN %s ELSE api_source END
-                   WHERE content_id = %s""",
-                (description, release_year, duration_or_pages, api_source, content_id)
+                """INSERT INTO contents (api_id, title, cover_url, type, description, release_year, duration_or_pages, api_source)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                (str(external_id), title, poster_url, content_type, description, release_year, duration_or_pages, api_source)
             )
-        return content_id
-    
-    # Yoksa yeni oluştur
-    cursor.execute(
-        """INSERT INTO contents (api_id, title, cover_url, type, description, release_year, duration_or_pages, api_source)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-        (str(external_id), title, poster_url, content_type, description, release_year, duration_or_pages, api_source)
-    )
-    return cursor.lastrowid
+            content_id = cursor.lastrowid
+
+    # Türleri kaydet
+    if content_id and genres:
+        save_genres(cursor, content_id, genres)
+        
+    return content_id
 
 def get_or_create_list(cursor, user_id: int, list_name: str):
     """
@@ -84,9 +119,7 @@ def get_or_create_list(cursor, user_id: int, list_name: str):
     )
     return cursor.lastrowid
 
-from typing import Optional
-
-def add_item_to_library(connection, username: str, list_key: Optional[str], external_id: str, title: str, poster_url: Optional[str], content_type: str, description: Optional[str] = None, release_year: Optional[int] = None, duration_or_pages: Optional[int] = None, api_source: str = None, list_id: int = None):
+def add_item_to_library(connection, username: str, list_key: Optional[str], external_id: str, title: str, poster_url: Optional[str], content_type: str, description: Optional[str] = None, release_year: Optional[int] = None, duration_or_pages: Optional[int] = None, api_source: str = None, list_id: int = None, genres: List[str] = None):
     """
     Kullanıcının kütüphanesine içerik ekler.
     """
@@ -105,8 +138,8 @@ def add_item_to_library(connection, username: str, list_key: Optional[str], exte
         
         user_id = user['user_id']
         
-        # İçeriği bul veya oluştur
-        content_id = get_or_create_content(cursor, external_id, title, poster_url, content_type, description, release_year, duration_or_pages, api_source)
+        # İçeriği bul veya oluştur (Türlerle birlikte)
+        content_id = get_or_create_content(cursor, external_id, title, poster_url, content_type, description, release_year, duration_or_pages, api_source, genres)
         
         # Listeyi bul veya oluştur
         if list_id:

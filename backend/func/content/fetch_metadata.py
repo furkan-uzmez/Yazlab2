@@ -24,6 +24,9 @@ def fetch_metadata(title, content_type):
                 release_date = first_match.get('release_date', '')
                 release_year = release_date.split('-')[0] if release_date else None
                 
+                # Türleri al
+                genres = details.get('genres', []) if details else []
+
                 return {
                     "id": str(first_match['id']),
                     "title": first_match['title'],
@@ -31,7 +34,8 @@ def fetch_metadata(title, content_type):
                     "type": "movie",
                     "description": first_match.get('overview'),
                     "release_year": release_year,
-                    "duration_or_pages": runtime
+                    "duration_or_pages": runtime,
+                    "genres": genres
                 }
         elif content_type == 'book' or content_type == 'kitap':
             results = search_book(title)
@@ -48,7 +52,8 @@ def fetch_metadata(title, content_type):
                     "type": "book",
                     "description": volume_info.get('description'),
                     "release_year": release_year,
-                    "duration_or_pages": volume_info.get('pageCount', 0)
+                    "duration_or_pages": volume_info.get('pageCount', 0),
+                    "genres": volume_info.get('categories', [])
                 }
     except Exception as e:
         print(f"    ! API Hatası ({title}): {e}")

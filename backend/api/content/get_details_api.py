@@ -7,6 +7,8 @@ from backend.func.content.get_content_from_db import get_content_from_db
 from backend.func.content.check_user_content_status import check_user_content_status
 from backend.func.db.connection.open_db_connection import open_db_connection
 
+from backend.func.list.add_to_library import get_or_create_content
+
 router = APIRouter(prefix="/content", tags=["content"])
 
 @router.get("/details")
@@ -90,6 +92,50 @@ async def get_content_details(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Content not found"
             )
+        
+        # --- DEĞİŞİKLİK: İçeriği veritabanına kaydet (Varsa günceller, yoksa ekler) ---
+        try:
+            cursor = connection.cursor(dictionary=True)
+            
+            # API'den gelen verileri hazırla
+            poster_url = result.get('poster_path')
+            if poster_url and not poster_url.startswith('http'):
+                 # TMDB poster path usually needs base url, but get_movie_details might return full url or just path
+                 # Let's check get_movie_details return. It returns 'poster_path' as is from TMDB.
+                 # Wait, fetch_metadata adds base url. get_movie_details returns raw path?
+                 # Let's check get_movie_details again.
+                 # It returns 'poster_path': movie_data.get('poster_path')
+                 # So it is just /path.jpg
+                 if content_type == 'movie':
+                     poster_url = f"https://image.tmdb.org/t/p/w500{poster_url}"
+            
+            # get_book_details returns 'poster_path' which is thumbnail url.
+            
+            release_year = None
+            if result.get('release_date'):
+                 release_year = int(result['release_date'].split('-')[0])
+            
+            duration_or_pages = result.get('runtime') if content_type == 'movie' else result.get('pageCount')
+            
+            api_source = 'tmdb' if content_type == 'movie' else 'google_books'
+            
+            get_or_create_content(
+                cursor=cursor,
+                external_id=str(result['id']), # API ID
+                title=result['title'],
+                poster_url=poster_url,
+                content_type=content_type,
+                description=result.get('overview'),
+                release_year=release_year,
+                duration_or_pages=duration_or_pages,
+                api_source=api_source,
+                genres=result.get('genres')
+            )
+            connection.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"İçerik kaydedilirken hata (önemsiz): {e}")
+            # Kaydetme hatası akışı bozmamalı
         
         # Kullanıcı durumu kontrolü
         user_status = None

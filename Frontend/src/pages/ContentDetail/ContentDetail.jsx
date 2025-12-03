@@ -203,7 +203,7 @@ function ContentDetail() {
   useEffect(() => {
     const fetchCustomLists = async () => {
       setIsLoadingLists(true);
-      
+
       const username = localStorage.getItem("profileusername");
       if (!username) {
         setIsLoadingLists(false);
@@ -287,13 +287,12 @@ function ContentDetail() {
         poster_url: content.poster_path || null,
         content_type: type,
         description: content.overview || null,
-        release_year: type === 'movie' 
-          ? (content.release_date ? new Date(content.release_date).getFullYear() : null) 
+        release_year: type === 'movie'
+          ? (content.release_date ? new Date(content.release_date).getFullYear() : null)
           : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
-        duration_or_pages: type === 'movie' 
-          ? (content.runtime || null) 
-          : (content.pageCount || null),
-        api_source: type === 'movie' ? 'tmdb' : 'google_books'
+        duration_or_pages: type === 'movie' ? (content.runtime || null) : (content.pageCount || null),
+        api_source: type === 'movie' ? 'tmdb' : 'google_books',
+        genres: content.genres || []
       };
 
       const response = await fetch("http://localhost:8000/list/add_item", {
@@ -314,17 +313,17 @@ function ContentDetail() {
           return list;
         });
         setCustomLists(updatedLists);
-        
+
         alert('İçerik listeye eklendi!');
         setIsListDropdownOpen(false);
       } else {
         const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
         console.error("API Error Response:", errorData);
         console.error("Request Body:", requestBody);
-        
+
         // 422 validation hatası için daha detaylı mesaj
         if (response.status === 422 && errorData.detail) {
-          const validationErrors = Array.isArray(errorData.detail) 
+          const validationErrors = Array.isArray(errorData.detail)
             ? errorData.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join(', ')
             : errorData.detail;
           alert(`Doğrulama hatası: ${validationErrors}`);
@@ -381,15 +380,6 @@ function ContentDetail() {
     try {
       if (isCurrentlyInList) {
         // Remove from list
-        // Note: We need content_id for removal, which we might not have if it's not in DB yet.
-        // But if it's in the list, it MUST be in DB.
-        // However, for safety, we should probably fetch the content_id first or handle this better.
-        // For now, let's assume content.id is the DB id if it's numeric, or we need to rely on backend handling.
-        // Actually, the backend remove expects 'content_id' (int). 
-        // If we only have TMDB ID, we can't remove easily without searching first.
-        // Let's skip removal implementation for now or try to send what we have.
-        // Wait, if we just added it, we might not know the content_id.
-        // Let's focus on ADDING first as per user request.
         console.warn("Removal not fully implemented yet");
       } else {
         // Add to list
@@ -406,7 +396,8 @@ function ContentDetail() {
             description: type === 'movie' ? content.overview : content.overview,
             release_year: type === 'movie' ? (content.release_date ? new Date(content.release_date).getFullYear() : null) : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
             duration_or_pages: type === 'movie' ? content.runtime : content.pageCount,
-            api_source: type === 'movie' ? 'tmdb' : 'google_books'
+            api_source: type === 'movie' ? 'tmdb' : 'google_books',
+            genres: content.genres || []
           })
         });
 
@@ -460,7 +451,8 @@ function ContentDetail() {
             description: type === 'movie' ? content.overview : content.overview,
             release_year: type === 'movie' ? (content.release_date ? new Date(content.release_date).getFullYear() : null) : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
             duration_or_pages: type === 'movie' ? content.runtime : content.pageCount,
-            api_source: type === 'movie' ? 'tmdb' : 'google_books'
+            api_source: type === 'movie' ? 'tmdb' : 'google_books',
+            genres: content.genres || []
           })
         });
 
