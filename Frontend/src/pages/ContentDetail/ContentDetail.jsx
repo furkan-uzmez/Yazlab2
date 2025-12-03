@@ -824,7 +824,7 @@ function ContentDetail() {
                 <div className="platform-rating-value">
                   <FaStar className="star-icon app-star" />
                   <span className="rating-number">{appAverageRating.toFixed(1)}</span>
-                  <span className="rating-max">/5</span>
+                  <span className="rating-max">/10</span>
                 </div>
                 <div className="platform-rating-count">
                   {appVoteCount.toLocaleString()} oy
