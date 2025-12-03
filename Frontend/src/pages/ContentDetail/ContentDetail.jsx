@@ -137,6 +137,9 @@ function ContentDetail() {
               setIsInRead(userStatus.is_watched); // Reusing is_watched for read
               setIsInToRead(userStatus.is_to_watch); // Reusing is_to_watch for to_read
             }
+            if (userStatus.score) {
+              setUserRating(userStatus.score);
+            }
           }
 
           if (type === 'movie') {
@@ -356,9 +359,44 @@ function ContentDetail() {
     setLogoutModalOpen(false);
   };
 
-  const handleRatingClick = (rating) => {
+  const handleRatingClick = async (rating) => {
     setUserRating(rating);
-    // In real app, save to API
+
+    const username = localStorage.getItem("profileusername");
+    const email = localStorage.getItem("email");
+
+    if (!email) {
+      alert("Puan vermek için giriş yapmalısınız.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/interactions/rate_content", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_email: email,
+          content_id: String(id),
+          score: rating,
+          title: content.title,
+          poster_url: content.poster_path,
+          content_type: type,
+          genres: content.genres || []
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Puan başarıyla kaydedildi.");
+      } else {
+        console.error("Puan kaydedilemedi.");
+        alert("Puan kaydedilirken bir hata oluştu.");
+      }
+    } catch (error) {
+      console.error("Puan API hatası:", error);
+      alert("Puan kaydedilirken bir hata oluştu.");
+    }
   };
 
   const handleWatchedToggle = async () => {

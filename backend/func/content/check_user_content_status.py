@@ -68,11 +68,20 @@ def check_user_content_status(connection, user_id: int, api_id: str, content_typ
                 is_watched = True
             elif list_name == 'izlenecek':
                 is_to_watch = True
+
+        # Kullanıcının verdiği puanı getir
+        cursor.execute(
+            "SELECT score FROM ratings WHERE user_id = %s AND content_id = %s",
+            (user_id, content_id)
+        )
+        rating_row = cursor.fetchone()
+        user_score = rating_row['score'] if rating_row else 0
                 
         return {
             "is_watched": is_watched,
             "is_to_watch": is_to_watch,
-            "in_lists": in_lists
+            "in_lists": in_lists,
+            "score": user_score
         }
         
     except Exception as e:
