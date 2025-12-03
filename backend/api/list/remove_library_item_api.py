@@ -10,7 +10,7 @@ from typing import Optional
 
 class RemoveLibraryItemRequest(BaseModel):
     username: str
-    list_key: str
+    list_key: Optional[str] = None
     content_id: Optional[int] = None
     list_id: Optional[int] = None
     external_id: Optional[Union[str, int]] = None

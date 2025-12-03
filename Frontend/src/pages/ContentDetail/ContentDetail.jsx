@@ -30,6 +30,7 @@ function ContentDetail() {
   const [isListDropdownOpen, setIsListDropdownOpen] = useState(false);
   const [isLoadingLists, setIsLoadingLists] = useState(false);
   const [addingToListId, setAddingToListId] = useState(null);
+  const [contentInLists, setContentInLists] = useState([]); // List IDs where content is present
   const dropdownRef = useRef(null);
 
   // Comments state
@@ -141,6 +142,9 @@ function ContentDetail() {
             }
             if (userStatus.score) {
               setUserRating(userStatus.score);
+            }
+            if (userStatus.in_lists) {
+              setContentInLists(userStatus.in_lists);
             }
           }
 
@@ -280,7 +284,7 @@ function ContentDetail() {
     };
   }, [isListDropdownOpen]);
 
-  const handleAddToList = async (listId) => {
+  const handleToggleList = async (listId) => {
     if (!content) return;
 
     const username = localStorage.getItem("profileusername");
@@ -290,65 +294,86 @@ function ContentDetail() {
     }
 
     setAddingToListId(listId);
+    const isAlreadyInList = contentInLists.includes(listId);
 
     try {
-      const requestBody = {
-        username: username,
-        list_id: listId, // Özel liste için list_id kullanıyoruz
-        external_id: String(content.id),
-        title: content.title,
-        poster_url: content.poster_path || null,
-        content_type: type,
-        description: content.overview || null,
-        release_year: type === 'movie'
-          ? (content.release_date ? new Date(content.release_date).getFullYear() : null)
-          : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
-        duration_or_pages: type === 'movie' ? (content.runtime || null) : (content.pageCount || null),
-        api_source: type === 'movie' ? 'tmdb' : 'google_books',
-        genres: content.genres || []
-      };
+      let response;
 
-      const response = await fetch("http://localhost:8000/list/add_item", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-      });
+      if (isAlreadyInList) {
+        // Remove from list
+        response = await fetch("http://localhost:8000/list/remove_item", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            list_id: listId,
+            external_id: String(content.id),
+            content_type: type,
+            api_source: type === 'movie' ? 'tmdb' : 'google_books'
+          })
+        });
+      } else {
+        // Add to list
+        const requestBody = {
+          username: username,
+          list_id: listId,
+          external_id: String(content.id),
+          title: content.title,
+          poster_url: content.poster_path || null,
+          content_type: type,
+          description: content.overview || null,
+          release_year: type === 'movie'
+            ? (content.release_date ? new Date(content.release_date).getFullYear() : null)
+            : (content.release_date ? parseInt(content.release_date.substring(0, 4)) : null),
+          duration_or_pages: type === 'movie' ? (content.runtime || null) : (content.pageCount || null),
+          api_source: type === 'movie' ? 'tmdb' : 'google_books',
+          genres: content.genres || []
+        };
+
+        response = await fetch("http://localhost:8000/list/add_item", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody)
+        });
+      }
 
       if (response.ok) {
-        // Başarılı olduğunda listeyi güncelle (item_count artacak)
-        const updatedLists = customLists.map(list => {
-          if (list.list_id === listId) {
-            return {
-              ...list,
-              item_count: (list.item_count || 0) + 1
-            };
-          }
-          return list;
-        });
-        setCustomLists(updatedLists);
-
-        alert('İçerik listeye eklendi!');
-        setIsListDropdownOpen(false);
+        // Update local state
+        if (isAlreadyInList) {
+          setContentInLists(prev => prev.filter(id => id !== listId));
+          setCustomLists(prev => prev.map(list => {
+            if (list.list_id === listId) {
+              return { ...list, item_count: Math.max(0, (list.item_count || 0) - 1) };
+            }
+            return list;
+          }));
+          // alert('İçerik listeden çıkarıldı.');
+        } else {
+          setContentInLists(prev => [...prev, listId]);
+          setCustomLists(prev => prev.map(list => {
+            if (list.list_id === listId) {
+              return { ...list, item_count: (list.item_count || 0) + 1 };
+            }
+            return list;
+          }));
+          // alert('İçerik listeye eklendi!');
+        }
       } else {
         const errorData = await response.json().catch(() => ({ detail: "Bilinmeyen hata" }));
         console.error("API Error Response:", errorData);
-        console.error("Request Body:", requestBody);
 
-        // 422 validation hatası için daha detaylı mesaj
         if (response.status === 422 && errorData.detail) {
           const validationErrors = Array.isArray(errorData.detail)
             ? errorData.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join(', ')
             : errorData.detail;
           alert(`Doğrulama hatası: ${validationErrors}`);
-        } else if (errorData.detail && (errorData.detail.includes("already") || errorData.detail.includes("zaten"))) {
-          alert('Bu içerik zaten listede!');
         } else {
-          alert(`İçerik eklenirken bir hata oluştu: ${errorData.detail || "Bilinmeyen hata"}`);
+          alert(`İşlem sırasında bir hata oluştu: ${errorData.detail || "Bilinmeyen hata"}`);
         }
       }
     } catch (error) {
       console.error("API Error:", error);
-      alert("İçerik eklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+      alert("İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
       setAddingToListId(null);
     }
@@ -950,30 +975,33 @@ function ContentDetail() {
                         </div>
                       ) : (
                         <div className="dropdown-list">
-                          {customLists.map((list) => (
-                            <button
-                              key={list.list_id}
-                              type="button"
-                              className="dropdown-item"
-                              onClick={() => handleAddToList(list.list_id)}
-                              disabled={addingToListId === list.list_id}
-                            >
-                              {addingToListId === list.list_id ? (
-                                <>
-                                  <div className="spinner-small"></div>
-                                  <span>Ekleniyor...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <FaList />
-                                  <span>{list.list_name || list.name}</span>
-                                  {(list.item_count !== undefined && list.item_count !== null) && (
-                                    <span className="item-count">({list.item_count})</span>
-                                  )}
-                                </>
-                              )}
-                            </button>
-                          ))}
+                          {customLists.map((list) => {
+                            const isInList = contentInLists.includes(list.list_id);
+                            return (
+                              <button
+                                key={list.list_id}
+                                type="button"
+                                className={`dropdown-item ${isInList ? 'active' : ''}`}
+                                onClick={() => handleToggleList(list.list_id)}
+                                disabled={addingToListId === list.list_id}
+                              >
+                                {addingToListId === list.list_id ? (
+                                  <>
+                                    <div className="spinner-small"></div>
+                                    <span>{isInList ? 'Çıkarılıyor...' : 'Ekleniyor...'}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    {isInList ? <FaCheck className="list-check-icon" /> : <FaList />}
+                                    <span>{list.list_name || list.name}</span>
+                                    {(list.item_count !== undefined && list.item_count !== null) && (
+                                      <span className="item-count">({list.item_count})</span>
+                                    )}
+                                  </>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
