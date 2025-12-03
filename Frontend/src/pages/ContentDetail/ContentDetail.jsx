@@ -163,7 +163,10 @@ function ContentDetail() {
               tagline: contentData.tagline,
               budget: contentData.budget,
               revenue: contentData.revenue,
-              status: contentData.status
+              revenue: contentData.revenue,
+              status: contentData.status,
+              directors: contentData.directors || [],
+              cast: contentData.cast || []
             };
 
             setContent(formattedContent);
