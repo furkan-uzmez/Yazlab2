@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status 
+from typing import Union
 from pydantic import BaseModel
 from backend.func.db.connection.open_db_connection import open_db_connection
 from backend.func.list.remove_from_library import remove_item_from_library
@@ -10,8 +11,11 @@ from typing import Optional
 class RemoveLibraryItemRequest(BaseModel):
     username: str
     list_key: str
-    content_id: int
+    content_id: Optional[int] = None
     list_id: Optional[int] = None
+    external_id: Optional[Union[str, int]] = None
+    content_type: Optional[str] = None
+    api_source: Optional[str] = None
 
 @router.delete("/remove_item")
 async def remove_library_item(request: RemoveLibraryItemRequest):
@@ -21,7 +25,10 @@ async def remove_library_item(request: RemoveLibraryItemRequest):
     Body: {
         "username": "mehmetdemir1",
         "list_key": "watched",
-        "content_id": 123,
+        "content_id": 123, # Opsiyonel (Internal ID)
+        "external_id": "123", # Opsiyonel (External ID)
+        "content_type": "movie",
+        "api_source": "tmdb",
         "list_id": 123 # Opsiyonel
     }
     """
@@ -39,7 +46,10 @@ async def remove_library_item(request: RemoveLibraryItemRequest):
             username=request.username,
             list_key=request.list_key,
             content_id=request.content_id,
-            list_id=request.list_id
+            list_id=request.list_id,
+            external_id=request.external_id,
+            content_type=request.content_type,
+            api_source=request.api_source
         )
         
         if not success:

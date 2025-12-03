@@ -35,11 +35,19 @@ def get_or_create_content(cursor, external_id: str, title: str, poster_url: str,
     """
     content_id = None
     
-    # Önce api_id ile kontrol et (external_id olarak geliyor)
-    cursor.execute(
-        "SELECT content_id FROM contents WHERE api_id = %s",
-        (str(external_id),)
-    )
+    # Önce api_id ve type ile kontrol et
+    query = "SELECT content_id FROM contents WHERE api_id = %s"
+    params = [str(external_id)]
+    
+    if content_type:
+        query += " AND type = %s"
+        params.append(content_type)
+        
+    if api_source:
+        query += " AND api_source = %s"
+        params.append(api_source)
+        
+    cursor.execute(query, tuple(params))
     existing = cursor.fetchone()
     
     if existing:

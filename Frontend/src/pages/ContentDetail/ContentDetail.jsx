@@ -292,7 +292,7 @@ function ContentDetail() {
       const requestBody = {
         username: username,
         list_id: listId, // Özel liste için list_id kullanıyoruz
-        external_id: String(id),
+        external_id: String(content.id),
         title: content.title,
         poster_url: content.poster_path || null,
         content_type: type,
@@ -385,7 +385,7 @@ function ContentDetail() {
         },
         body: JSON.stringify({
           user_email: email,
-          content_id: String(id),
+          content_id: String(content.id),
           score: rating,
           title: content.title,
           poster_url: content.poster_path,
@@ -425,7 +425,24 @@ function ContentDetail() {
     try {
       if (isCurrentlyInList) {
         // Remove from list
-        console.warn("Removal not fully implemented yet");
+        const response = await fetch("http://localhost:8000/list/remove_item", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            list_key: listKey,
+            external_id: String(content.id), // TMDB/Google ID
+            content_type: type,
+            api_source: type === 'movie' ? 'tmdb' : 'google_books'
+          })
+        });
+
+        if (!response.ok) {
+          // Revert optimistic update on error
+          if (type === 'movie') setIsInWatched(isCurrentlyInList);
+          else setIsInRead(isCurrentlyInList);
+          console.error("Failed to remove from list");
+        }
       } else {
         // Add to list
         const response = await fetch("http://localhost:8000/list/add_item", {
@@ -434,7 +451,7 @@ function ContentDetail() {
           body: JSON.stringify({
             username: username,
             list_key: listKey,
-            external_id: String(id), // TMDB/Google ID
+            external_id: String(content.id), // TMDB/Google ID
             title: content.title,
             poster_url: content.poster_path,
             content_type: type,
@@ -479,8 +496,25 @@ function ContentDetail() {
 
     try {
       if (isCurrentlyInList) {
-        // Remove logic (skipped for now as per above)
-        console.warn("Removal not fully implemented yet");
+        // Remove from list
+        const response = await fetch("http://localhost:8000/list/remove_item", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            list_key: listKey,
+            external_id: String(content.id),
+            content_type: type,
+            api_source: type === 'movie' ? 'tmdb' : 'google_books'
+          })
+        });
+
+        if (!response.ok) {
+          // Revert
+          if (type === 'movie') setIsInToWatch(isCurrentlyInList);
+          else setIsInToRead(isCurrentlyInList);
+          console.error("Failed to remove from list");
+        }
       } else {
         // Add to list
         const response = await fetch("http://localhost:8000/list/add_item", {
@@ -489,7 +523,7 @@ function ContentDetail() {
           body: JSON.stringify({
             username: username,
             list_key: listKey,
-            external_id: String(id),
+            external_id: String(content.id),
             title: content.title,
             poster_url: content.poster_path,
             content_type: type,
@@ -529,7 +563,7 @@ function ContentDetail() {
         },
         body: JSON.stringify({
           user_email: currentUserEmail,
-          content_id: String(contentId), // Ensure string for backend
+          content_id: String(content.id), // Ensure string for backend
           comment_text: commentText.trim(),
           title: content.title,
           poster_url: content.poster_path,

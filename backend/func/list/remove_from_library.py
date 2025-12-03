@@ -1,6 +1,6 @@
 import mysql.connector
 
-def remove_item_from_library(connection, username: str, list_key: str, content_id: int, list_id: int = None):
+def remove_item_from_library(connection, username: str, list_key: str, content_id: int = None, list_id: int = None, external_id: str = None, content_type: str = None, api_source: str = None):
     """
     Kullanıcının kütüphanesinden içerik kaldırır.
     """
@@ -18,6 +18,34 @@ def remove_item_from_library(connection, username: str, list_key: str, content_i
             return False
         
         user_id = user['user_id']
+        
+        # İçerik ID'sini bul
+        target_content_id = content_id
+        
+        if not target_content_id and external_id:
+            # External ID ile bulmaya çalış
+            query = "SELECT content_id FROM contents WHERE api_id = %s"
+            params = [str(external_id)]
+            
+            if content_type:
+                query += " AND type = %s"
+                params.append(content_type)
+            
+            if api_source:
+                query += " AND api_source = %s"
+                params.append(api_source)
+                
+            cursor.execute(query, tuple(params))
+            content_row = cursor.fetchone()
+            
+            if content_row:
+                target_content_id = content_row['content_id']
+            else:
+                # Eğer içerik veritabanında yoksa, zaten listede de olamaz
+                return True
+        
+        if not target_content_id:
+            return False
         
         # Listeyi bul
         if list_id:
@@ -46,7 +74,7 @@ def remove_item_from_library(connection, username: str, list_key: str, content_i
         # Listeden kaldır
         cursor.execute(
             "DELETE FROM list_items WHERE list_id = %s AND content_id = %s",
-            (target_list_id, content_id)
+            (target_list_id, target_content_id)
         )
         
         connection.commit()
