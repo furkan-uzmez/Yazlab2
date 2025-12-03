@@ -116,7 +116,8 @@
 }
 
 .app-rating .star-icon.app-star {
-  color: #ff4a4a; /* Different color for app rating */
+  color: #ff4a4a;
+  /* Different color for app rating */
 }
 
 .platform-rating-value {
@@ -156,11 +157,9 @@
 
 .genre-badge {
   padding: 0.5rem 1rem;
-  background: linear-gradient(
-    135deg,
-    rgba(74, 158, 255, 0.15) 0%,
-    rgba(74, 158, 255, 0.08) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(74, 158, 255, 0.15) 0%,
+      rgba(74, 158, 255, 0.08) 100%);
   border: 1px solid rgba(74, 158, 255, 0.25);
   border-radius: 20px;
   color: #4a9eff;
@@ -204,7 +203,7 @@
   gap: 2rem;
   padding: 2rem 0;
   position: relative;
-  z-index: 10001 ;
+  z-index: 10001;
 }
 
 /* Rating Section */
@@ -274,12 +273,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.03) 50%,
-    rgba(0, 0, 0, 0.15) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.03) 50%,
+      rgba(0, 0, 0, 0.15) 100%);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -293,32 +290,26 @@
 }
 
 .library-btn:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(0, 0, 0, 0.2) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(0, 0, 0, 0.2) 100%);
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
 
 .library-btn.active {
-  background: linear-gradient(
-    135deg,
-    rgba(74, 158, 255, 0.2) 0%,
-    rgba(74, 158, 255, 0.1) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(74, 158, 255, 0.2) 0%,
+      rgba(74, 158, 255, 0.1) 100%);
   border-color: rgba(74, 158, 255, 0.3);
   color: #4a9eff;
 }
 
 .library-btn.active:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(74, 158, 255, 0.25) 0%,
-    rgba(74, 158, 255, 0.15) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(74, 158, 255, 0.25) 0%,
+      rgba(74, 158, 255, 0.15) 100%);
 }
 
 /* Custom List */
@@ -328,12 +319,10 @@
   gap: 0.5rem;
   padding: 0.875rem 1rem;
   min-width: 180px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.03) 50%,
-    rgba(0, 0, 0, 0.15) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.03) 50%,
+      rgba(0, 0, 0, 0.15) 100%);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -348,12 +337,10 @@
 }
 
 .custom-list-btn:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(0, 0, 0, 0.2) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(0, 0, 0, 0.2) 100%);
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
@@ -369,30 +356,33 @@
   position: absolute;
   top: calc(100% + -1rem);
   right: -240px;
-  width: 200px; /* Sabit genişlik */
+  width: 200px;
+  /* Sabit genişlik */
   max-height: 320px;
-  overflow-x: hidden; /* Yatay scroll'u gizle */
-  overflow-y: auto; /* Dikey scroll ekle */
-  background: linear-gradient(
-    135deg,
-    rgba(10, 10, 10, 0.75) 0%,
-    rgba(15, 15, 15, 0.7) 50%,
-    rgba(10, 10, 10, 0.75) 100%
-  );
+  overflow-x: hidden;
+  /* Yatay scroll'u gizle */
+  overflow-y: auto;
+  /* Dikey scroll ekle */
+  background: linear-gradient(135deg,
+      rgba(10, 10, 10, 0.75) 0%,
+      rgba(15, 15, 15, 0.7) 50%,
+      rgba(10, 10, 10, 0.75) 100%);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
   border: 0.5px solid rgba(79, 78, 78, 0.2);
   border-radius: 20px;
   padding: 0.4rem;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.9),
     0 0 0 1px rgba(255, 255, 255, 0.15) inset,
     0 2px 12px rgba(255, 255, 255, 0.08) inset,
     0 -1px 0 rgba(255, 255, 255, 0.05) inset;
   z-index: 10000;
   animation: customListMenuSlideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  scrollbar-width: thin; /* Firefox için ince scrollbar */
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent; /* Firefox scrollbar rengi */
+  scrollbar-width: thin;
+  /* Firefox için ince scrollbar */
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  /* Firefox scrollbar rengi */
 }
 
 .custom-list-dropdown::before {
@@ -413,12 +403,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.05) 100%);
   pointer-events: none;
   border-radius: 24px;
   z-index: -1;
@@ -447,10 +435,12 @@
     transform: translateY(-15px) scale(0.96);
     filter: blur(4px);
   }
+
   50% {
     opacity: 0.8;
     transform: translateY(-2px) scale(1.01);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -478,7 +468,8 @@
 
 .dropdown-item {
   display: flex;
-  align-items: flex-start; /* Uzun metinler için üstten hizala */
+  align-items: flex-start;
+  /* Uzun metinler için üstten hizala */
   gap: 0.625rem;
   width: 100%;
   padding: 0.65rem 0.75rem;
@@ -492,10 +483,10 @@
   font-weight: 400;
   cursor: pointer;
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
   position: relative;
   overflow: hidden;
@@ -552,7 +543,7 @@
   border: 1px solid transparent;
   color: #ffffff;
   transform: translateX(5px) translateZ(0);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
@@ -567,6 +558,7 @@
     opacity: 0;
     transform: translateX(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -590,7 +582,8 @@
   position: relative;
   z-index: 1;
   transition: transform 0.3s ease;
-  margin-top: 0.1rem; /* Uzun metinler için icon'u biraz aşağı kaydır */
+  margin-top: 0.1rem;
+  /* Uzun metinler için icon'u biraz aşağı kaydır */
 }
 
 .dropdown-item:hover:not(:disabled) svg {
@@ -601,10 +594,12 @@
   flex: 1;
   position: relative;
   z-index: 1;
-  min-width: 0; /* Flex item'ın wrap olmasını sağlar */
+  min-width: 0;
+  /* Flex item'ın wrap olmasını sağlar */
   word-wrap: break-word;
   overflow-wrap: break-word;
-  white-space: normal; /* Alt satıra geçmesine izin ver */
+  white-space: normal;
+  /* Alt satıra geçmesine izin ver */
   line-height: 1.4;
 }
 
@@ -615,8 +610,10 @@
   position: relative;
   z-index: 1;
   margin-left: auto;
-  flex-shrink: 0; /* Sayı her zaman görünür kalsın */
-  white-space: nowrap; /* Sayı tek satırda kalsın */
+  flex-shrink: 0;
+  /* Sayı her zaman görünür kalsın */
+  white-space: nowrap;
+  /* Sayı tek satırda kalsın */
 }
 
 .spinner-small {
@@ -710,7 +707,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeInUp {
@@ -718,6 +717,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1133,3 +1133,49 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+
+/* Comment Like Button */
+.comment-footer {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.comment-like-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin-left: -0.5rem;
+  /* Align with text */
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.comment-like-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.comment-like-btn.liked {
+  color: #ff4a4a;
+}
+
+.comment-like-btn.liked:hover {
+  background: rgba(255, 74, 74, 0.1);
+}
+
+.comment-like-count {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.comment-like-btn svg {
+  font-size: 1rem;
+}

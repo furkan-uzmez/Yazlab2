@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaStar, FaCalendarAlt, FaClock, FaBookOpen, FaUser, FaFilm, FaBook, FaCheck, FaPlus, FaTimes, FaList, FaEdit, FaTrash, FaPaperPlane } from 'react-icons/fa';
+import { FaStar, FaCalendarAlt, FaClock, FaBookOpen, FaUser, FaFilm, FaBook, FaCheck, FaPlus, FaTimes, FaList, FaEdit, FaTrash, FaPaperPlane, FaHeart, FaRegHeart } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
@@ -749,6 +749,76 @@ function ContentDetail() {
     }
   };
 
+  const handleLikeComment = async (commentId) => {
+    const username = localStorage.getItem("profileusername");
+    if (!username) {
+      alert("Beğenmek için giriş yapmalısınız.");
+      return;
+    }
+
+    // Optimistic update
+    setComments(prevComments =>
+      prevComments.map(comment => {
+        if (comment.id === commentId) {
+          const isLiked = !comment.isLiked;
+          return {
+            ...comment,
+            isLiked: isLiked,
+            likes: isLiked ? comment.likes + 1 : Math.max(0, comment.likes - 1)
+          };
+        }
+        return comment;
+      })
+    );
+
+    try {
+      const response = await fetch("http://localhost:8000/interactions/like_comment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          comment_id: commentId,
+          username: username
+        }),
+      });
+
+      if (!response.ok) {
+        // Revert on error
+        console.error("Beğeni işlemi başarısız.");
+        setComments(prevComments =>
+          prevComments.map(comment => {
+            if (comment.id === commentId) {
+              const isLiked = !comment.isLiked; // Revert back
+              return {
+                ...comment,
+                isLiked: isLiked,
+                likes: isLiked ? comment.likes + 1 : Math.max(0, comment.likes - 1)
+              };
+            }
+            return comment;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Beğeni API hatası:", error);
+      // Revert on error
+      setComments(prevComments =>
+        prevComments.map(comment => {
+          if (comment.id === commentId) {
+            const isLiked = !comment.isLiked; // Revert back
+            return {
+              ...comment,
+              isLiked: isLiked,
+              likes: isLiked ? comment.likes + 1 : Math.max(0, comment.likes - 1)
+            };
+          }
+          return comment;
+        })
+      );
+    }
+  };
+
 
 
 
@@ -1141,7 +1211,18 @@ function ContentDetail() {
                               </div>
                             </div>
                           ) : (
-                            <p className="comment-text">{comment.text}</p>
+                            <>
+                              <p className="comment-text">{comment.text}</p>
+                              <div className="comment-footer">
+                                <button
+                                  className={`comment-like-btn ${comment.isLiked ? 'liked' : ''}`}
+                                  onClick={() => handleLikeComment(comment.id)}
+                                >
+                                  {comment.isLiked ? <FaHeart /> : <FaRegHeart />}
+                                  <span className="comment-like-count">{comment.likes}</span>
+                                </button>
+                              </div>
+                            </>
                           )}
                         </div>
                       </div>
