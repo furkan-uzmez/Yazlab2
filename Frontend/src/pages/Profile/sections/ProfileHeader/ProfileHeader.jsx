@@ -24,7 +24,7 @@ function ProfileHeader({
   // Güvenli veri erişimi ve varsayılan değerler
   const username = profileUser?.username || 'İsimsiz Kullanıcı';
   const bio = profileUser?.bio || 'Henüz bir biyografi eklenmemiş.';
-  const avatarUrl = profileUser?.avatar_url || `https://i.pravatar.cc/150?img=${profileUser?.user_id || 1}`;
+  const avatarUrl = profileUser?.avatar_url || '/default-avatar.png';
 
   // Takip ve takipçi sayılarını al
   useEffect(() => {
@@ -77,7 +77,7 @@ function ProfileHeader({
           src={avatarUrl}
           alt={username}
           className="profile-avatar"
-          onError={(e) => { e.target.src = `https://i.pravatar.cc/150?img=${profileUser?.user_id || 1}`; }} // Kırık resimler için fallback
+          onError={(e) => { e.target.src = '/default-avatar.png'; }} // Kırık resimler için fallback
         />
       </div>
       <div className="profile-info-section">
