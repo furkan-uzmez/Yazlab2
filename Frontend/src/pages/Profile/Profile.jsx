@@ -1537,12 +1537,14 @@ function Profile() {
                         className="follow-modal-user-avatar"
                       />
                       <span className="follow-modal-username">{user.username}</span>
-                      <button
-                        className="follow-modal-remove-btn"
-                        onClick={(e) => handleRemoveFollower(e, user.user_id)}
-                      >
-                        Takipçiyi Çıkar
-                      </button>
+                      {isOwnProfile && (
+                        <button
+                          className="follow-modal-remove-btn"
+                          onClick={(e) => handleRemoveFollower(e, user.user_id)}
+                        >
+                          Takipçiyi Çıkar
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1588,12 +1590,14 @@ function Profile() {
                         className="follow-modal-user-avatar"
                       />
                       <span className="follow-modal-username">{user.username}</span>
-                      <button
-                        className="follow-modal-unfollow-btn"
-                        onClick={(e) => handleUnfollow(e, user.user_id)}
-                      >
-                        Takipten Çık
-                      </button>
+                      {isOwnProfile && (
+                        <button
+                          className="follow-modal-unfollow-btn"
+                          onClick={(e) => handleUnfollow(e, user.user_id)}
+                        >
+                          Takipten Çık
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
