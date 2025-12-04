@@ -133,6 +133,26 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
         if (!reviewResponse.ok) {
           const errorData = await reviewResponse.json().catch(() => ({ detail: "Review eklenemedi" }));
           throw new Error(errorData.detail || "Review eklenemedi");
+        } else {
+          // Review başarıyla eklendiyse, aynı metni içerik detayındaki yorumlar için de ekle
+          try {
+            await fetch('http://localhost:8000/interactions/add_comment_by_content', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                user_email: userEmail,
+                content_id: String(selectedContent.content_id),
+                comment_text: reviewText.trim(),
+                title: selectedContent.title,
+                poster_url: selectedContent.poster_url || selectedContent.cover_url,
+                content_type: contentType === 'movie' ? 'movie' : 'book'
+              })
+            });
+          } catch (commentError) {
+            console.error("Review yorumu ContentDetail'e eklenemedi:", commentError);
+          }
         }
       } else if (hasRating) {
         // If only rating, send to add_rating
