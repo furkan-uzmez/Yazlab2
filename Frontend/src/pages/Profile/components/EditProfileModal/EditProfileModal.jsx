@@ -87,7 +87,7 @@ function EditProfileModal({
           <div className="edit-profile-avatar-section">
             <div className="avatar-preview-container" onClick={handleAvatarClick}>
               <img 
-                src={avatarPreview || formData.avatar_url || `https://i.pravatar.cc/150?img=1`}
+                src={avatarPreview || formData.avatar_url || '/default-avatar.png'}
                 alt="Avatar Preview"
                 className="avatar-preview"
               />
