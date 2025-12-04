@@ -1532,7 +1532,7 @@ function Profile() {
                       onClick={() => handleUserClick(user.username)}
                     >
                       <img
-                        src={user.avatar_url || `https://i.pravatar.cc/150?img=${index + 1}`}
+                        src={user.avatar_url || '/default-avatar.png'}
                         alt={user.username}
                         className="follow-modal-user-avatar"
                       />
@@ -1585,7 +1585,7 @@ function Profile() {
                       onClick={() => handleUserClick(user.username)}
                     >
                       <img
-                        src={user.avatar_url || `https://i.pravatar.cc/150?img=${index + 1}`}
+                        src={user.avatar_url || '/default-avatar.png'}
                         alt={user.username}
                         className="follow-modal-user-avatar"
                       />
