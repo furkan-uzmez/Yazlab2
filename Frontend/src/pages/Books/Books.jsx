@@ -32,6 +32,27 @@ function Books() {
   });
 
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Debounce search query
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Reset state when category or search query changes
+  useEffect(() => {
+    setBooks([]);
+    setPage(1);
+    setHasMore(true);
+  }, [activeCategory, debouncedSearchQuery]);
+
   // Fetch books from API
   useEffect(() => {
     const fetchBooks = async () => {
@@ -42,21 +63,24 @@ function Books() {
         if (activeCategory === 'new') {
           apiCategory = 'new';
         }
-        
-        const response = await fetch(
-          `http://localhost:8000/content/popular/books?category=${apiCategory}&max_results=40`
-        );
-        
+
+        let url = `http://localhost:8000/content/popular/books?category=${apiCategory}&page=${page}&max_results=20`;
+        if (debouncedSearchQuery) {
+          url += `&query=${encodeURIComponent(debouncedSearchQuery)}`;
+        }
+
+        const response = await fetch(url);
+
         if (response.ok) {
           const data = await response.json();
           const booksList = data.items || [];
-          
+
           // Format books data
           const formattedBooks = booksList.map(book => {
             const info = book.volumeInfo || {};
             const imageLinks = info.imageLinks || {};
             const thumbnail = imageLinks.thumbnail || imageLinks.smallThumbnail || imageLinks.medium || null;
-            
+
             return {
               id: book.id, // Google Books API ID - this will be used directly
               title: info.title || '',
@@ -67,8 +91,9 @@ function Books() {
               genre_ids: info.categories || []
             };
           });
-          
-          setBooks(formattedBooks);
+
+          setBooks(prev => page === 1 ? formattedBooks : [...prev, ...formattedBooks]);
+          setHasMore(booksList.length === 20);
         } else {
           console.error("Kitaplar yüklenemedi:", response.status);
         }
@@ -78,9 +103,26 @@ function Books() {
         setLoading(false);
       }
     };
-    
+
     fetchBooks();
-  }, [activeCategory]);
+  }, [activeCategory, page, debouncedSearchQuery]);
+
+  // Infinite scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop + 1 >=
+        document.documentElement.scrollHeight
+      ) {
+        if (hasMore && !loading) {
+          setPage((prev) => prev + 1);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, loading]);
 
   // Old mock data removed - now using API
   useEffect(() => {
@@ -317,7 +359,7 @@ function Books() {
   }, []);
 
   const handleLogout = () => setLogoutModalOpen(true);
-  
+
   const handleConfirmLogout = () => {
     setLogoutLoading(true);
     setTimeout(() => {
@@ -359,7 +401,7 @@ function Books() {
 
   return (
     <div className="books-container">
-      <Sidebar 
+      <Sidebar
         onLogout={handleLogout}
         isSearchMode={isSearchMode}
         onSearchModeChange={setIsSearchMode}
@@ -449,13 +491,8 @@ function Books() {
         )}
 
         {/* Books Grid */}
-        {loading ? (
-          <div className="books-grid">
-            {[...Array(12)].map((_, index) => (
-              <BookCardSkeleton key={`skeleton-${index}`} />
-            ))}
-          </div>
-        ) : filteredAndSortedBooks.length > 0 ? (
+        {/* Books Grid */}
+        {filteredAndSortedBooks.length > 0 || loading ? (
           <div className="books-grid">
             {filteredAndSortedBooks.map((book, index) => (
               <Link
@@ -488,6 +525,9 @@ function Books() {
                 </div>
               </Link>
             ))}
+            {loading && [...Array(12)].map((_, index) => (
+              <BookCardSkeleton key={`skeleton-${index}`} />
+            ))}
           </div>
         ) : (
           <div className="books-empty">
@@ -516,7 +556,7 @@ function Books() {
         genres={genres}
       />
 
-      <BottomNav 
+      <BottomNav
         onSearchClick={() => setIsSearchMode(true)}
         isSearchMode={isSearchMode}
       />

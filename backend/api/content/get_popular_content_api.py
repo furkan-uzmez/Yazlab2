@@ -51,21 +51,29 @@ async def get_popular_movies_endpoint(
             detail="Could not retrieve movies"
         )
 
+from backend.func.content.search_book import search_book
+
 @router.get("/popular/books")
 async def get_popular_books_endpoint(
     category: str = Query("popular", description="Category: popular, new"),
-    max_results: int = Query(40, ge=1, le=40)
+    page: int = Query(1, ge=1, description="Page number"),
+    max_results: int = Query(20, ge=1, le=40),
+    query: str = Query(None, description="Search query")
 ):
     """
-    Popüler kitapları getirir.
-    Kullanım: GET /content/popular/books?category=popular&max_results=40
+    Popüler kitapları getirir veya arama yapar.
+    Kullanım: GET /content/popular/books?category=popular&page=1&max_results=20&query=harry
     Categories: popular, new
     """
     try:
-        if category == "popular":
-            result = get_popular_books(max_results)
+        start_index = (page - 1) * max_results
+        
+        if query:
+            result = search_book(query, max_results, start_index)
+        elif category == "popular":
+            result = get_popular_books(max_results, start_index)
         elif category == "new":
-            result = get_new_books(max_results)
+            result = get_new_books(max_results, start_index)
         else:
             raise HTTPException(
                 status_code=400,

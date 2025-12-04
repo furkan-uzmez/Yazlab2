@@ -7,7 +7,7 @@ load_dotenv()
 GOOGLE_BOOK_API = os.getenv("GOOGLE_BOOK_API")
 BASE_URL = "https://www.googleapis.com/books/v1"
 
-def get_popular_books(max_results: int = 40):
+def get_popular_books(max_results: int = 40, start_index: int = 0):
     """
     Google Books API'den popüler kitapları getirir.
     Popüler kitaplar için genel arama yapıyoruz.
@@ -19,6 +19,7 @@ def get_popular_books(max_results: int = 40):
             "q": "bestseller OR popular OR classic",
             "key": GOOGLE_BOOK_API,
             "maxResults": max_results,
+            "startIndex": start_index,
             "orderBy": "relevance"
         }
         r = requests.get(url, params=params)
@@ -31,7 +32,7 @@ def get_popular_books(max_results: int = 40):
         print(f"Popüler kitaplar alınırken hata: {e}")
         return None
 
-def get_new_books(max_results: int = 40):
+def get_new_books(max_results: int = 40, start_index: int = 0):
     """
     Google Books API'den yeni kitapları getirir.
     """
@@ -41,6 +42,7 @@ def get_new_books(max_results: int = 40):
             "q": "new releases OR 2024 OR 2023",
             "key": GOOGLE_BOOK_API,
             "maxResults": max_results,
+            "startIndex": start_index,
             "orderBy": "newest"
         }
         r = requests.get(url, params=params)
