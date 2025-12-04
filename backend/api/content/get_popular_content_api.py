@@ -9,8 +9,11 @@ from backend.func.content.get_popular_books import (
     get_popular_books,
     get_new_books
 )
+from backend.func.db.connection.open_db_connection import open_db_connection
+from backend.func.interactions.get_content_comment_count import get_content_comment_count
 
 router = APIRouter(prefix="/content", tags=["content"])
+
 
 @router.get("/popular/movies")
 async def get_popular_movies_endpoint(
@@ -40,6 +43,24 @@ async def get_popular_movies_endpoint(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Movies not found"
             )
+
+        # --- Uygulama yorum sayısını ekle (comment_count) ---
+        try:
+            connection = open_db_connection()
+        except Exception as conn_err:
+            print(f"Uyarı: get_popular_movies için DB bağlantısı açılamadı: {conn_err}")
+            connection = None
+
+        if connection:
+            try:
+                for movie in result.get("results", []):
+                    api_id = str(movie.get("id"))
+                    movie["comment_count"] = get_content_comment_count(
+                        connection, api_id, "movie"
+                    )
+            finally:
+                connection.close()
+        # DB yoksa, comment_count frontend'de 0 olarak kalır
         
         return result
     except HTTPException:
@@ -52,6 +73,7 @@ async def get_popular_movies_endpoint(
         )
 
 from backend.func.content.search_book import search_book
+
 
 @router.get("/popular/books")
 async def get_popular_books_endpoint(
@@ -85,7 +107,25 @@ async def get_popular_books_endpoint(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Books not found"
             )
-        
+
+        # --- Uygulama yorum sayısını ekle (comment_count) ---
+        # Google Books sonuç yapısı: { items: [ { id, volumeInfo, ... }, ... ] }
+        try:
+            connection = open_db_connection()
+        except Exception as conn_err:
+            print(f"Uyarı: get_popular_books için DB bağlantısı açılamadı: {conn_err}")
+            connection = None
+
+        if connection:
+            try:
+                for item in result.get("items", []):
+                    api_id = str(item.get("id"))
+                    item["comment_count"] = get_content_comment_count(
+                        connection, api_id, "book"
+                    )
+            finally:
+                connection.close()
+
         return result
     except HTTPException:
         raise

@@ -88,7 +88,10 @@ function Books() {
               release_date: info.publishedDate || '',
               vote_average: info.averageRating || 0,
               overview: info.description || '',
-              genre_ids: info.categories || []
+              genre_ids: info.categories || [],
+              // Ek alanlar: oy sayısı (ratingsCount) ve (ileride) yorum sayısı
+              vote_count: info.ratingsCount || 0,
+              comment_count: book.comment_count || 0
             };
           });
 
@@ -479,6 +482,8 @@ function Books() {
               <option value="rating">Puan</option>
               <option value="date">Tarih</option>
               <option value="title">İsim</option>
+              <option value="most-votes">En Çok Oy Alan</option>
+              <option value="most-comments">En Çok Yorum Alan</option>
             </select>
           </div>
         </div>

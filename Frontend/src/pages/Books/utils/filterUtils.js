@@ -47,6 +47,12 @@ export const sortBooks = (books, sortBy) => {
         return new Date(b.release_date) - new Date(a.release_date);
       case 'title':
         return a.title.localeCompare(b.title);
+      case 'most-votes':
+        // En çok oy alan (Google Books ratingsCount veya benzeri alan)
+        return (b.vote_count || 0) - (a.vote_count || 0);
+      case 'most-comments':
+        // En çok yorum alan (uygulama tarafında comment_count alanı eklenirse kullanılacak)
+        return (b.comment_count || 0) - (a.comment_count || 0);
       case 'popularity':
       default:
         return 0;

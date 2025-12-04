@@ -108,7 +108,10 @@ function Movies() {
               release_date: movie.release_date,
               vote_average: movie.vote_average || 0,
               overview: movie.overview || '',
-              genre_ids: movie.genre_ids || []
+              genre_ids: movie.genre_ids || [],
+              // Ek alanlar: oy sayısı ve (ileride) yorum sayısı
+              vote_count: movie.vote_count || 0,
+              comment_count: movie.comment_count || 0
             }));
 
             setMovies(prevMovies => {
@@ -513,6 +516,8 @@ function Movies() {
               <option value="rating">Puan</option>
               <option value="date">Tarih</option>
               <option value="title">İsim</option>
+              <option value="most-votes">En Çok Oy Alan</option>
+              <option value="most-comments">En Çok Yorum Alan</option>
             </select>
           </div>
         </div>
