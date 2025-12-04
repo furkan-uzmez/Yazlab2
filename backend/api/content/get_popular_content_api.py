@@ -7,7 +7,9 @@ from backend.func.content.get_popular_movies import (
 )
 from backend.func.content.get_sorted_content import (
     get_most_commented_movies,
-    get_most_added_movies
+    get_most_added_movies,
+    get_most_commented_books,
+    get_most_added_books
 )
 from backend.func.content.get_popular_books import (
     get_popular_books,
@@ -90,7 +92,7 @@ from backend.func.content.search_book import search_book
 
 @router.get("/popular/books")
 async def get_popular_books_endpoint(
-    category: str = Query("popular", description="Category: popular, new"),
+    category: str = Query("popular", description="Category: popular, new, most-commented, most-added"),
     page: int = Query(1, ge=1, description="Page number"),
     max_results: int = Query(20, ge=1, le=40),
     query: str = Query(None, description="Search query")
@@ -98,7 +100,7 @@ async def get_popular_books_endpoint(
     """
     Popüler kitapları getirir veya arama yapar.
     Kullanım: GET /content/popular/books?category=popular&page=1&max_results=20&query=harry
-    Categories: popular, new
+    Categories: popular, new, most-commented, most-added
     """
     try:
         start_index = (page - 1) * max_results
@@ -109,10 +111,14 @@ async def get_popular_books_endpoint(
             result = get_popular_books(max_results, start_index)
         elif category == "new":
             result = get_new_books(max_results, start_index)
+        elif category == "most-commented":
+            result = get_most_commented_books(page, max_results)
+        elif category == "most-added":
+            result = get_most_added_books(page, max_results)
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Invalid category. Supported: popular, new"
+                detail="Invalid category. Supported: popular, new, most-commented, most-added"
             )
         
         if result is None:
@@ -136,6 +142,10 @@ async def get_popular_books_endpoint(
                     item["comment_count"] = get_content_comment_count(
                         connection, api_id, "book"
                     )
+                    if category != "most-added":
+                        item["list_count"] = get_content_list_count(
+                            connection, api_id, "book"
+                        )
             finally:
                 connection.close()
 

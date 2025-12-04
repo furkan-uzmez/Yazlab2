@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { FaFilter, FaSearch, FaStar, FaCalendarAlt } from 'react-icons/fa';
+import { FaFilter, FaSearch, FaStar, FaCalendarAlt, FaComment, FaList } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
@@ -62,6 +62,10 @@ function Books() {
         let apiCategory = 'popular';
         if (activeCategory === 'new') {
           apiCategory = 'new';
+        } else if (activeCategory === 'most-commented') {
+          apiCategory = 'most-commented';
+        } else if (activeCategory === 'most-added') {
+          apiCategory = 'most-added';
         }
 
         let url = `http://localhost:8000/content/popular/books?category=${apiCategory}&page=${page}&max_results=20`;
@@ -91,7 +95,8 @@ function Books() {
               genre_ids: info.categories || [],
               // Ek alanlar: oy sayısı (ratingsCount) ve (ileride) yorum sayısı
               vote_count: info.ratingsCount || 0,
-              comment_count: book.comment_count || 0
+              comment_count: book.comment_count || 0,
+              list_count: book.list_count || 0
             };
           });
 
@@ -446,6 +451,20 @@ function Books() {
           >
             Tümü
           </button>
+          <button
+            type="button"
+            className={`category-tab ${activeCategory === 'most-commented' ? 'active' : ''}`}
+            onClick={() => handleCategoryChange('most-commented')}
+          >
+            En Çok Yorum Alan
+          </button>
+          <button
+            type="button"
+            className={`category-tab ${activeCategory === 'most-added' ? 'active' : ''}`}
+            onClick={() => handleCategoryChange('most-added')}
+          >
+            En Çok Listeye Eklenme
+          </button>
         </div>
 
         {/* Search and Filters */}
@@ -517,6 +536,16 @@ function Books() {
                       <FaStar className="star-icon" />
                       <span>{book.vote_average.toFixed(1)}</span>
                     </div>
+                    <div className="book-stats">
+                      <div className="stat-item">
+                        <FaComment className="stat-icon" />
+                        <span>{book.comment_count || 0}</span>
+                      </div>
+                      <div className="stat-item">
+                        <FaList className="stat-icon" />
+                        <span>{book.list_count || 0}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="book-info">
@@ -526,6 +555,18 @@ function Books() {
                       <FaCalendarAlt className="meta-icon" />
                       {new Date(book.release_date).getFullYear()}
                     </span>
+                    {activeCategory === 'most-commented' && (
+                      <span className="book-comments">
+                        <FaComment className="meta-icon" />
+                        {book.comment_count || 0}
+                      </span>
+                    )}
+                    {activeCategory === 'most-added' && (
+                      <span className="book-comments">
+                        <FaList className="meta-icon" />
+                        {book.list_count || 0}
+                      </span>
+                    )}
                   </div>
                 </div>
               </Link>
