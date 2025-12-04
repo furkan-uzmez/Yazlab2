@@ -437,9 +437,35 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  margin-bottom: 0.5rem;
   color: #ffffff;
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+.movie-stats {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  backdrop-filter: blur(4px);
+  font-size: 0.9rem;
+}
+
+.stat-icon {
+  color: var(--primary-color);
+  font-size: 0.9rem;
 }
 
 .star-icon {
@@ -584,4 +610,18 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
+}
+
+.movie-comments {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #a0a0a0;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+}
+
+.movie-comments .meta-icon {
+  color: #4a9eff;
+  font-size: 0.8rem;
 }

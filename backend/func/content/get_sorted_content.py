@@ -47,7 +47,8 @@ def get_most_commented_movies(page: int = 1, limit: int = 20):
                 "vote_average": 0, # DB'den ortalama puanı çekmek için ekstra sorgu gerekir, şimdilik 0
                 "overview": "",
                 "genre_ids": [],
-                "comment_count": row['comment_count']
+                "comment_count": row['comment_count'],
+                "list_count": 0 # Şimdilik 0, istenirse join ile çekilebilir
             })
             
         return {"results": movies, "page": page}
@@ -100,7 +101,8 @@ def get_most_added_movies(page: int = 1, limit: int = 20):
                 "vote_average": 0,
                 "overview": "",
                 "genre_ids": [],
-                "vote_count": row['add_count'] # Frontend'de vote_count alanını kullanabiliriz veya yeni alan
+                "comment_count": 0, # Şimdilik 0
+                "list_count": row['add_count']
             })
             
         return {"results": movies, "page": page}

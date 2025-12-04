@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { FaFilter, FaSearch, FaStar, FaCalendarAlt } from 'react-icons/fa';
+import { FaFilter, FaSearch, FaStar, FaCalendarAlt, FaComment, FaList } from 'react-icons/fa';
 import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
@@ -115,7 +115,8 @@ function Movies() {
               genre_ids: movie.genre_ids || [],
               // Ek alanlar: oy sayısı ve (ileride) yorum sayısı
               vote_count: movie.vote_count || 0,
-              comment_count: movie.comment_count || 0
+              comment_count: movie.comment_count || 0,
+              list_count: movie.list_count || 0
             }));
 
             setMovies(prevMovies => {
@@ -577,6 +578,16 @@ function Movies() {
                           <FaStar className="star-icon" />
                           <span>{movie.vote_average.toFixed(1)}</span>
                         </div>
+                        <div className="movie-stats">
+                          <div className="stat-item">
+                            <FaComment className="stat-icon" />
+                            <span>{movie.comment_count || 0}</span>
+                          </div>
+                          <div className="stat-item">
+                            <FaList className="stat-icon" />
+                            <span>{movie.list_count || 0}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className="movie-info">
@@ -586,6 +597,13 @@ function Movies() {
                           <FaCalendarAlt className="meta-icon" />
                           {new Date(movie.release_date).getFullYear()}
                         </span>
+                        {activeCategory === 'most-commented' && (
+                          <span className="movie-comments">
+                            <FaComment className="meta-icon" />
+                            {movie.comment_count || 0}
+                          </span>
+                        )}
+
                       </div>
                     </div>
                   </Link>
@@ -618,6 +636,12 @@ function Movies() {
                           <FaCalendarAlt className="meta-icon" />
                           {new Date(movie.release_date).getFullYear()}
                         </span>
+                        {activeCategory === 'most-commented' && (
+                          <span className="movie-comments">
+                            <FaComment className="meta-icon" />
+                            {movie.comment_count || 0}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </Link>

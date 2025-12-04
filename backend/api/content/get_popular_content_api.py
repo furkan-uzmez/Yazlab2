@@ -15,6 +15,7 @@ from backend.func.content.get_popular_books import (
 )
 from backend.func.db.connection.open_db_connection import open_db_connection
 from backend.func.interactions.get_content_comment_count import get_content_comment_count
+from backend.func.interactions.get_content_list_count import get_content_list_count
 
 router = APIRouter(prefix="/content", tags=["content"])
 
@@ -63,7 +64,11 @@ async def get_popular_movies_endpoint(
             try:
                 for movie in result.get("results", []):
                     api_id = str(movie.get("id"))
-                    movie["comment_count"] = get_content_comment_count(
+                    if category != "most-commented":
+                        movie["comment_count"] = get_content_comment_count(
+                            connection, api_id, "movie"
+                        )
+                    movie["list_count"] = get_content_list_count(
                         connection, api_id, "movie"
                     )
             finally:
