@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { FaFilter, FaSearch, FaStar, FaCalendarAlt } from 'react-icons/fa';
@@ -30,45 +30,98 @@ function Movies() {
     ratingFrom: '',
     ratingTo: ''
   });
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef();
 
+
+  // Reset state when category changes or search query is cleared
+  useEffect(() => {
+    if (!searchQuery) {
+      setMovies([]);
+      setPage(1);
+      setHasMore(true);
+    } else {
+      // When searching, we might want to clear movies too to show search results fresh
+      // But let's handle that in the fetch logic or here.
+      // Actually, if we switch from search to no search, we want to reset.
+      // If we switch categories, we want to reset.
+      setMovies([]);
+      setPage(1);
+      setHasMore(true);
+    }
+  }, [activeCategory, searchQuery]);
 
   // Fetch movies from API
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
       try {
-        // Map category to API category
-        let apiCategory = 'popular';
-        if (activeCategory === 'top-rated') {
-          apiCategory = 'top-rated';
-        } else if (activeCategory === 'new') {
-          apiCategory = 'new';
-        }
-        
-        const response = await fetch(
-          `http://localhost:8000/content/popular/movies?category=${apiCategory}&page=1`
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          const moviesList = data.results || [];
-          
-          // Format movies data
-          const formattedMovies = moviesList.map(movie => ({
-            id: movie.id, // TMDB API ID - this will be used directly
-            title: movie.title,
-            poster_path: movie.poster_path 
-              ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` 
-              : '/placeholder.jpg',
-            release_date: movie.release_date,
-            vote_average: movie.vote_average || 0,
-            overview: movie.overview || '',
-            genre_ids: movie.genre_ids || []
-          }));
-          
-          setMovies(formattedMovies);
+        if (searchQuery.length > 2) {
+          // Search mode
+          const response = await fetch(
+            `http://localhost:8000/content/search?query=${searchQuery}&api_type=movie`
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            const searchResults = data.results || [];
+
+            const formattedMovies = searchResults.map(movie => ({
+              id: movie.id,
+              title: movie.title,
+              poster_path: movie.poster_url || '/placeholder.jpg',
+              release_date: movie.release_year ? `${movie.release_year}-01-01` : '',
+              vote_average: 0, // Search API doesn't return rating
+              overview: movie.description || '',
+              genre_ids: []
+            }));
+
+            setMovies(formattedMovies);
+            setHasMore(false); // Disable infinite scroll for search results
+          }
         } else {
-          console.error("Filmler yüklenemedi:", response.status);
+          // Normal mode
+          // Map category to API category
+          let apiCategory = 'popular';
+          if (activeCategory === 'top-rated') {
+            apiCategory = 'top-rated';
+          } else if (activeCategory === 'new') {
+            apiCategory = 'new';
+          }
+
+          const response = await fetch(
+            `http://localhost:8000/content/popular/movies?category=${apiCategory}&page=${page}`
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            const moviesList = data.results || [];
+
+            // Format movies data
+            const formattedMovies = moviesList.map(movie => ({
+              id: movie.id, // TMDB API ID - this will be used directly
+              title: movie.title,
+              poster_path: movie.poster_path
+                ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
+                : '/placeholder.jpg',
+              release_date: movie.release_date,
+              vote_average: movie.vote_average || 0,
+              overview: movie.overview || '',
+              genre_ids: movie.genre_ids || []
+            }));
+
+            setMovies(prevMovies => {
+              if (page === 1) return formattedMovies;
+              // Filter out duplicates based on ID
+              const existingIds = new Set(prevMovies.map(m => m.id));
+              const newUniqueMovies = formattedMovies.filter(m => !existingIds.has(m.id));
+              return [...prevMovies, ...newUniqueMovies];
+            });
+            setHasMore(moviesList.length > 0);
+          } else {
+            console.error("Filmler yüklenemedi:", response.status);
+          }
         }
       } catch (error) {
         console.error("Filmler API hatası:", error);
@@ -76,9 +129,14 @@ function Movies() {
         setLoading(false);
       }
     };
-    
-    fetchMovies();
-  }, [activeCategory]);
+
+    // Debounce search
+    const timeoutId = setTimeout(() => {
+      fetchMovies();
+    }, searchQuery ? 500 : 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [activeCategory, page, searchQuery]);
 
   // Old mock data removed - now using API
   useEffect(() => {
@@ -315,7 +373,7 @@ function Movies() {
   }, []);
 
   const handleLogout = () => setLogoutModalOpen(true);
-  
+
   const handleConfirmLogout = () => {
     setLogoutLoading(true);
     setTimeout(() => {
@@ -351,13 +409,33 @@ function Movies() {
     }, 300);
   };
 
+  const lastMovieElementRef = useCallback(node => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
+
   // Filter and sort movies
-  const filteredMovies = filterMovies(movies, searchQuery, activeCategory, filters);
+  // Only apply client-side filtering if NOT searching (or if we want to filter search results too, but usually search API handles it)
+  // For now, let's keep it simple: if searching, show results as is (or maybe just sort).
+  // But wait, filterMovies filters by searchQuery too. We should disable that part if we are doing server-side search.
+  // Actually, if we use server-side search, 'movies' already contains the search results.
+  // So we should pass empty string as searchQuery to filterMovies to avoid double filtering?
+  // Or better, just update filterMovies to not filter by search if we are in server-side search mode.
+  // But filterMovies is a utility.
+  // Let's just pass '' as searchQuery to filterMovies if we are in server-side search mode (searchQuery.length > 2).
+  const effectiveSearchQuery = searchQuery.length > 2 ? '' : searchQuery;
+  const filteredMovies = filterMovies(movies, effectiveSearchQuery, activeCategory, filters);
   const filteredAndSortedMovies = sortMovies(filteredMovies, sortBy);
 
   return (
     <div className="movies-container">
-      <Sidebar 
+      <Sidebar
         onLogout={handleLogout}
         isSearchMode={isSearchMode}
         onSearchModeChange={setIsSearchMode}
@@ -455,37 +533,74 @@ function Movies() {
           </div>
         ) : filteredAndSortedMovies.length > 0 ? (
           <div className="movies-grid">
-            {filteredAndSortedMovies.map((movie, index) => (
-              <Link
-                key={movie.id}
-                to={`/content/movie/${movie.id}`}
-                className="movie-card"
-                style={{ animationDelay: `${index * 0.03}s` }}
-              >
-                <div className="movie-poster-wrapper">
-                  <img
-                    src={movie.poster_path || '/placeholder.jpg'}
-                    alt={movie.title}
-                    className="movie-poster"
-                  />
-                  <div className="movie-overlay">
-                    <div className="movie-rating">
-                      <FaStar className="star-icon" />
-                      <span>{movie.vote_average.toFixed(1)}</span>
+            {filteredAndSortedMovies.map((movie, index) => {
+              if (filteredAndSortedMovies.length === index + 1) {
+                return (
+                  <Link
+                    ref={lastMovieElementRef}
+                    key={movie.id}
+                    to={`/content/movie/${movie.id}`}
+                    className="movie-card"
+                    style={{ animationDelay: `${index * 0.03}s` }}
+                  >
+                    <div className="movie-poster-wrapper">
+                      <img
+                        src={movie.poster_path || '/placeholder.jpg'}
+                        alt={movie.title}
+                        className="movie-poster"
+                      />
+                      <div className="movie-overlay">
+                        <div className="movie-rating">
+                          <FaStar className="star-icon" />
+                          <span>{movie.vote_average.toFixed(1)}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="movie-info">
-                  <h3 className="movie-title">{movie.title}</h3>
-                  <div className="movie-meta">
-                    <span className="movie-year">
-                      <FaCalendarAlt className="meta-icon" />
-                      {new Date(movie.release_date).getFullYear()}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                    <div className="movie-info">
+                      <h3 className="movie-title">{movie.title}</h3>
+                      <div className="movie-meta">
+                        <span className="movie-year">
+                          <FaCalendarAlt className="meta-icon" />
+                          {new Date(movie.release_date).getFullYear()}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              } else {
+                return (
+                  <Link
+                    key={movie.id}
+                    to={`/content/movie/${movie.id}`}
+                    className="movie-card"
+                    style={{ animationDelay: `${index * 0.03}s` }}
+                  >
+                    <div className="movie-poster-wrapper">
+                      <img
+                        src={movie.poster_path || '/placeholder.jpg'}
+                        alt={movie.title}
+                        className="movie-poster"
+                      />
+                      <div className="movie-overlay">
+                        <div className="movie-rating">
+                          <FaStar className="star-icon" />
+                          <span>{movie.vote_average.toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="movie-info">
+                      <h3 className="movie-title">{movie.title}</h3>
+                      <div className="movie-meta">
+                        <span className="movie-year">
+                          <FaCalendarAlt className="meta-icon" />
+                          {new Date(movie.release_date).getFullYear()}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              }
+            })}
           </div>
         ) : (
           <div className="movies-empty">
@@ -514,7 +629,7 @@ function Movies() {
         genres={genres}
       />
 
-      <BottomNav 
+      <BottomNav
         onSearchClick={() => setIsSearchMode(true)}
         isSearchMode={isSearchMode}
       />
