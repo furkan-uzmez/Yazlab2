@@ -603,6 +603,13 @@ function Movies() {
                             {movie.comment_count || 0}
                           </span>
                         )}
+                        {activeCategory === 'most-added' && (
+                          <span className="movie-comments">
+                            <FaList className="meta-icon" />
+                            {movie.list_count || 0}
+                          </span>
+                        )}
+
 
                       </div>
                     </div>
@@ -640,6 +647,12 @@ function Movies() {
                           <span className="movie-comments">
                             <FaComment className="meta-icon" />
                             {movie.comment_count || 0}
+                          </span>
+                        )}
+                        {activeCategory === 'most-added' && (
+                          <span className="movie-comments">
+                            <FaList className="meta-icon" />
+                            {movie.list_count || 0}
                           </span>
                         )}
                       </div>
