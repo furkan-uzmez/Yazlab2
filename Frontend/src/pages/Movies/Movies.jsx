@@ -88,6 +88,10 @@ function Movies() {
             apiCategory = 'top-rated';
           } else if (activeCategory === 'new') {
             apiCategory = 'new';
+          } else if (activeCategory === 'most-commented') {
+            apiCategory = 'most-commented';
+          } else if (activeCategory === 'most-added') {
+            apiCategory = 'most-added';
           }
 
           const response = await fetch(
@@ -479,6 +483,20 @@ function Movies() {
             onClick={() => handleCategoryChange('all')}
           >
             Tümü
+          </button>
+          <button
+            type="button"
+            className={`category-tab ${activeCategory === 'most-commented' ? 'active' : ''}`}
+            onClick={() => handleCategoryChange('most-commented')}
+          >
+            En Çok Yorum Alan
+          </button>
+          <button
+            type="button"
+            className={`category-tab ${activeCategory === 'most-added' ? 'active' : ''}`}
+            onClick={() => handleCategoryChange('most-added')}
+          >
+            En Çok Listeye Eklenme
           </button>
         </div>
 

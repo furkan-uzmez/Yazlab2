@@ -5,6 +5,10 @@ from backend.func.content.get_popular_movies import (
     get_top_rated_movies,
     get_now_playing_movies
 )
+from backend.func.content.get_sorted_content import (
+    get_most_commented_movies,
+    get_most_added_movies
+)
 from backend.func.content.get_popular_books import (
     get_popular_books,
     get_new_books
@@ -17,13 +21,13 @@ router = APIRouter(prefix="/content", tags=["content"])
 
 @router.get("/popular/movies")
 async def get_popular_movies_endpoint(
-    category: str = Query("popular", description="Category: popular, top-rated, new"),
+    category: str = Query("popular", description="Category: popular, top-rated, new, most-commented, most-added"),
     page: int = Query(1, ge=1, le=1000)
 ):
     """
     Popüler filmleri getirir.
     Kullanım: GET /content/popular/movies?category=popular&page=1
-    Categories: popular, top-rated, new
+    Categories: popular, top-rated, new, most-commented, most-added
     """
     try:
         if category == "popular":
@@ -32,10 +36,14 @@ async def get_popular_movies_endpoint(
             result = get_top_rated_movies(page)
         elif category == "new":
             result = get_now_playing_movies(page)
+        elif category == "most-commented":
+            result = get_most_commented_movies(page)
+        elif category == "most-added":
+            result = get_most_added_movies(page)
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Invalid category. Supported: popular, top-rated, new"
+                detail="Invalid category. Supported: popular, top-rated, new, most-commented, most-added"
             )
         
         if result is None:
