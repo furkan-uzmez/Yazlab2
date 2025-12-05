@@ -81,7 +81,7 @@ function Home() {
             id: c.comment_id, // Backend: comment_id -> Frontend: id
             userId: c.user_id, // Backend'den gelen user_id'yi kullanıyoruz
             userName: c.username, // Backend: username -> Frontend: userName
-            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default', // Backend: avatar_url -> Frontend: userAvatar
+            userAvatar: c.avatar_url || '/default-avatar.png', // Backend: avatar_url -> Frontend: userAvatar
             text: c.text,
             date: c.created_at,
             likes: c.like_count,

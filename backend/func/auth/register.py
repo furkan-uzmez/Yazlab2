@@ -4,8 +4,9 @@ def register_user(connection, email, password, username):
     try:
         hashed_password = hash_password(password)
         cursor = connection.cursor()
-        query = "INSERT INTO users (email, password_hash, username) VALUES (%s, %s, %s)"
-        cursor.execute(query, (email, hashed_password, username))
+        default_avatar_url = "/default-avatar.png"
+        query = "INSERT INTO users (email, password_hash, username, avatar_url) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query, (email, hashed_password, username, default_avatar_url))
 
         # 2. Yeni eklenen kullanıcının ID'sini al (Kritik Adım)
         new_user_id = cursor.lastrowid

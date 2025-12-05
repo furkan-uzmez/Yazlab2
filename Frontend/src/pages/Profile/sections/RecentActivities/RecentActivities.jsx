@@ -61,7 +61,7 @@ function RecentActivities({
       type: activity.review_text && activity.rating_score ? 'rating_and_review' : activity.type,
       userName: activity.activity_user_username,
       userId: activity.activity_user_username,
-      userAvatar: activity.activity_user_avatar || `https://i.pravatar.cc/150?img=${activity.activity_id}`,
+      userAvatar: activity.activity_user_avatar || '/default-avatar.png',
       actionText: actionText,
       date: activity.created_at,
       contentTitle: activity.content_title,

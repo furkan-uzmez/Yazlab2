@@ -54,7 +54,7 @@ function ActivityCard({ activity, onCommentClick, isCommentPanelOpen ,onLike}) {
       <div className="activity-header">
         <div className="user-info">
           <img 
-            src={activity.userAvatar || '/api/placeholder/40/40'} 
+            src={activity.userAvatar || '/default-avatar.png'} 
             alt={activity.userName}
             className="user-avatar"
           />

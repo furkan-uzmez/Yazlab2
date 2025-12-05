@@ -91,7 +91,7 @@ function ContentDetail() {
             id: c.comment_id,
             userId: c.user_id,
             userName: c.username,
-            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            userAvatar: c.avatar_url || '/default-avatar.png',
             text: c.text,
             date: c.created_at,
             likes: c.like_count || 0,
@@ -613,7 +613,7 @@ function ContentDetail() {
             id: c.comment_id,
             userId: c.user_id,
             userName: c.username,
-            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            userAvatar: c.avatar_url || '/default-avatar.png',
             text: c.text,
             date: c.created_at,
             likes: c.like_count || 0,
@@ -678,7 +678,7 @@ function ContentDetail() {
             id: c.comment_id,
             userId: c.user_id,
             userName: c.username,
-            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            userAvatar: c.avatar_url || '/default-avatar.png',
             text: c.text,
             date: c.created_at,
             likes: c.like_count || 0,
@@ -730,7 +730,7 @@ function ContentDetail() {
             id: c.comment_id,
             userId: c.user_id,
             userName: c.username,
-            userAvatar: c.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            userAvatar: c.avatar_url || '/default-avatar.png',
             text: c.text,
             date: c.created_at,
             likes: c.like_count || 0,
@@ -1157,7 +1157,7 @@ function ContentDetail() {
                   return (
                     <div key={comment.id} className="comment-item">
                       <img
-                        src={comment.userAvatar || '/api/placeholder/40/40'}
+                        src={comment.userAvatar || '/default-avatar.png'}
                         alt={comment.userName}
                         className="comment-avatar"
                       />

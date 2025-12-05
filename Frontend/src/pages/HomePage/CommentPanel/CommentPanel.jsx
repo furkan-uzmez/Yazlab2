@@ -155,7 +155,7 @@ function CommentPanel({
           <div className="comment-panel-post">
             <div className="comment-panel-post-header">
               <img 
-                src={selectedActivity.userAvatar || '/api/placeholder/40/40'} 
+                src={selectedActivity.userAvatar || '/default-avatar.png'} 
                 alt={selectedActivity.userName}
                 className="comment-panel-user-avatar"
               />
@@ -246,7 +246,7 @@ function CommentPanel({
                 return (
                   <div key={comment.id} className="comment-panel-item">
                     <img 
-                      src={comment.userAvatar || '/api/placeholder/32/32'} 
+                      src={comment.userAvatar || '/default-avatar.png'} 
                       alt={comment.userName}
                       className="comment-panel-avatar"
                     />

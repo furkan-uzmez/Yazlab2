@@ -123,7 +123,7 @@ function RightPanel({ followedUsers, onFollowUser }) {
                   }}
                 > {/* key='id' -> 'username' */}
                   <img
-                    src={user.avatar_url} // src='avatar' -> 'avatar_url'
+                    src={user.avatar_url || '/default-avatar.png'} // src='avatar' -> 'avatar_url'
                     alt={user.username}   // alt='name' -> 'username'
                     className="right-panel-avatar"
                   />

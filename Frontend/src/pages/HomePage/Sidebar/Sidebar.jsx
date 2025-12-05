@@ -137,7 +137,7 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
           formattedResults = items.map(user => ({
             id: user.user_id || user.username || Math.random(),
             title: user.username,
-            image: user.avatar_url || 'https://i.pravatar.cc/150?img=default',
+            image: user.avatar_url || '/default-avatar.png',
             subtitle: user.bio
               ? (user.bio.length > 30 ? user.bio.substring(0, 30) + '...' : user.bio)
               : 'Kullanıcı',
