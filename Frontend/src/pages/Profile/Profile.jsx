@@ -23,7 +23,8 @@ function Profile() {
   const [isSearchMode, setIsSearchMode] = useState(false);
 
   // Mock data - Frontend only
-  const isOwnProfile = !userId; // If no userId, it's own profile
+  const storedUsername = localStorage.getItem('profileusername');
+  const isOwnProfile = !userId || (userId === storedUsername);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
 
@@ -103,7 +104,8 @@ function Profile() {
       setLoadingProfile(true);
       try {
         let url = '';
-        let isOwnProfileView = !userId; // URL'de userId yoksa kendi profilimizdir
+        const storedUsername = localStorage.getItem('profileusername');
+        let isOwnProfileView = !userId || (userId === storedUsername);
 
         if (isOwnProfileView) {
           // Kendi profilimiz: Email ile ara
@@ -627,9 +629,9 @@ function Profile() {
         setSelectedActivity((prev) =>
           prev
             ? {
-                ...prev,
-                comments: (prev.comments || 0) + 1
-              }
+              ...prev,
+              comments: (prev.comments || 0) + 1
+            }
             : prev
         );
 
@@ -671,9 +673,9 @@ function Profile() {
         prevComments.map((comment) =>
           comment.id === commentId
             ? {
-                ...comment,
-                likes: Math.max(0, (comment.likes || 0) + changeAmount)
-              }
+              ...comment,
+              likes: Math.max(0, (comment.likes || 0) + changeAmount)
+            }
             : comment
         )
       );
@@ -701,9 +703,9 @@ function Profile() {
           prevComments.map((comment) =>
             comment.id === commentId
               ? {
-                  ...comment,
-                  likes: Math.max(0, (comment.likes || 0) - changeAmount)
-                }
+                ...comment,
+                likes: Math.max(0, (comment.likes || 0) - changeAmount)
+              }
               : comment
           )
         );
@@ -718,9 +720,9 @@ function Profile() {
       prevComments.map((comment) =>
         comment.id === commentId
           ? {
-              ...comment,
-              text: newText
-            }
+            ...comment,
+            text: newText
+          }
           : comment
       )
     );
@@ -1559,15 +1561,13 @@ function Profile() {
       {/* Takip Edilenler Modal */}
       {showFollowingModal && (
         <div
-          className={`follow-modal-overlay ${
-            isFollowingModalOpening && !isFollowingModalClosing ? 'active' : ''
-          }`}
+          className={`follow-modal-overlay ${isFollowingModalOpening && !isFollowingModalClosing ? 'active' : ''
+            }`}
           onClick={handleCloseFollowingModal}
         >
           <div
-            className={`follow-modal ${
-              isFollowingModalClosing ? 'closing' : isFollowingModalOpening ? 'opening' : ''
-            }`}
+            className={`follow-modal ${isFollowingModalClosing ? 'closing' : isFollowingModalOpening ? 'opening' : ''
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="follow-modal-header">

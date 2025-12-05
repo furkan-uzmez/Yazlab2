@@ -536,7 +536,6 @@ function Movies() {
               <option value="date">Tarih</option>
               <option value="title">İsim</option>
               <option value="most-votes">En Çok Oy Alan</option>
-              <option value="most-comments">En Çok Yorum Alan</option>
             </select>
           </div>
         </div>
