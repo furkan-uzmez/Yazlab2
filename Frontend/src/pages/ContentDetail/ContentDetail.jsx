@@ -167,7 +167,6 @@ function ContentDetail() {
               tagline: contentData.tagline,
               budget: contentData.budget,
               revenue: contentData.revenue,
-              revenue: contentData.revenue,
               status: contentData.status,
               directors: contentData.directors || [],
               cast: contentData.cast || []
