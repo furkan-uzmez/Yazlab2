@@ -95,4 +95,4 @@ A premium, full-stack social library platform for discovering, reviewing, and in
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
-This project is licensed under the MIT License.
+This project is licensed under the MIT License .
