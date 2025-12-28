@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaSearch, FaStar, FaFilm, FaBook, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './AddPostModal.css';
+import { API_BASE } from '../../../../utils/api';
 
 function AddPostModal({ isOpen, onClose, onPostAdded }) {
   const [step, setStep] = useState(1); // 1: Tip Seç, 2: İçerik Seç, 3: Puan Ver
@@ -47,7 +48,7 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
     setIsSearching(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${contentType}`
+        `${API_BASE}/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${contentType}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -124,7 +125,7 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
           reviewPayload.rating_score = rating;
         }
         
-        const reviewResponse = await fetch('http://localhost:8000/feed/add_review', {
+        const reviewResponse = await fetch(`${API_BASE}/feed/add_review`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(reviewPayload)
@@ -136,7 +137,7 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
         } else {
           // Review başarıyla eklendiyse, aynı metni içerik detayındaki yorumlar için de ekle
           try {
-            await fetch('http://localhost:8000/interactions/add_comment_by_content', {
+            await fetch(`${API_BASE}/interactions/add_comment_by_content`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -156,7 +157,7 @@ function AddPostModal({ isOpen, onClose, onPostAdded }) {
         }
       } else if (hasRating) {
         // If only rating, send to add_rating
-        const ratingResponse = await fetch('http://localhost:8000/feed/add_rating', {
+        const ratingResponse = await fetch(`${API_BASE}/feed/add_rating`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

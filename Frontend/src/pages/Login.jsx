@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Beams from '../components/Beams';
+import { API_BASE } from '../utils/api';
 import './Login.css';
 
 function Login() {
@@ -23,7 +24,7 @@ function Login() {
     
     try {
       // --- 1. ADIM: LOGIN İSTEĞİ ---
-      const loginResponse = await fetch("http://localhost:8000/auth/login", {
+      const loginResponse = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData), 
@@ -47,7 +48,7 @@ function Login() {
       localStorage.setItem("email", formData.email);
 
       // --- 2. ADIM: KULLANICI DETAYLARINI ÇEKME ---
-      const userUrl = `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(formData.email)}`;
+      const userUrl = `${API_BASE}/user/search_by_email?query=${encodeURIComponent(formData.email)}`;
       const userResponse = await fetch(userUrl);
 
       if (userResponse.ok) {

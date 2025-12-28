@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaEdit, FaPlus, FaUserPlus, FaUserCheck } from 'react-icons/fa';
 import './ProfileHeader.css';
+import { API_BASE } from '../../../../utils/api';
 
 function ProfileHeader({
   profileUser,
@@ -36,14 +37,14 @@ function ProfileHeader({
 
       try {
         // Takipçi sayısı
-        const followersResponse = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/followers`);
+        const followersResponse = await fetch(`${API_BASE}/user/${encodeURIComponent(profileUser.email)}/followers`);
         if (followersResponse.ok) {
           const followersData = await followersResponse.json();
           setFollowersCount(followersData.followers?.length || 0);
         }
 
         // Takip edilen sayısı
-        const followingResponse = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/following`);
+        const followingResponse = await fetch(`${API_BASE}/user/${encodeURIComponent(profileUser.email)}/following`);
         if (followingResponse.ok) {
           const followingData = await followingResponse.json();
           setFollowingCount(followingData.following?.length || 0);

@@ -7,6 +7,7 @@ import RightPanel from './RightPanel/RightPanel';
 import CommentPanel from './CommentPanel/CommentPanel';
 import LogoutModal from './LogoutModal/LogoutModal';
 import './Home.css';
+import { API_BASE } from '../../utils/api';
 
 function Home() {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ function Home() {
     try {
       const userEmail = localStorage.getItem("email");
       
-      const response = await fetch(`http://localhost:8000/interactions/get_all_comments?email=${userEmail}`);
+      const response = await fetch(`${API_BASE}/interactions/get_all_comments?email=${userEmail}`);
      
       if (response.ok) {
         const data = await response.json();
@@ -130,7 +131,7 @@ function Home() {
       }
 
       // --- API İSTEĞİ ---
-      const response = await fetch("http://localhost:8000/interactions/add_comment", {
+      const response = await fetch(`${API_BASE}/interactions/add_comment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -154,7 +155,7 @@ function Home() {
         // 2. Yorumları veritabanından yeniden yükle (güncel veriler için)
         const userEmail = localStorage.getItem("email");
         if (userEmail) {
-          const refreshResponse = await fetch(`http://localhost:8000/interactions/get_all_comments?email=${userEmail}`);
+          const refreshResponse = await fetch(`${API_BASE}/interactions/get_all_comments?email=${userEmail}`);
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
             const allComments = refreshData.comments || [];
@@ -221,7 +222,7 @@ function Home() {
         return;
       }
 
-      const response = await fetch("http://localhost:8000/feed/like_review", {
+      const response = await fetch(`${API_BASE}/feed/like_review`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -291,7 +292,7 @@ function Home() {
       );
 
       // 3. Sonra API isteğini gönder (Arka planda)
-      const response = await fetch("http://localhost:8000/interactions/like_comment", {
+      const response = await fetch(`${API_BASE}/interactions/like_comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -397,7 +398,7 @@ const fetchActivities = useCallback(async (pageNum) => {
 
       // --- DÜZELTME 2: URL'e '&page=' parametresini ekle ---
       // Bu olmazsa hep aynı 10 veriyi çeker.
-      const url = `http://localhost:8000/feed/search?email=${userEmail}&page=${pageNum}`;
+      const url = `${API_BASE}/feed/search?email=${userEmail}&page=${pageNum}`;
 
       const response = await fetch(url);
       

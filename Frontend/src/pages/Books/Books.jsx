@@ -10,6 +10,7 @@ import FilterModal from './components/FilterModal/FilterModal';
 import { genres } from './utils/genres';
 import { filterBooks, sortBooks, hasActiveFilters } from './utils/filterUtils';
 import './styles/Books.css';
+import { API_BASE } from '../../utils/api';
 
 function Books() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ function Books() {
           apiCategory = 'most-added';
         }
 
-        let url = `http://localhost:8000/content/popular/books?category=${apiCategory}&page=${page}&max_results=20`;
+        let url = `${API_BASE}/content/popular/books?category=${apiCategory}&page=${page}&max_results=20`;
         if (debouncedSearchQuery) {
           url += `&query=${encodeURIComponent(debouncedSearchQuery)}`;
         }

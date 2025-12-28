@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaHome, FaUser, FaFilm, FaBook, FaSearch, FaGripLines, FaSignOutAlt, FaArrowLeft, FaTimes, FaSpinner, FaSun, FaMoon, FaCog, FaInfoCircle, FaQuestionCircle, FaArrowRight } from 'react-icons/fa';
 import ShinyText from '../../../components/ShinyText';
+import { API_BASE } from '../../../utils/api';
 import './Sidebar.css';
 
 function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChange }) {
@@ -82,9 +83,9 @@ function Sidebar({ onLogout, isSearchMode: externalSearchMode, onSearchModeChang
       let url = '';
 
       if (searchType === 'movie' || searchType === 'book') {
-        url = `http://localhost:8000/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${searchType}`;
+        url = `${API_BASE}/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${searchType}`;
       } else if (searchType === 'user') {
-        url = `http://localhost:8000/user/search?query=${encodeURIComponent(searchQuery)}`;
+        url = `${API_BASE}/user/search?query=${encodeURIComponent(searchQuery)}`;
       }
 
       const response = await fetch(url);

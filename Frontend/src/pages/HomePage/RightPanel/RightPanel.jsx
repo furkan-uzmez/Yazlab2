@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { API_BASE } from '../../../utils/api';
 import { FaUserFriends, FaStar } from 'react-icons/fa';
 import './RightPanel.css';
 
@@ -19,7 +20,7 @@ function RightPanel({ followedUsers, onFollowUser }) {
         if (!email) return;
 
         // 1. Get Current User ID
-        const userRes = await fetch(`http://localhost:8000/user/search_by_email?query=${email}`);
+        const userRes = await fetch(`${API_BASE}/user/search_by_email?query=${email}`);
         if (userRes.ok) {
           const userData = await userRes.json();
           // The API returns { message: "...", results: { user_id: ..., ... } }
@@ -28,7 +29,7 @@ function RightPanel({ followedUsers, onFollowUser }) {
 
           // 2. Get Recommendations
           if (userId) {
-            const recRes = await fetch(`http://localhost:8000/user/recommendations?user_id=${userId}`);
+            const recRes = await fetch(`${API_BASE}/user/recommendations?user_id=${userId}`);
             if (recRes.ok) {
               const recData = await recRes.json();
               setRecommendations(recData);
@@ -37,7 +38,7 @@ function RightPanel({ followedUsers, onFollowUser }) {
         }
 
         // 3. Get Following (Existing logic)
-        const url = `http://localhost:8000/user/${email}/followers`;
+        const url = `${API_BASE}/user/${email}/followers`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
@@ -58,7 +59,7 @@ function RightPanel({ followedUsers, onFollowUser }) {
       const endpoint = isCurrentlyFollowed ? "/user/unfollow" : "/user/follow";
       const method = isCurrentlyFollowed ? "DELETE" : "POST";
 
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
         method: method,
         headers: {
           "Content-Type": "application/json",

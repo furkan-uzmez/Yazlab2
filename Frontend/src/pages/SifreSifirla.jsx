@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Beams from '../components/Beams';
+import { API_BASE } from '../utils/api';
 import './SifreSifirla.css';
 
 function SifreSifirla() {
@@ -31,7 +32,7 @@ function SifreSifirla() {
       const token = searchParams.get('token');
       
       // Backend'e şifre sıfırlama isteği gönder
-      const response = await fetch("http://localhost:8000/auth/update_password", {
+      const response = await fetch(`${API_BASE}/auth/update_password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

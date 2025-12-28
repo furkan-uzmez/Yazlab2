@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTimes, FaFilm, FaBook, FaRegThumbsUp, FaArrowRight, FaEdit, FaTrash, FaCheck, FaTimes as FaTimesIcon } from 'react-icons/fa';
 import { formatTimeAgo } from '../utils/utils';
+import { API_BASE } from '../../../utils/api';
 import './CommentPanel.css';
 
 // Yorum Metni Bileşeni (Daha Fazla Göster özelliği ile)
@@ -70,7 +71,7 @@ function CommentPanel({
     }
 
     try {
-        const response = await fetch("http://localhost:8000/interactions/update_comment", {
+        const response = await fetch(`${API_BASE}/interactions/update_comment`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -108,7 +109,7 @@ function CommentPanel({
     }
 
     try {
-      const response = await fetch("http://localhost:8000/interactions/delete_comment", {
+      const response = await fetch(`${API_BASE}/interactions/delete_comment`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

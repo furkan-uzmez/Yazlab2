@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Beams from '../components/Beams';
+import { API_BASE } from '../utils/api';
 import './SifremiUnuttum.css';
 
 function SifremiUnuttum() {
@@ -12,7 +13,7 @@ function SifremiUnuttum() {
 
     try {
       // 1. Backend'inize (FastAPI) e-posta gönderme isteği atın
-      const response = await fetch("http://localhost:8000/auth/send_forget_password_email", {
+      const response = await fetch(`${API_BASE}/auth/send_forget_password_email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

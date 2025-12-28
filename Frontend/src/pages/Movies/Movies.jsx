@@ -10,6 +10,7 @@ import FilterModal from './components/FilterModal/FilterModal';
 import { genres } from './utils/genres';
 import { filterMovies, sortMovies, hasActiveFilters } from './utils/filterUtils';
 import './styles/Movies.css';
+import { API_BASE } from '../../utils/api';
 
 function Movies() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ function Movies() {
         if (searchQuery.length > 2) {
           // Search mode
           const response = await fetch(
-            `http://localhost:8000/content/search?query=${searchQuery}&api_type=movie`
+            `${API_BASE}/content/search?query=${searchQuery}&api_type=movie`
           );
 
           if (response.ok) {
@@ -95,7 +96,7 @@ function Movies() {
           }
 
           const response = await fetch(
-            `http://localhost:8000/content/popular/movies?category=${apiCategory}&page=${page}`
+            `${API_BASE}/content/popular/movies?category=${apiCategory}&page=${page}`
           );
 
           if (response.ok) {

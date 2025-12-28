@@ -14,6 +14,7 @@ import LibraryTabs from './sections/LibraryTabs/LibraryTabs';
 import CustomLists from './sections/CustomLists/CustomLists';
 import RecentActivities from './sections/RecentActivities/RecentActivities';
 import './Profile.css';
+import { API_BASE } from '../../utils/api';
 
 function Profile() {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ function Profile() {
 
       try {
         // API isteği
-        const response = await fetch(`http://localhost:8000/list/get_library?username=${encodeURIComponent(targetUsername)}`);
+        const response = await fetch(`${API_BASE}/list/get_library?username=${encodeURIComponent(targetUsername)}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -115,12 +116,12 @@ function Profile() {
             return;
           }
           // API: /user/search_by_email?query=...
-          url = `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(email)}`;
+          url = `${API_BASE}/user/search_by_email?query=${encodeURIComponent(email)}`;
         } else {
           // Başkasının profili: Username ile ara
           // Viewer ID ekle (takip durumunu kontrol etmek için)
           const currentUserId = localStorage.getItem('user_id');
-          url = `http://localhost:8000/user/search?query=${encodeURIComponent(userId)}`;
+          url = `${API_BASE}/user/search?query=${encodeURIComponent(userId)}`;
           if (currentUserId) {
             url += `&viewer_id=${currentUserId}`;
           }
@@ -194,7 +195,7 @@ function Profile() {
       }
 
       try {
-        const response = await fetch(`http://localhost:8000/list/get_lists?username=${encodeURIComponent(targetUsername)}`);
+        const response = await fetch(`${API_BASE}/list/get_lists?username=${encodeURIComponent(targetUsername)}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -340,7 +341,7 @@ function Profile() {
 
     const apiSource = contentType === 'movie' ? 'tmdb' : 'google_books';
 
-    fetch('http://localhost:8000/list/add_item', {
+    fetch(`${API_BASE}/list/add_item`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -386,7 +387,7 @@ function Profile() {
     // get_user_library'den dönen verilerde id zaten content_id olarak geliyor
     // Bu yüzden content.id'yi direkt kullanabiliriz
     try {
-      const response = await fetch('http://localhost:8000/list/remove_item', {
+      const response = await fetch(`${API_BASE}/list/remove_item`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -453,7 +454,7 @@ function Profile() {
       setLoadingActivities(true);
       try {
         const currentUserId = localStorage.getItem('user_id');
-        let url = `http://localhost:8000/feed/user_activities?user_id=${profileUser.user_id}`;
+        let url = `${API_BASE}/feed/user_activities?user_id=${profileUser.user_id}`;
 
         if (currentUserId) {
           url += `&viewer_id=${currentUserId}`;
@@ -508,7 +509,7 @@ function Profile() {
       }
 
       const response = await fetch(
-        `http://localhost:8000/interactions/get_all_comments?email=${userEmail}`
+        `${API_BASE}/interactions/get_all_comments?email=${userEmail}`
       );
 
       if (response.ok) {
@@ -574,7 +575,7 @@ function Profile() {
         return;
       }
 
-      const response = await fetch('http://localhost:8000/interactions/add_comment', {
+      const response = await fetch(`${API_BASE}/interactions/add_comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -592,7 +593,7 @@ function Profile() {
 
         // Yorumları veritabanından yeniden yükle (güncel veriler için)
         const refreshResponse = await fetch(
-          `http://localhost:8000/interactions/get_all_comments?email=${userEmail}`
+          `${API_BASE}/interactions/get_all_comments?email=${userEmail}`
         );
 
         if (refreshResponse.ok) {
@@ -680,7 +681,7 @@ function Profile() {
         )
       );
 
-      const response = await fetch('http://localhost:8000/interactions/like_comment', {
+      const response = await fetch(`${API_BASE}/interactions/like_comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -775,7 +776,7 @@ function Profile() {
     setIsFollowLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:8000/user/${endpoint}`, {
+      const response = await fetch(`${API_BASE}/user/${endpoint}`, {
         method: method,
         headers: {
           'Content-Type': 'application/json',
@@ -818,7 +819,7 @@ function Profile() {
     }, 10);
 
     try {
-      const response = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/followers`);
+      const response = await fetch(`${API_BASE}/user/${encodeURIComponent(profileUser.email)}/followers`);
       if (response.ok) {
         const data = await response.json();
         setFollowersList(data.followers || []);
@@ -844,7 +845,7 @@ function Profile() {
     }, 10);
 
     try {
-      const response = await fetch(`http://localhost:8000/user/${encodeURIComponent(profileUser.email)}/following`);
+      const response = await fetch(`${API_BASE}/user/${encodeURIComponent(profileUser.email)}/following`);
       if (response.ok) {
         const data = await response.json();
         setFollowingList(data.following || []);
@@ -888,7 +889,7 @@ function Profile() {
     if (!currentUserId || !userId) return;
 
     try {
-      const response = await fetch('http://localhost:8000/user/unfollow', {
+      const response = await fetch(`${API_BASE}/user/unfollow`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -919,7 +920,7 @@ function Profile() {
     if (!currentUserId || !followerId) return;
 
     try {
-      const response = await fetch('http://localhost:8000/user/unfollow', {
+      const response = await fetch(`${API_BASE}/user/unfollow`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -967,7 +968,7 @@ function Profile() {
     if (!currentUsername) return;
 
     try {
-      const response = await fetch('http://localhost:8000/user/update_profile', {
+      const response = await fetch(`${API_BASE}/user/update_profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -1036,7 +1037,7 @@ function Profile() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/list/create', {
+      const response = await fetch(`${API_BASE}/list/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1092,7 +1093,7 @@ function Profile() {
     if (!username) return;
 
     try {
-      const response = await fetch('http://localhost:8000/list/delete', {
+      const response = await fetch(`${API_BASE}/list/delete`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -1131,7 +1132,7 @@ function Profile() {
 
     // Fetch list items from API
     try {
-      const response = await fetch(`http://localhost:8000/list/items/${list.id}`);
+      const response = await fetch(`${API_BASE}/list/items/${list.id}`);
       if (response.ok) {
         const data = await response.json();
         setSelectedList(prev => ({
@@ -1189,7 +1190,7 @@ function Profile() {
 
   const fetchSearchResults = async (query, type) => {
     try {
-      const response = await fetch(`http://localhost:8000/content/search?query=${encodeURIComponent(query)}&api_type=${type}`);
+      const response = await fetch(`${API_BASE}/content/search?query=${encodeURIComponent(query)}&api_type=${type}`);
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data.results || []);
@@ -1210,7 +1211,7 @@ function Profile() {
       if (!username) return;
 
       try {
-        const response = await fetch('http://localhost:8000/list/add_item', {
+        const response = await fetch(`${API_BASE}/list/add_item`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1271,7 +1272,7 @@ function Profile() {
       if (!username) return;
 
       try {
-        const response = await fetch('http://localhost:8000/list/remove_item', {
+        const response = await fetch(`${API_BASE}/list/remove_item`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1311,7 +1312,7 @@ function Profile() {
     e.preventDefault();
     if (selectedList) {
       try {
-        const response = await fetch('http://localhost:8000/list/update', {
+        const response = await fetch(`${API_BASE}/list/update`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

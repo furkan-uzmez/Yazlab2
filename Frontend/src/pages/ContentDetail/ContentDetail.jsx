@@ -5,6 +5,7 @@ import BottomNav from '../../components/BottomNav';
 import Sidebar from '../HomePage/Sidebar/Sidebar';
 import LogoutModal from '../HomePage/LogoutModal/LogoutModal';
 import ContentDetailSkeleton from '../../components/ContentDetailSkeleton';
+import { API_BASE } from '../../utils/api';
 import { formatTimeAgo } from '../HomePage/utils/utils';
 import './ContentDetail.css';
 
@@ -53,8 +54,8 @@ function ContentDetail() {
       const fetchCurrentUser = async () => {
         try {
           const response = await fetch(
-            `http://localhost:8000/user/search_by_email?query=${encodeURIComponent(email)}`
-          );
+              `${API_BASE}/user/search_by_email?query=${encodeURIComponent(email)}`
+            );
           if (response.ok) {
             const data = await response.json();
             const userData = data.user || (Array.isArray(data.results) ? data.results[0] : data.results);
@@ -79,7 +80,7 @@ function ContentDetail() {
       try {
         const contentId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
         const response = await fetch(
-          `http://localhost:8000/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
+          `${API_BASE}/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
         );
 
         if (response.ok) {
@@ -120,7 +121,7 @@ function ContentDetail() {
       setLoading(true);
       try {
         const username = localStorage.getItem("profileusername");
-        let url = `http://localhost:8000/content/details?content_id=${encodeURIComponent(id)}&content_type=${type}`;
+        let url = `${API_BASE}/content/details?content_id=${encodeURIComponent(id)}&content_type=${type}`;
         if (username) {
           url += `&username=${encodeURIComponent(username)}`;
         }
@@ -228,7 +229,7 @@ function ContentDetail() {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/list/get_lists?username=${encodeURIComponent(username)}`
+          `${API_BASE}/list/get_lists?username=${encodeURIComponent(username)}`
         );
 
         if (response.ok) {
@@ -300,7 +301,7 @@ function ContentDetail() {
 
       if (isAlreadyInList) {
         // Remove from list
-        response = await fetch("http://localhost:8000/list/remove_item", {
+        response = await fetch(`${API_BASE}/list/remove_item`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -329,7 +330,7 @@ function ContentDetail() {
           genres: content.genres || []
         };
 
-        response = await fetch("http://localhost:8000/list/add_item", {
+        response = await fetch(`${API_BASE}/list/add_item`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestBody)
@@ -405,7 +406,7 @@ function ContentDetail() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/interactions/rate_content", {
+      const response = await fetch(`${API_BASE}/interactions/rate_content`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -452,7 +453,7 @@ function ContentDetail() {
     try {
       if (isCurrentlyInList) {
         // Remove from list
-        const response = await fetch("http://localhost:8000/list/remove_item", {
+        const response = await fetch(`${API_BASE}/list/remove_item`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -472,7 +473,7 @@ function ContentDetail() {
         }
       } else {
         // Add to list
-        const response = await fetch("http://localhost:8000/list/add_item", {
+        const response = await fetch(`${API_BASE}/list/add_item`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -524,7 +525,7 @@ function ContentDetail() {
     try {
       if (isCurrentlyInList) {
         // Remove from list
-        const response = await fetch("http://localhost:8000/list/remove_item", {
+        const response = await fetch(`${API_BASE}/list/remove_item`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -544,7 +545,7 @@ function ContentDetail() {
         }
       } else {
         // Add to list
-        const response = await fetch("http://localhost:8000/list/add_item", {
+        const response = await fetch(`${API_BASE}/list/add_item`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -583,7 +584,7 @@ function ContentDetail() {
 
     try {
       const contentId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
-      const response = await fetch('http://localhost:8000/interactions/add_comment_by_content', {
+      const response = await fetch(`${API_BASE}/interactions/add_comment_by_content`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -603,7 +604,7 @@ function ContentDetail() {
         setShowAllComments(false); // Reset to show first 5 comments
         // Refresh comments
         const commentsResponse = await fetch(
-          `http://localhost:8000/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
+          `${API_BASE}/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
         );
         if (commentsResponse.ok) {
           const data = await commentsResponse.json();
@@ -650,7 +651,7 @@ function ContentDetail() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/interactions/update_comment', {
+      const response = await fetch(`${API_BASE}/interactions/update_comment`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -668,7 +669,7 @@ function ContentDetail() {
         // Refresh comments
         const contentId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
         const commentsResponse = await fetch(
-          `http://localhost:8000/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
+          `${API_BASE}/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
         );
         if (commentsResponse.ok) {
           const data = await commentsResponse.json();
@@ -705,7 +706,7 @@ function ContentDetail() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/interactions/delete_comment', {
+      const response = await fetch(`${API_BASE}/interactions/delete_comment`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -720,7 +721,7 @@ function ContentDetail() {
         // Refresh comments
         const contentId = typeof id === 'string' ? (isNaN(parseInt(id)) ? id : parseInt(id)) : id;
         const commentsResponse = await fetch(
-          `http://localhost:8000/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
+          `${API_BASE}/interactions/get_comments_by_content?content_id=${contentId}&email=${currentUserEmail}`
         );
         if (commentsResponse.ok) {
           const data = await commentsResponse.json();
@@ -771,7 +772,7 @@ function ContentDetail() {
     );
 
     try {
-      const response = await fetch("http://localhost:8000/interactions/like_comment", {
+      const response = await fetch(`${API_BASE}/interactions/like_comment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

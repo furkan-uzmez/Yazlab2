@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaSearch, FaPlus, FaFilm, FaBook, FaCheck } from 'react-icons/fa';
 import './AddContentModal.css';
+import { API_BASE } from '../../../../utils/api';
 
 function AddContentModal({
   isOpen,
@@ -48,7 +49,7 @@ function AddContentModal({
     setSearchResults([]);
 
     try {
-      const url = `http://localhost:8000/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${searchType}`;
+      const url = `${API_BASE}/content/search?query=${encodeURIComponent(searchQuery)}&api_type=${searchType}`;
       const response = await fetch(url);
 
       if (response.ok) {

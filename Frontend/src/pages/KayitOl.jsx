@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Beams from '../components/Beams';
+import { API_BASE } from '../utils/api';
 import './KayitOl.css';
 
 function KayitOl() {
@@ -26,7 +27,7 @@ function KayitOl() {
   }
 
   try {
-    const response = await fetch("http://localhost:8000/auth/register", {
+    const response = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
