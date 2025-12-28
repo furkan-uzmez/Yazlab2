@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.list.add_to_library import add_item_to_library
+from func.db.connection.open_db_connection import open_db_connection
+from func.list.add_to_library import add_item_to_library
 
 router = APIRouter(prefix="/list", tags=["list"])
 

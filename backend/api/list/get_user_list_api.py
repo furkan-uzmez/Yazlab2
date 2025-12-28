@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.list.get_user_list import get_lists as get_lists_func
+from func.db.connection.open_db_connection import open_db_connection
+from func.list.get_user_list import get_lists as get_lists_func
 
 router = APIRouter(prefix="/list", tags=["list"])
 

@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, status, Query
 from typing import Optional
 
-from backend.func.content.get_movie_details import get_movie_details as get_movie_details_func
-from backend.func.content.get_book_details import get_book_details as get_book_details_func
-from backend.func.content.get_content_from_db import get_content_from_db
-from backend.func.content.check_user_content_status import check_user_content_status
-from backend.func.db.connection.open_db_connection import open_db_connection
+from func.content.get_movie_details import get_movie_details as get_movie_details_func
+from func.content.get_book_details import get_book_details as get_book_details_func
+from func.content.get_content_from_db import get_content_from_db
+from func.content.check_user_content_status import check_user_content_status
+from func.db.connection.open_db_connection import open_db_connection
 
-from backend.func.list.add_to_library import get_or_create_content
-from backend.func.interactions.get_content_rating_stats import get_content_rating_stats
+from func.list.add_to_library import get_or_create_content
+from func.interactions.get_content_rating_stats import get_content_rating_stats
 
 router = APIRouter(prefix="/content", tags=["content"])
 

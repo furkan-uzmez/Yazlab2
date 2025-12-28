@@ -1,5 +1,5 @@
 import mysql.connector
-from backend.func.list.add_to_library import get_or_create_content
+from func.list.add_to_library import get_or_create_content
 
 def rate_content(connection, user_email: str, content_id: str, score: float, title: str = None, poster_url: str = None, content_type: str = None, genres: list = None) -> bool:
     """

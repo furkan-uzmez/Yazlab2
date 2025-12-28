@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status , Query
 from pydantic import BaseModel
 
-from backend.func.content.search_movie import search_movie as search_movie_func
-from backend.func.content.search_book import search_book as search_book_func
+from func.content.search_movie import search_movie as search_movie_func
+from func.content.search_book import search_book as search_book_func
 
 router = APIRouter(prefix="/content", tags=["content"])
 

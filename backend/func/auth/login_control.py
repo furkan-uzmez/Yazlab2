@@ -1,4 +1,4 @@
-from backend.func.security.check_password import check_password
+from func.security.check_password import check_password
 
 def login_control(connection, email, password):
     cursor = connection.cursor()

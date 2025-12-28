@@ -1,30 +1,32 @@
 import mysql.connector
 from mysql.connector import Error
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
-host_name = os.getenv("DB_HOST")
-user_name = os.getenv("DB_USER")
-user_password = os.getenv("DB_PASSWORD")
-db_name = os.getenv("DB_NAME")
-
-
 def open_db_connection():
-    connection = None
+    connection = None  
+
+    host = os.getenv("DB_HOST")
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    database = os.getenv("DB_NAME") 
     
+    port_val = os.getenv("DB_PORT")
+
     try:
         connection = mysql.connector.connect(
-            host=host_name,
-            user=user_name,
-            password=user_password,
-            database=db_name,
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=port_val,
             charset='utf8mb4',
             autocommit=True
         )
-        print("Database connection opened successfully")
+        print("✅ Veritabanı bağlantısı başarılı!")
     except Error as e:
-        print(f"The error '{e}' occurred")
+        print(f"❌ Veritabanı bağlantı hatası: '{e}'")
     
     return connection

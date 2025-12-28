@@ -2,9 +2,9 @@ from fastapi import APIRouter , HTTPException, status
 from pydantic import BaseModel
 
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.auth.forget_password import send_reset_email,update_password as update_password_func
-from backend.func.security.jwt_utils import create_reset_token, validate_reset_token
+from func.db.connection.open_db_connection import open_db_connection
+from func.auth.forget_password import send_reset_email,update_password as update_password_func
+from func.security.jwt_utils import create_reset_token, validate_reset_token
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])

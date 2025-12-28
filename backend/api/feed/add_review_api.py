@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from typing import Union
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.feed.add_review import add_review
+from func.db.connection.open_db_connection import open_db_connection
+from func.feed.add_review import add_review
 
 router = APIRouter(prefix="/feed", tags=["feed"])
 

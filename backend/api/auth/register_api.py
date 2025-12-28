@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.auth.register import register_user as register
+from func.db.connection.open_db_connection import open_db_connection
+from func.auth.register import register_user as register
 from database.follow_everyone import follow_everyone as follow_all_users
 from database.make_everyone_follow_me import make_them_follow_me
 

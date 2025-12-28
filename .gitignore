@@ -5,3 +5,4 @@ users_data.json
 activities.json
 comments.json
 logs
+__pycache__ 

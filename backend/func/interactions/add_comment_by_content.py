@@ -1,5 +1,5 @@
 import mysql.connector
-from backend.func.list.add_to_library import get_or_create_content
+from func.list.add_to_library import get_or_create_content
 
 def add_comment_by_content(connection, user_email: str, content_id: str, comment_text: str, title: str = None, poster_url: str = None, content_type: str = None) -> bool:
     """

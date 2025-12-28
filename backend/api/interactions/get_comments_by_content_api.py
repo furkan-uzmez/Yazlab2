@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.interactions.get_comments_by_content import get_comments_by_content
+from func.db.connection.open_db_connection import open_db_connection
+from func.interactions.get_comments_by_content import get_comments_by_content
 
 router = APIRouter(prefix="/interactions", tags=["interactions"])
 

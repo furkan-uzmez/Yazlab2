@@ -1,4 +1,4 @@
-from backend.func.db.connection.open_db_connection import open_db_connection
+from func.db.connection.open_db_connection import open_db_connection
 
 def get_most_commented_movies(page: int = 1, limit: int = 20):
     """

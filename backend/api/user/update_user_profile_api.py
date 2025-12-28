@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.user.update_user_profile import update_user_profile as update_user_profile_func
+from func.db.connection.open_db_connection import open_db_connection
+from func.user.update_user_profile import update_user_profile as update_user_profile_func
 
 
 router = APIRouter(prefix="/user", tags=["user"])

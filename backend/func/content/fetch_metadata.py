@@ -1,6 +1,6 @@
-from backend.func.content.search_movie import search_movie
-from backend.func.content.search_book import search_book
-from backend.func.content.get_movie_details import get_movie_details
+from func.content.search_movie import search_movie
+from func.content.search_book import search_book
+from func.content.get_movie_details import get_movie_details
 
 def fetch_metadata(title, content_type):
     """

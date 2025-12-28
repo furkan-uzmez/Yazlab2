@@ -1,4 +1,4 @@
-from backend.func.security.hash_password import hash_password
+from func.security.hash_password import hash_password
 
 def register_user(connection, email, password, username):
     try:

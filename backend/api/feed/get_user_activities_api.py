@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Query
 from typing import Optional
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.feed.get_user_activities import get_user_activities
+from func.db.connection.open_db_connection import open_db_connection
+from func.feed.get_user_activities import get_user_activities
 
 router = APIRouter(prefix="/feed", tags=["feed"])
 

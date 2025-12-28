@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Query
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.user.recommendations import get_recommended_users
+from func.db.connection.open_db_connection import open_db_connection
+from func.user.recommendations import get_recommended_users
 
 router = APIRouter(prefix="/user", tags=["user"])
 

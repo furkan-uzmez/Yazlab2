@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.interactions.update_comment import update_comment
+from func.db.connection.open_db_connection import open_db_connection
+from func.interactions.update_comment import update_comment
 
 router = APIRouter(prefix="/interactions", tags=["interactions"])
 

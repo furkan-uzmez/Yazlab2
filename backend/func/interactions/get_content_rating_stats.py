@@ -1,4 +1,4 @@
-from backend.func.list.add_to_library import get_or_create_content
+from func.list.add_to_library import get_or_create_content
 
 def get_content_rating_stats(connection, api_id: str, content_type: str) -> dict:
     """

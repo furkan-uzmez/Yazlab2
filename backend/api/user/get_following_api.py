@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.user.get_following import get_following as get_following_func
+from func.db.connection.open_db_connection import open_db_connection
+from func.user.get_following import get_following as get_following_func
 
 router = APIRouter(prefix="/user", tags=["user"])
 

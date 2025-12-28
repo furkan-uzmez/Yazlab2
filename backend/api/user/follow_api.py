@@ -1,8 +1,8 @@
 from fastapi import APIRouter ,  HTTPException, status
 from pydantic import BaseModel
 
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.user.follow import follow as follow_user , unfollow as unfollow_user
+from func.db.connection.open_db_connection import open_db_connection
+from func.user.follow import follow as follow_user , unfollow as unfollow_user
 
 
 router = APIRouter(prefix="/user", tags=["user"])

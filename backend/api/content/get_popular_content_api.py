@@ -1,23 +1,23 @@
 from fastapi import APIRouter, HTTPException, status, Query
 
-from backend.func.content.get_popular_movies import (
+from func.content.get_popular_movies import (
     get_popular_movies,
     get_top_rated_movies,
     get_now_playing_movies
 )
-from backend.func.content.get_sorted_content import (
+from func.content.get_sorted_content import (
     get_most_commented_movies,
     get_most_added_movies,
     get_most_commented_books,
     get_most_added_books
 )
-from backend.func.content.get_popular_books import (
+from func.content.get_popular_books import (
     get_popular_books,
     get_new_books
 )
-from backend.func.db.connection.open_db_connection import open_db_connection
-from backend.func.interactions.get_content_comment_count import get_content_comment_count
-from backend.func.interactions.get_content_list_count import get_content_list_count
+from func.db.connection.open_db_connection import open_db_connection
+from func.interactions.get_content_comment_count import get_content_comment_count
+from func.interactions.get_content_list_count import get_content_list_count
 
 router = APIRouter(prefix="/content", tags=["content"])
 
@@ -87,7 +87,7 @@ async def get_popular_movies_endpoint(
             detail="Could not retrieve movies"
         )
 
-from backend.func.content.search_book import search_book
+from func.content.search_book import search_book
 
 
 @router.get("/popular/books")

@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+gunicorn
+mysql-connector-python
+python-dotenv
+python-jose
+fastapi-mail
+requests
+bcrypt

@@ -1,5 +1,5 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from backend.func.security.hash_password import hash_password
+from func.security.hash_password import hash_password
 from dotenv import load_dotenv
 import os
 
